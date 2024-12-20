@@ -1,0 +1,24 @@
+name: desktop-llm
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - numpy
+  - scipy
+  - pytorch
+  - transformers
+  - pydantic
+  - fastapi
+  - uvicorn
+  - aiohttp
+  - tiktoken
+  - pip:
+    - -r requirements.txt
+    - typing-extensions
+    - tenacity
+    - pydantic-settings
+    - python-dotenv
+    - ollama @ git+https://github.com/ollama/ollama-python.git
+prefix: C:\Users\Eidan Garcia\anaconda3\envs\desktop-llm

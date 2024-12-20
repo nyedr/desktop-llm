@@ -1,0 +1,26 @@
+{
+  "functions": [
+    {
+      "name": "add_numbers",
+      "module_path": "test_functions",
+      "function_name": "add_numbers",
+      "type": "sync",
+      "description": "Add two numbers and return the result",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "a": {"type": "number"},
+          "b": {"type": "number"}
+        },
+        "required": ["a", "b"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "result": {"type": "number"}
+        },
+        "required": ["result"]
+      }
+    }
+  ]
+}

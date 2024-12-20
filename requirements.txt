@@ -1,0 +1,42 @@
+# Core Dependencies
+fastapi>=0.104.1
+uvicorn>=0.24.0
+pydantic>=2.4.2
+pydantic-settings>=2.0.3
+
+# Streaming and Real-time
+sse-starlette>=1.6.5
+websockets>=12.0
+
+# Dependency Injection and Configuration
+dependency-injector>=4.41.0
+python-dotenv>=1.0.0
+
+# AI and Machine Learning
+openai>=1.3.5
+transformers>=4.35.2
+torch>=2.1.1
+tiktoken>=0.5.1
+ollama>=0.1.6  # Added Ollama Python client
+
+# HTTP and API
+httpx>=0.25.1
+requests>=2.31.0
+aiohttp>=3.9.1
+
+# Caching and Performance
+aiocache>=0.12.2
+redis>=5.0.1
+
+# Utility Libraries
+tenacity>=8.2.2
+typing-extensions>=4.7.0
+structlog>=23.2.0
+
+# Testing and Development
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
+pytest-cov>=4.1.0
+black>=23.11.0
+isort>=5.12.0
+mypy>=1.7.1

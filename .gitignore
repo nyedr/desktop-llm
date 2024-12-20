@@ -1,0 +1,15 @@
+.env
+
+/logs
+
+# Ignore the __pycache__ directory
+/__pycache__
+
+# Ignore the .pytest_cache directory
+/.pytest_cache
+
+# Ignore the .venv directory
+/.venv
+
+# Ignore the .git directory
+/.git

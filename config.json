@@ -1,0 +1,125 @@
+{
+  "llm_model_name": "qwen2.5:7b-instruct-q8_0",
+  "vocab_size": 152064,
+  "max_position_embeddings": 4096,
+  "special_tokens": {
+    "image_token": "<IMAGE>",
+    "context_token": "<CONTEXT>"
+  },
+  "prompt_templates": {
+    "captioning": "Describe this image: {image}",
+    "question_answering": "Given the image: {image}, answer the following question: {question}",
+    "contextual": "Context: {context}\nImage: {image}\nQuestion: {question}",
+    "title_generation": "Generate a title for this image: {image}",
+    "tags_generation": "Generate relevant tags for this image: {image}",
+    "emoji_generation": "Generate emojis representing this image: {image}",
+    "search_query_generation": "Generate a search query based on this image: {image}",
+    "explanation": "{question}"
+  },
+  "default_task": "captioning",
+  "alignment": {
+    "enabled": false,
+    "method": "linear",
+    "target_embedding_size": 152064
+  },
+  "tools": {
+    "enabled": true,
+    "tool_definitions": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_current_weather",
+          "description": "Get current weather at a location",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "location": {
+                "type": "string",
+                "description": "The location to get the weather for"
+              },
+              "unit": {
+                "type": "string",
+                "enum": ["celsius", "fahrenheit"],
+                "description": "The unit to return the temperature in. Defaults to fahrenheit."
+              }
+            },
+            "required": ["location"]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "generate_embedding",
+          "description": "Generate an embedding vector for an image",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "image_path": {
+                "type": "string",
+                "description": "Path to the image file"
+              },
+              "model_name": {
+                "type": "string",
+                "description": "Name of the embedding model to use. Defaults to default-embedding-model."
+              }
+            },
+            "required": ["image_path"]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "generate_search_query",
+          "description": "Generate a search query based on image description",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "image_description": {
+                "type": "string",
+                "description": "Description of the image"
+              }
+            },
+            "required": ["image_description"]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "generate_tags",
+          "description": "Generate tags based on image description",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "image_description": {
+                "type": "string",
+                "description": "Description of the image"
+              },
+              "max_tags": {
+                "type": "integer",
+                "description": "Maximum number of tags to generate. Defaults to 10."
+              }
+            },
+            "required": ["image_description"]
+          }
+        }
+      }
+    ]
+  },
+  "api_mappings": {
+    "OpenAI": {
+      "endpoint": "https://api.openai.com/v1/chat/completions",
+      "headers": {
+        "Authorization": "Bearer YOUR_OPENAI_API_KEY"
+      },
+      "payload_mapping": "convert_payload_openai_to_generic"
+    },
+    "Ollama": {
+      "endpoint": "http://localhost:11434/v1/chat/completions",
+      "headers": {},
+      "payload_mapping": "convert_payload_ollama_to_generic"
+    }
+  }
+}
