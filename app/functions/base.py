@@ -13,35 +13,44 @@ class FunctionType(str, Enum):
 
 # Error Classes
 class FunctionError(Exception):
-    """Base class for all function-related errors."""
-    pass
+    """Base class for function-related errors."""
+    def __init__(self, message: str, function_name: str = None, details: dict = None):
+        self.function_name = function_name
+        self.details = details or {}
+        super().__init__(message)
 
 class ValidationError(FunctionError):
-    """Error in function validation."""
+    """Raised when function validation fails."""
     pass
 
 class TimeoutError(FunctionError):
-    """Function execution timeout."""
-    pass
+    """Raised when function execution times out."""
+    def __init__(self, message: str, timeout_seconds: float = None, **kwargs):
+        details = {"timeout_seconds": timeout_seconds} if timeout_seconds else {}
+        super().__init__(message, details=details, **kwargs)
 
 class ExecutionError(FunctionError):
-    """Error during function execution."""
-    pass
+    """Raised when function execution fails."""
+    def __init__(self, message: str, original_error: Exception = None, **kwargs):
+        details = {"error_type": type(original_error).__name__} if original_error else {}
+        super().__init__(message, details=details, **kwargs)
 
 class FunctionNotFoundError(FunctionError):
-    """Function not found in registry."""
+    """Raised when a requested function is not found."""
     pass
 
 class ModuleImportError(FunctionError):
-    """Error importing function module."""
+    """Raised when a function module cannot be imported."""
     pass
 
-class InputValidationError(FunctionError):
-    """Error validating function input."""
-    pass
+class InputValidationError(ValidationError):
+    """Raised when function input validation fails."""
+    def __init__(self, message: str, invalid_params: list = None, **kwargs):
+        details = {"invalid_params": invalid_params} if invalid_params else {}
+        super().__init__(message, details=details, **kwargs)
 
-class OutputValidationError(FunctionError):
-    """Error validating function output."""
+class OutputValidationError(ValidationError):
+    """Raised when function output validation fails."""
     pass
 
 # Base Classes

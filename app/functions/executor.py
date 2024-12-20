@@ -47,7 +47,7 @@ class FunctionExecutor:
             # Get function class
             func_class = self.registry.get_function(name)
             if not func_class:
-                raise FunctionNotFoundError(f"Function not found: {name}")
+                raise FunctionNotFoundError(f"Function not found: {name}", function_name=name)
             
             # Create function instance
             func = func_class()
@@ -58,7 +58,11 @@ class FunctionExecutor:
                 try:
                     validate(instance=params, schema=func.parameters)
                 except JsonSchemaValidationError as e:
-                    raise InputValidationError(f"Invalid input parameters for {name}: {str(e)}")
+                    raise InputValidationError(
+                        f"Invalid input parameters for {name}: {str(e)}", 
+                        function_name=name,
+                        invalid_params=list(e.path)
+                    )
             
             # Execute the function
             logger.debug(f"Executing function {name}")
@@ -70,13 +74,22 @@ class FunctionExecutor:
                     # Pipeline function
                     result = await func.pipe(params)
                 else:
-                    raise ExecutionError(f"Function {name} has no executable method")
+                    raise ExecutionError(
+                        f"Function {name} has no executable method",
+                        function_name=name
+                    )
                 
                 logger.debug(f"Function {name} executed successfully")
                 return result
                 
             except Exception as e:
-                raise ExecutionError(f"Error executing function {name}: {str(e)}")
+                if isinstance(e, FunctionError):
+                    raise
+                raise ExecutionError(
+                    f"Error executing function {name}: {str(e)}", 
+                    function_name=name,
+                    original_error=e
+                )
             
         except FunctionError:
             # Re-raise known function errors
@@ -84,7 +97,11 @@ class FunctionExecutor:
         except Exception as e:
             # Wrap unknown errors
             logger.error(f"Unexpected error executing {name}: {str(e)}", exc_info=True)
-            raise ExecutionError(f"Unexpected error executing {name}: {str(e)}")
+            raise ExecutionError(
+                f"Unexpected error executing {name}: {str(e)}", 
+                function_name=name,
+                original_error=e
+            )
 
     async def handle_tool_calls(self, tool_calls: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Handle multiple tool calls in sequence.
