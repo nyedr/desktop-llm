@@ -46,21 +46,36 @@ class MultiStepPipeline(Pipeline):
 
         # Step 2: Process each message
         processed_messages = []
-        for msg in user_messages:
-            content = msg.content
-            # Example processing: Add length info
-            processed_content = f"{content} (Length: {len(content)})"
-            processed_messages.append(processed_content)
+        for msg in messages:
+            if isinstance(msg, ChatMessage):
+                if msg.role == "user":
+                    # Process user messages
+                    new_message = {
+                        "role": msg.role,
+                        "content": f"{msg.content} (Length: {len(msg.content)})"
+                    }
+                    if msg.name:
+                        new_message["name"] = msg.name
+                    if msg.tool_calls:
+                        new_message["tool_calls"] = msg.tool_calls
+                    if msg.tool_call_id:
+                        new_message["tool_call_id"] = msg.tool_call_id
+                    if msg.images:
+                        new_message["images"] = msg.images
+                    processed_messages.append(ChatMessage(**new_message))
+                else:
+                    # Keep non-user messages unchanged
+                    processed_messages.append(msg)
 
         # Step 3: Combine results
         summary = {
             "original_count": len(messages),
             "user_messages": len(user_messages),
-            "processed": processed_messages,
-            "total_length": sum(len(m) for m in processed_messages)
+            "processed": [msg.content for msg in processed_messages if msg.role == "user"],
+            "total_length": sum(len(msg.content) for msg in processed_messages if msg.role == "user")
         }
         
         return {
-            "messages": messages,
+            "messages": processed_messages,
             "summary": summary
         }

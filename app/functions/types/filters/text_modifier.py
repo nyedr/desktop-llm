@@ -29,9 +29,30 @@ class TextModifierFilter(Filter):
         """
         messages = data.get("messages", [])
         if messages:
+            new_messages = []
+            for msg in messages[:-1]:
+                new_messages.append(msg)
+            
             last_message = messages[-1]
             if isinstance(last_message, ChatMessage) and last_message.role == "user":
-                last_message.content = f"Context: This is a user message. Content: {last_message.content}"
+                # Create a new message with modified content
+                new_message = {
+                    "role": last_message.role,
+                    "content": f"Context: This is a user message. Content: {last_message.content}"
+                }
+                if last_message.name:
+                    new_message["name"] = last_message.name
+                if last_message.tool_calls:
+                    new_message["tool_calls"] = last_message.tool_calls
+                if last_message.tool_call_id:
+                    new_message["tool_call_id"] = last_message.tool_call_id
+                if last_message.images:
+                    new_message["images"] = last_message.images
+                new_messages.append(ChatMessage(**new_message))
+            else:
+                new_messages.append(last_message)
+            
+            data["messages"] = new_messages
         return data
 
     async def outlet(self, data: Dict[str, Any]) -> Dict[str, Any]:

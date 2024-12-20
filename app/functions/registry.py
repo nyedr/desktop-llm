@@ -40,11 +40,16 @@ class FunctionRegistry:
         Args:
             function_class: Class to register
         """
-        if not hasattr(function_class, 'name'):
-            raise ValueError(f"Function class {function_class.__name__} must have a name attribute")
+        if 'name' not in function_class.model_fields:
+            raise ValueError(f"Function class {function_class.__name__} must have a name field")
         
-        self._functions[function_class.name] = function_class
-        logger.info(f"Registered function: {function_class.name}")
+        # Get default name from the field
+        name = function_class.model_fields['name'].default
+        if not name:
+            raise ValueError(f"Function class {function_class.__name__} must have a default name")
+        
+        self._functions[name] = function_class
+        logger.info(f"Registered function: {name}")
     
     def get_function(self, name: str) -> Optional[Type[BaseFunction]]:
         """Get a function class by name.
@@ -72,22 +77,17 @@ class FunctionRegistry:
         ]
     
     def list_functions(self) -> List[Dict[str, Any]]:
-        """Get details of all registered functions.
+        """List all registered functions.
         
         Returns:
-            List of function details
+            List of function metadata
         """
-        return [
-            {
-                "name": func.name,
-                "type": func.type,
-                "description": func.description,
-                "priority": func.priority,
-                "config": func.config,
-                "parameters": getattr(func, "parameters", None)
-            }
-            for func in self._functions.values()
-        ]
+        return [{
+            "name": func.model_fields['name'].default,
+            "description": func.model_fields['description'].default,
+            "type": func.model_fields['type'].default,
+            "parameters": func.model_fields['parameters'].default if 'parameters' in func.model_fields else None
+        } for func in self._functions.values()]
 
     async def check_dependencies(self, dependencies: List[str]) -> bool:
         """Check if all dependencies are available.

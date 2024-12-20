@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "desktop-llm"
+version = "0.1.0"
+description = "A desktop LLM application"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "pytest",
+    "pytest-asyncio",
+    "httpx",
+    "ollama",
+    "sse-starlette"
+]
+requires-python = ">=3.8"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

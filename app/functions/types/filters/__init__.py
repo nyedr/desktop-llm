@@ -3,8 +3,7 @@
 from app.functions.types.filters.text_modifier import TextModifierFilter
 from app.functions.registry import registry
 
-# Register filter instances
-text_modifier = TextModifierFilter()
-registry.register(text_modifier)
+# Register filter class
+registry.register(TextModifierFilter)
 
 __all__ = ['TextModifierFilter']

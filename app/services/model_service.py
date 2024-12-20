@@ -147,7 +147,7 @@ class ModelService:
             formatted_messages = []
             for msg in messages:
                 if isinstance(msg, ChatMessage):
-                    formatted_messages.append(msg.dict(exclude_none=True))
+                    formatted_messages.append(msg.model_dump(exclude_none=True))
                 else:
                     formatted_messages.append(msg)
 
