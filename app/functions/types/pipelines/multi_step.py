@@ -1,9 +1,10 @@
 """Example pipeline that performs multiple processing steps."""
 
-from typing import Dict, Any, List
-from app.functions.base import Pipeline, FunctionType
+from typing import Dict, Any, List, Literal
+from app.functions.base import Pipeline, FunctionType, register_function
 from app.models.chat import ChatMessage
-from app.functions import register_function
+from pydantic import Field
+
 
 @register_function(
     func_type=FunctionType.PIPELINE,
@@ -16,21 +17,27 @@ from app.functions import register_function
 )
 class MultiStepPipeline(Pipeline):
     """Pipeline that processes data through multiple defined steps."""
-    
-    name: str = "multi_step_processor"
-    description: str = "Processes data through multiple steps"
-    type: FunctionType = FunctionType.PIPELINE
-    config: Dict[str, Any] = {
-        "max_steps": 3,
-        "timeout_per_step": 30
-    }
+
+    name: str = Field(default="multi_step_processor",
+                      description="Name of the pipeline")
+    description: str = Field(
+        default="Processes data through multiple steps", description="Description of the pipeline")
+    type: Literal[FunctionType.PIPELINE] = Field(
+        default=FunctionType.PIPELINE, description="Pipeline type")
+    config: Dict[str, Any] = Field(
+        default={
+            "max_steps": 3,
+            "timeout_per_step": 30
+        },
+        description="Configuration for the pipeline"
+    )
 
     async def pipe(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Process data through multiple steps.
-        
+
         Args:
             data: Input data containing messages and request info
-            
+
         Returns:
             Processed data after all steps
         """
@@ -40,7 +47,7 @@ class MultiStepPipeline(Pipeline):
 
         # Step 1: Collect all user messages
         user_messages = [
-            msg for msg in messages 
+            msg for msg in messages
             if isinstance(msg, ChatMessage) and msg.role == "user"
         ]
 
@@ -74,7 +81,7 @@ class MultiStepPipeline(Pipeline):
             "processed": [msg.content for msg in processed_messages if msg.role == "user"],
             "total_length": sum(len(msg.content) for msg in processed_messages if msg.role == "user")
         }
-        
+
         return {
             "messages": processed_messages,
             "summary": summary

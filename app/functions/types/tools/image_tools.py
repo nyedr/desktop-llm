@@ -1,159 +1,126 @@
-"""Tools for image-related operations."""
+"""Image processing tools."""
 
-from typing import Dict, Any, List
-from app.functions import Tool, register_function, FunctionType
+from typing import Dict, Any, List, Literal
+from app.functions.base import Tool, FunctionType, register_function
 from pydantic import Field
 
+
 @register_function(
-    func_type=FunctionType.PIPE,
-    name="generate_embedding",
-    description="Generates an embedding vector for an image",
-    priority=None,
-    config={"model_name": "default-embedding-model"}
+    func_type=FunctionType.TOOL,
+    name="image_embedding",
+    description="Generates embeddings for images",
+    config={
+        "model": "clip",
+        "batch_size": 32
+    }
 )
 class ImageEmbeddingTool(Tool):
     """Tool for generating image embeddings."""
 
-    name: str = Field(default="generate_embedding", description="Name of the embedding tool")
+    name: str = Field(default="image_embedding",
+                      description="Name of the image embedding tool")
     description: str = Field(
-        default="Generates an embedding vector for an image",
-        description="Description of the embedding tool"
+        default="Generates embeddings for images",
+        description="Description of the image embedding tool"
     )
-    type: FunctionType = FunctionType.PIPE
-
-    parameters: Dict[str, Any] = Field(
+    type: Literal[FunctionType.TOOL] = Field(
+        default=FunctionType.TOOL, description="Tool type")
+    config: Dict[str, Any] = Field(
         default={
-            "type": "object",
-            "properties": {
-                "image_path": {
-                    "type": "string",
-                    "description": "Path to the image file"
-                },
-                "model_name": {
-                    "type": "string",
-                    "description": "Name of the embedding model to use",
-                    "default": "default-embedding-model"
-                }
-            },
-            "required": ["image_path"]
+            "model": "clip",
+            "batch_size": 32
         },
-        description="Parameters for the image embedding tool"
+        description="Configuration for the image embedding tool"
     )
 
     async def execute(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate embedding for an image.
-        
+        """Generate embeddings for images.
+
         Args:
-            args: Dictionary containing image_path and optional model_name
-            
+            args: Dictionary containing image data
+
         Returns:
-            Generated embedding vector
+            Generated embeddings
         """
-        image_path = args["image_path"]
-        model_name = args.get("model_name", self.config["model_name"])
-        
-        # TODO: Implement actual embedding generation
-        embedding = [0.1, 0.2, 0.3]  # Placeholder
-        
-        return {"embedding": embedding}
+        # Implementation would go here
+        return {"embeddings": []}
+
 
 @register_function(
-    func_type=FunctionType.PIPE,
-    name="generate_search_query",
-    description="Generates a search query based on image description",
-    priority=None,
-    config={}
+    func_type=FunctionType.TOOL,
+    name="search_query",
+    description="Generates search queries from images",
+    config={
+        "max_tokens": 50
+    }
 )
 class SearchQueryTool(Tool):
-    """Tool for generating search queries from image descriptions."""
+    """Tool for generating search queries from images."""
 
-    name: str = Field(default="generate_search_query", description="Name of the search query tool")
+    name: str = Field(default="search_query",
+                      description="Name of the search query tool")
     description: str = Field(
-        default="Generates a search query based on image description",
+        default="Generates search queries from images",
         description="Description of the search query tool"
     )
-    type: FunctionType = FunctionType.PIPE
-
-    parameters: Dict[str, Any] = Field(
+    type: Literal[FunctionType.TOOL] = Field(
+        default=FunctionType.TOOL, description="Tool type")
+    config: Dict[str, Any] = Field(
         default={
-            "type": "object",
-            "properties": {
-                "image_description": {
-                    "type": "string",
-                    "description": "Description of the image"
-                }
-            },
-            "required": ["image_description"]
+            "max_tokens": 50
         },
-        description="Parameters for the search query tool"
+        description="Configuration for the search query tool"
     )
 
     async def execute(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate search query from image description.
-        
+        """Generate search queries from images.
+
         Args:
-            args: Dictionary containing image_description
-            
+            args: Dictionary containing image data
+
         Returns:
-            Generated search query
+            Generated search queries
         """
-        description = args["image_description"]
-        
-        # TODO: Implement actual query generation
-        query = description.lower().replace(" ", "+")
-        
-        return {"query": query}
+        # Implementation would go here
+        return {"queries": []}
+
 
 @register_function(
-    func_type=FunctionType.PIPE,
-    name="generate_tags",
-    description="Generates tags from image description",
-    priority=None,
-    config={"max_default_tags": 10}
+    func_type=FunctionType.TOOL,
+    name="tag_generator",
+    description="Generates tags for images",
+    config={
+        "max_tags": 10,
+        "min_confidence": 0.5
+    }
 )
 class TagGeneratorTool(Tool):
-    """Tool for generating tags from image descriptions."""
+    """Tool for generating tags for images."""
 
-    name: str = Field(default="generate_tags", description="Name of the tag generator tool")
+    name: str = Field(default="tag_generator",
+                      description="Name of the tag generator tool")
     description: str = Field(
-        default="Generates tags from image description",
+        default="Generates tags for images",
         description="Description of the tag generator tool"
     )
-    type: FunctionType = FunctionType.PIPE
-
-    parameters: Dict[str, Any] = Field(
+    type: Literal[FunctionType.TOOL] = Field(
+        default=FunctionType.TOOL, description="Tool type")
+    config: Dict[str, Any] = Field(
         default={
-            "type": "object",
-            "properties": {
-                "image_description": {
-                    "type": "string",
-                    "description": "Description of the image"
-                },
-                "max_tags": {
-                    "type": "integer",
-                    "description": "Maximum number of tags to generate",
-                    "default": 10
-                }
-            },
-            "required": ["image_description"]
+            "max_tags": 10,
+            "min_confidence": 0.5
         },
-        description="Parameters for the tag generator tool"
+        description="Configuration for the tag generator tool"
     )
 
     async def execute(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate tags from image description.
-        
+        """Generate tags for images.
+
         Args:
-            args: Dictionary containing image_description and optional max_tags
-            
+            args: Dictionary containing image data
+
         Returns:
             Generated tags
         """
-        description = args["image_description"]
-        max_tags = args.get("max_tags", self.config["max_default_tags"])
-        
-        # TODO: Implement actual tag generation
-        words = description.lower().split()
-        tags = list(set(words))[:max_tags]
-        
-        return {"tags": tags}
+        # Implementation would go here
+        return {"tags": []}

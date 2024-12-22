@@ -8,9 +8,9 @@
   - [x] Real-time word-by-word streaming
   - [x] Tool call handling within stream
   - [x] Optimize stream continuation after tool execution
-- [ ] Test function executions
-  - [ ] Add comprehensive test suite
-  - [ ] Test edge cases and error handling
+- [x] Test function executions
+  - [x] Add comprehensive test suite
+  - [x] Test edge cases and error handling
 
 ### Function System Revamp
 
@@ -35,17 +35,14 @@
   - [x] Response formatting tools
   - [x] Error handling framework
 
-- [ ] Migration and Testing
-  - [x] Convert existing functions to new system
-  - [x] Add comprehensive testing suite
-  - [ ] Create function development guidelines
-
 ### Memory and Context
 
 - [ ] Implement long term LLM memory
-  - [ ] Integrate Chroma for vector storage
+  - [x] Integrate Chroma for vector storage
   - [ ] Set up Redis/Redis Search for fast retrieval
-  - [ ] Design memory management system
+  - [x] Design memory management system
+  - [x] Implement memory retrieval and storage
+  - [x] Add integration testing for memory retrieval with LLM
 
 ### Custom Functions
 
@@ -53,7 +50,6 @@
   - [x] Content moderation filter
   - [x] Text modifier filter
   - [x] Multi-step pipeline
-  - [ ] Add more example functions
 
 ### Testing and Documentation
 
@@ -64,12 +60,14 @@
   - [x] Test filter and pipeline system
   - [ ] Add more test cases
   - [ ] Test error handling
+  - [ ] Deeply test memory retrieval and storage
 
 - [ ] Documentation
   - [ ] Write API documentation
-  - [ ] Create function development guide
   - [ ] Document deployment process
   - [ ] Add usage examples
+  - [ ] Create function development guidelines
+  - [ ] Add more example functions
 
 ### Future Enhancements
 

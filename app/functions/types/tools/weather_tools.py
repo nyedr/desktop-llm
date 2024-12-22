@@ -1,25 +1,29 @@
 """Tools for weather-related operations."""
 
-import json
 from typing import Dict, Any
-from app.functions import Tool, register_function, FunctionType
+from app.functions.base import Tool, FunctionType
 from pydantic import Field
 
-@register_function(
-    func_type=FunctionType.PIPE,
-    name="get_current_weather",
-    description="Get current weather information for a location",
-    priority=None,
-    config={"default_unit": "fahrenheit"}
-)
+
 class WeatherTool(Tool):
     """Tool for getting current weather information."""
-    
-    name: str = "get_current_weather"
-    description: str = "Get current weather information for a location"
-    type: FunctionType = FunctionType.PIPE
-    config: Dict[str, Any] = {"default_unit": "fahrenheit"}
 
+    name: str = Field(
+        default="get_current_weather",
+        description="Get current weather information for a location"
+    )
+    description: str = Field(
+        default="Get current weather information for a location",
+        description="Brief description of the tool's purpose"
+    )
+    type: FunctionType = Field(
+        default=FunctionType.TOOL,
+        description="Type of function"
+    )
+    config: Dict[str, Any] = Field(
+        default={"default_unit": "fahrenheit"},
+        description="Configuration for the weather tool"
+    )
     parameters: Dict[str, Any] = Field(
         default={
             "type": "object",
@@ -42,16 +46,16 @@ class WeatherTool(Tool):
 
     async def execute(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Get current weather for a location.
-        
+
         Args:
             args: Dictionary containing location and optional unit
-            
+
         Returns:
             Current weather information
         """
         location = args["location"]
         unit = args.get("unit", self.config["default_unit"])
-        
+
         # TODO: Implement actual weather API call
         weather = {
             "location": location,
@@ -61,5 +65,5 @@ class WeatherTool(Tool):
             "humidity": 45,
             "wind_speed": 8
         }
-        
+
         return weather

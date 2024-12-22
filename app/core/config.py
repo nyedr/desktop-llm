@@ -2,6 +2,7 @@ from typing import List
 from pydantic_settings import BaseSettings
 from pydantic import Field
 
+
 class AppConfig(BaseSettings):
     """Application-wide configuration settings."""
     OLLAMA_BASE_URLS: List[str] = Field(default=["http://localhost:11434"])
@@ -18,13 +19,27 @@ class AppConfig(BaseSettings):
     MODEL_FILTER_LIST: List[str] = Field(default_factory=list)
     GENERATION_REQUEST_TIMEOUT: int = Field(default=300)
     LOG_LEVEL: str = Field(default="DEBUG")
-    SSE_PING_INTERVAL: int = Field(default=15)  # Seconds between SSE ping messages
-    SSE_RETRY_TIMEOUT: int = Field(default=5000)  # Milliseconds to wait before retrying connection
+    # Seconds between SSE ping messages
+    SSE_PING_INTERVAL: int = Field(default=15)
+    # Milliseconds to wait before retrying connection
+    SSE_RETRY_TIMEOUT: int = Field(default=5000)
+
+    # Chroma Settings
+    CHROMA_PERSIST_DIRECTORY: str = Field(default="chroma_data")
+    CHROMA_COLLECTION_NAME: str = Field(default="desktop_llm_memory")
+    CHROMA_EMBEDDING_MODEL: str = Field(default="multi-qa-mpnet-base-dot-v1")
+
+    # MCP Settings
+    MCP_SERVER_FILESYSTEM_PATH: str = Field(
+        default="./src/filesystem/dist/index.js")
+    MCP_SERVER_FILESYSTEM_COMMAND: str = Field(default="node")
+    WORKSPACE_DIR: str = Field(default="./data")
 
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
         extra = "allow"
+
 
 # Create a global config instance
 config = AppConfig()

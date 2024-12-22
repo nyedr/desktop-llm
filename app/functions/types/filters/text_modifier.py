@@ -1,69 +1,84 @@
-"""Example filter that modifies text in both directions."""
+"""Example filter that modifies text content."""
 
-from typing import Dict, Any
+from typing import Dict, Any, List, Literal
 from app.functions.base import Filter, FunctionType, register_function
-from app.models.chat import ChatMessage
+from pydantic import Field
+
 
 @register_function(
     func_type=FunctionType.FILTER,
     name="text_modifier",
-    description="Modifies text content in both inlet and outlet",
-    priority=1
+    description="Modifies text content of messages",
+    priority=1,
+    config={
+        "prefix": "[Modified] ",
+        "suffix": " [End]"
+    }
 )
 class TextModifierFilter(Filter):
-    """Filter that adds context to incoming messages and formatting to outgoing ones."""
-    
-    name: str = "text_modifier"
-    description: str = "Modifies text content in both inlet and outlet"
-    type: FunctionType = FunctionType.FILTER
-    priority: int = 1
+    """Filter that modifies text content in both inlet and outlet."""
+
+    name: str = Field(default="text_modifier",
+                      description="Name of the filter")
+    description: str = Field(
+        default="Modifies text content in both inlet and outlet",
+        description="Description of the filter"
+    )
+    type: Literal[FunctionType.FILTER] = Field(
+        default=FunctionType.FILTER, description="Filter type")
+    priority: int = Field(default=1, description="Filter priority")
+    config: Dict[str, Any] = Field(
+        default={
+            "prefix": "[Modified] ",
+            "suffix": " [End]"
+        },
+        description="Configuration for the filter"
+    )
 
     async def inlet(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Add context to incoming messages.
-        
+        """Process incoming messages.
+
         Args:
-            data: Request data containing messages
-            
+            data: Dictionary containing messages and request info
+
         Returns:
             Modified request data
         """
         messages = data.get("messages", [])
-        if messages:
-            new_messages = []
-            for msg in messages[:-1]:
-                new_messages.append(msg)
-            
-            last_message = messages[-1]
-            if isinstance(last_message, ChatMessage) and last_message.role == "user":
-                # Create a new message with modified content
-                new_message = {
-                    "role": last_message.role,
-                    "content": f"Context: This is a user message. Content: {last_message.content}"
-                }
-                if last_message.name:
-                    new_message["name"] = last_message.name
-                if last_message.tool_calls:
-                    new_message["tool_calls"] = last_message.tool_calls
-                if last_message.tool_call_id:
-                    new_message["tool_call_id"] = last_message.tool_call_id
-                if last_message.images:
-                    new_message["images"] = last_message.images
-                new_messages.append(ChatMessage(**new_message))
-            else:
-                new_messages.append(last_message)
-            
-            data["messages"] = new_messages
+        if not messages:
+            return data
+
+        prefix = self.config.get("prefix", "")
+        suffix = self.config.get("suffix", "")
+
+        modified_messages = []
+        for message in messages:
+            if message.get("role") == "user":
+                content = message.get("content", "")
+                message = message.copy()
+                message["content"] = f"{prefix}{content}{suffix}"
+            modified_messages.append(message)
+
+        data["messages"] = modified_messages
         return data
 
     async def outlet(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Format outgoing messages.
-        
+        """Process outgoing messages.
+
         Args:
-            data: Response data containing message
-            
+            data: Dictionary containing response data
+
         Returns:
             Modified response data
         """
-        if "content" in data:
-            data["content"] = f"[Processed Response] {data['content']}"
+        # Don't modify tool responses as they contain JSON data
+        if data.get("role") in ["tool", "function"]:
+            return data
+
+        # Only modify content for assistant messages
+        if "content" in data and data.get("role") == "assistant":
+            prefix = self.config.get("prefix", "")
+            suffix = self.config.get("suffix", "")
+            data = data.copy()
+            data["content"] = f"{prefix}{data['content']}{suffix}"
         return data

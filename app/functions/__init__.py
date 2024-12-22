@@ -8,7 +8,7 @@ from app.functions.base import (
     FunctionType,
     register_function
 )
-from app.functions.registry import registry
+from app.functions.registry import function_registry
 from app.functions.executor import executor
 from app.functions.types import *
 
@@ -19,6 +19,6 @@ __all__ = [
     'Pipeline',
     'FunctionType',
     'register_function',
-    'registry',
+    'function_registry',
     'executor'
 ]

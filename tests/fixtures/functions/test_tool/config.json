@@ -1,0 +1,13 @@
+{
+  "functions": [
+    {
+      "name": "simple_tool",
+      "module_path": "tests.fixtures.functions.test_tool.simple_tool",
+      "function_name": "SimpleTool",
+      "type": "tool",
+      "parameters": {},
+      "enabled": true,
+      "dependencies": []
+    }
+  ]
+}

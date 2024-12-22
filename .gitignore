@@ -1,5 +1,11 @@
 .env
 
+/chroma_data
+
+/data
+
+/test_data
+
 /logs
 
 # Ignore the __pycache__ directory
@@ -13,3 +19,5 @@
 
 # Ignore the .git directory
 /.git
+
+startup_debug.log

@@ -15,10 +15,12 @@ import asyncio
 
 logger = logging.getLogger(__name__)
 
+
 @pytest.fixture(autouse=True)
 def patch_sse_exit_event():
     """Patch SSE exit event to use current event loop."""
     AppStatus.should_exit_event = anyio.Event()
+
 
 @pytest.fixture
 async def async_test_client():
@@ -26,6 +28,7 @@ async def async_test_client():
     transport = ASGITransport(app=app, raise_app_exceptions=True)
     async with AsyncClient(transport=transport, base_url="http://testserver") as client:
         yield client
+
 
 async def mock_chat_generator(tool_calls=None, error=None):
     """Mock chat completion generator."""
@@ -47,6 +50,7 @@ async def mock_chat_generator(tool_calls=None, error=None):
             yield {
                 "role": "tool",
                 "content": "Tool response",
+                "name": tool_call["function"]["name"],
                 "tool_call_id": tool_call["id"]
             }
         # Finally yield the assistant's response
@@ -61,6 +65,7 @@ async def mock_chat_generator(tool_calls=None, error=None):
             "role": "assistant",
             "content": "Hello there!"
         }
+
 
 @pytest.mark.asyncio
 @patch('app.services.model_service.ModelService.get_all_models')
@@ -105,6 +110,7 @@ async def test_chat_stream_start(mock_agent_chat, mock_get_all_models, async_tes
     assert events[1]["event"] == "message"
     assert events[2]["event"] == "end"
     assert events[1]["data"]["content"] == "Hello there!"
+
 
 @pytest.mark.asyncio
 @patch('app.services.model_service.ModelService.get_all_models')
@@ -164,24 +170,29 @@ async def test_chat_invalid_request(mock_get_all_models, async_test_client):
     )
     assert response.status_code == 422
 
+
 @pytest.mark.asyncio
 @patch('app.services.model_service.ModelService.get_all_models')
 @patch('app.services.agent.Agent.chat')
 async def test_chat_with_tools(mock_agent_chat, mock_get_all_models, async_test_client):
     """Test chat endpoint with tools enabled."""
     mock_get_all_models.return_value = {"test-model": {}}
+
+    # Mock a tool call sequence
     tool_calls = [{
         "id": "call_123",
         "type": "function",
         "function": {
-            "name": "get_weather",
+            "name": "get_current_weather",
             "arguments": json.dumps({"location": "New York"})
         }
     }]
+
     mock_agent_chat.return_value = mock_chat_generator(tool_calls=tool_calls)
 
     request = ChatRequest(
-        messages=[ChatMessage(role="user", content="Get the weather")],
+        messages=[ChatMessage(
+            role="user", content="What's the weather in New York?")],
         model="test-model",
         enable_tools=True
     )
@@ -210,15 +221,51 @@ async def test_chat_with_tools(mock_agent_chat, mock_get_all_models, async_test_
                     events.append({"event": current_event, "data": data})
 
     # Verify we got all expected events
-    assert len(events) >= 4, f"Expected at least 4 events (including tool call), got {len(events)}"
+    assert len(
+        events) >= 4, f"Expected at least 4 events (start, tool call, tool response, final message), got {len(events)}"
+
+    # Verify start event
     assert events[0]["event"] == "start"
+
+    # Verify tool call message
     assert events[1]["event"] == "message"
     assert events[1]["data"]["tool_calls"] == tool_calls
-    assert events[2]["event"] == "message"
-    assert events[2]["data"]["role"] == "tool"
-    assert events[3]["event"] == "message"
-    assert events[3]["data"]["content"] == "The weather in New York is sunny."
-    assert events[4]["event"] == "end"
+    assert events[1]["data"]["role"] == "assistant"
+
+    # Find error response and tool response
+    error_response = None
+    tool_response = None
+    final_response = None
+
+    for event in events[2:]:
+        if event["event"] == "message":
+            if "error" in event["data"]:
+                error_response = event["data"]
+            elif event["data"].get("role") == "tool":
+                tool_response = event["data"]
+            elif event["data"].get("role") == "assistant" and "sunny" in event["data"].get("content", ""):
+                final_response = event["data"]
+
+    # Verify error response
+    assert error_response is not None
+    assert error_response["tool_call_id"] == "call_123"
+    assert error_response["error"]["type"] == "ValidationError"
+
+    # Verify tool response
+    assert tool_response is not None
+    assert tool_response["role"] == "tool"
+    assert tool_response["content"] == "Tool response"
+    assert tool_response["name"] == "get_current_weather"
+    assert tool_response["tool_call_id"] == "call_123"
+
+    # Verify final assistant message
+    assert final_response is not None
+    assert final_response["role"] == "assistant"
+    assert "sunny" in final_response["content"]
+
+    # Verify end event
+    assert events[-1]["event"] == "end"
+
 
 @pytest.mark.asyncio
 @patch('app.services.model_service.ModelService.get_all_models')
@@ -257,6 +304,7 @@ async def test_chat_with_filters(mock_agent_chat, mock_get_all_models, async_tes
     assert message_event is not None, "Message event not received"
     # Add assertions for filtered content once filters are implemented
 
+
 @pytest.mark.asyncio
 @patch('app.services.model_service.ModelService.get_all_models')
 @patch('app.services.agent.Agent.chat')
@@ -265,7 +313,8 @@ async def test_chat_error_handling(mock_agent_chat, mock_get_all_models, async_t
     mock_get_all_models.return_value = {"test-model": {}}
 
     # Test model service error
-    mock_agent_chat.return_value = mock_chat_generator(error=Exception("Model service error"))
+    mock_agent_chat.return_value = mock_chat_generator(
+        error=Exception("Model service error"))
 
     request = ChatRequest(
         messages=[ChatMessage(role="user", content="Hello")],
@@ -294,6 +343,7 @@ async def test_chat_error_handling(mock_agent_chat, mock_get_all_models, async_t
     assert len(events) >= 1, "Expected at least 1 event"
     assert events[0]["event"] == "error"
     assert "Model service error" in events[0]["data"]["error"]
+
 
 @pytest.mark.asyncio
 @patch('app.services.model_service.ModelService.get_all_models')

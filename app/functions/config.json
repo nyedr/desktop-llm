@@ -1,0 +1,117 @@
+{
+  "functions": [
+    {
+      "name": "get_current_weather",
+      "module_path": "app.functions.types.tools.weather_tools",
+      "function_name": "WeatherTool",
+      "type": "tool",
+      "description": "Get current weather information for a location",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "Location to get weather for"
+          },
+          "unit": {
+            "type": "string",
+            "enum": ["celsius", "fahrenheit"],
+            "description": "Temperature unit",
+            "default": "fahrenheit"
+          }
+        },
+        "required": ["location"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "The location requested"
+          },
+          "temperature": {
+            "type": "number",
+            "description": "The current temperature"
+          },
+          "unit": {
+            "type": "string",
+            "description": "The temperature unit (celsius or fahrenheit)"
+          },
+          "conditions": {
+            "type": "string",
+            "description": "The current weather conditions"
+          },
+          "humidity": {
+            "type": "number",
+            "description": "The current humidity percentage"
+          },
+          "wind_speed": {
+            "type": "number",
+            "description": "The current wind speed"
+          }
+        }
+      },
+      "enabled": true,
+      "dependencies": []
+    },
+    {
+      "name": "calculator",
+      "module_path": "app.functions.types.tools.calculator",
+      "function_name": "CalculatorTool",
+      "type": "tool",
+      "description": "Performs basic arithmetic calculations",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "operation": {
+            "type": "string",
+            "enum": ["add", "subtract", "multiply", "divide"],
+            "description": "The arithmetic operation to perform"
+          },
+          "a": {
+            "type": "number",
+            "description": "First operand"
+          },
+          "b": {
+            "type": "number",
+            "description": "Second operand"
+          }
+        },
+        "required": ["operation", "a", "b"]
+      },
+      "output_schema": {
+        "type": "number",
+        "description": "The result of the calculation"
+      },
+      "enabled": true,
+      "dependencies": []
+    }
+  ],
+  "filters": [
+    {
+      "name": "text_modifier",
+      "module_path": "app.functions.types.filters.text_modifier",
+      "function_name": "TextModifierFilter",
+      "type": "filter",
+      "description": "Modifies text content in both inlet and outlet",
+      "enabled": true,
+      "dependencies": [],
+      "priority": 1
+    }
+  ],
+  "pipelines": [
+    {
+      "name": "multi_step_processor",
+      "module_path": "app.functions.types.pipelines.multi_step",
+      "function_name": "MultiStepPipeline",
+      "type": "pipeline",
+      "description": "Processes data through multiple steps",
+      "enabled": true,
+      "dependencies": [],
+      "config": {
+        "max_steps": 3,
+        "timeout_per_step": 30
+      }
+    }
+  ]
+}
