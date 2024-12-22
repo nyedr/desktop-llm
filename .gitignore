@@ -6,6 +6,14 @@
 
 /test_data
 
+/src/filesystem/node_modules
+
+/src/filesystem/dist
+
+/src/filesystem/build
+
+/src/filesystem/package-lock.json
+
 /logs
 
 # Ignore the __pycache__ directory
