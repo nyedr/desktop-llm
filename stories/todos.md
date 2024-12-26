@@ -2,6 +2,11 @@
 
 ## Core Features
 
+### Random todos
+
+- [ ] Make the application services non-blocking to improve partition tolerance
+- [ ] Thoroughly test the filesystem server
+
 ### Streaming and Tool Execution
 
 - [x] Implement single continuous streaming

@@ -6,7 +6,7 @@
 
 /test_data
 
-/src/filesystem/node_modules
+
 
 /src/filesystem/dist
 
@@ -27,5 +27,17 @@
 
 # Ignore the .git directory
 /.git
+
+# Ignore all node_modules directories
+**/node_modules/
+
+# Ignore all build directories
+**/build/
+
+# Ignore all dist directories
+**/dist/
+
+# Ignore all package-lock.json files
+**/package-lock.json
 
 startup_debug.log

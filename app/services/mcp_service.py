@@ -27,26 +27,25 @@ Important:
 import asyncio
 import logging
 import os
-import time
-from typing import Optional, List, Dict, Any, Tuple, TypeVar, Type
-from contextlib import asynccontextmanager
+import signal
+import sys
+from typing import Optional
+from pathlib import Path
 
-import anyio
-from mcp.client.stdio import stdio_client, StdioServerParameters
-from mcp.client.session import ClientSession
-from mcp.shared.session import (
-    JSONRPCRequest,
-    JSONRPCResponse,
-    JSONRPCError,
+from mcp.client.stdio import (
+    stdio_client,
+    StdioServerParameters,
 )
+from mcp.client.session import ClientSession
 from langchain_mcp import MCPToolkit
 
 from app.services.base import BaseService
 
 logger = logging.getLogger(__name__)
 
-# Type variable for response types
-ResponseT = TypeVar('ResponseT')
+# Define the filesystem server directory relative to the project root
+FILESYSTEM_SERVER_DIR = Path(
+    __file__).parent.parent.parent / "src" / "filesystem"
 
 
 class MCPServiceError(Exception):
@@ -59,28 +58,8 @@ class MCPInitializationError(MCPServiceError):
     pass
 
 
-class MCPCommunicationError(MCPServiceError):
-    """Raised when communication with the MCP server fails."""
-    pass
-
-
 class MCPService(BaseService):
-    """Model Context Protocol (MCP) Service.
-
-    This service manages communication with the Node.js MCP server, which provides
-    filesystem access and other tools through a JSON-RPC protocol.
-
-    The service lifecycle:
-    1. Initialization - Validates paths and starts the Node.js server
-    2. Server Session Creation - Establishes stdio communication and tests connectivity
-    3. Operation - Handles tool requests and responses
-    4. Shutdown - Gracefully closes connections and stops the server
-
-    Error Handling:
-    - MCPInitializationError: Raised for any initialization failures
-    - MCPCommunicationError: Raised for communication issues after initialization
-    - MCPToolError: Raised for errors during tool execution
-    """
+    """Model Context Protocol (MCP) Service."""
 
     def __init__(self):
         """Initialize the MCP service."""
@@ -88,68 +67,126 @@ class MCPService(BaseService):
         self.toolkit: Optional[MCPToolkit] = None
         self.session: Optional[ClientSession] = None
         self._stdio_client = None
+        self._initialized = False
+        self._node_process = None
+        self._max_retries = 2
+        self._retry_delay = 1.0  # seconds
+        self._initialization_timeout = 5.0  # 5 seconds timeout
+        self._task_group = None
+
+    async def _terminate_node_server(self):
+        """Terminate the Node.js server process if it's running."""
+        try:
+            if self._node_process and hasattr(self._node_process, 'returncode') and self._node_process.returncode is None:
+                logger.info(
+                    f"Terminating Node.js server (PID: {self._node_process.pid})")
+                if sys.platform == 'win32':
+                    self._node_process.terminate()
+                else:
+                    os.kill(self._node_process.pid, signal.SIGTERM)
+                try:
+                    await asyncio.wait_for(self._node_process.wait(), timeout=5.0)
+                except asyncio.TimeoutError:
+                    logger.warning(
+                        "Node.js server did not terminate gracefully, forcing kill")
+                    if sys.platform == 'win32':
+                        self._node_process.kill()
+                    else:
+                        os.kill(self._node_process.pid, signal.SIGKILL)
+        except Exception as e:
+            logger.error(f"Error terminating Node.js server: {e}")
 
     async def initialize(self):
-        """Initialize the MCP toolkit and establish a session."""
+        """Initialize the MCP service with improved error handling."""
         try:
-            logger.info("Initializing MCP Service...")
-            # Get the absolute path to the Node.js server
-            node_server_path = os.path.abspath(
-                os.path.join(
-                    os.path.dirname(__file__),
-                    "..",
-                    "..",
-                    "src",
-                    "filesystem",
-                    "dist",
-                    "index.js"
-                )
-            )
-
-            # Get the workspace path
-            workspace_path = os.path.abspath(
-                os.path.join(
-                    os.path.dirname(__file__),
-                    "..",
-                    "..",
-                    "data"
-                )
-            )
-
-            # Create server parameters
-            server_params = StdioServerParameters(
-                command="node",
-                args=[node_server_path, workspace_path]
-            )
-            logger.debug(f"MCP server parameters: {server_params}")
-
-            # Create stdio client and session
-            self._stdio_client = stdio_client(server_params)
-            read_stream, write_stream = await self._stdio_client.__aenter__()
-            self.session = ClientSession(read_stream, write_stream)
-
-            # Initialize toolkit
-            self.toolkit = MCPToolkit(session=self.session)
-            await self.toolkit.initialize()
-            logger.info("MCP Service initialized successfully")
-            return self.toolkit
-
+            await self._start_server()
+            self._initialized = True
+            return True
         except Exception as e:
-            logger.error(f"Failed to initialize MCP Service: {e}")
-            raise
+            logger.error(f"Failed to initialize MCP service: {e}")
+            await self.terminate()
+            return False
+
+    async def terminate(self):
+        """Terminate the MCP service and clean up resources."""
+        try:
+            if self.session:
+                try:
+                    await self.session.close()
+                except Exception as e:
+                    logger.error(f"Error closing session: {e}")
+                self.session = None
+
+            if self._stdio_client:
+                try:
+                    await self._stdio_client.__aexit__(None, None, None)
+                except Exception as e:
+                    logger.error(f"Error closing stdio client: {e}")
+                self._stdio_client = None
+
+            if self._node_process:
+                await self._terminate_node_server()
+
+            self._initialized = False
+            logger.info("MCP service terminated successfully")
+        except Exception as e:
+            logger.error(f"Error during MCP service termination: {e}")
+
+    async def _start_server(self):
+        """Start the Node.js server with retries."""
+        for attempt in range(self._max_retries):
+            try:
+                if self._node_process:
+                    await self._terminate_node_server()
+
+                # Create server parameters
+                server_params = StdioServerParameters(
+                    command="node",
+                    args=[str(FILESYSTEM_SERVER_DIR / "dist" / "index.js")],
+                )
+
+                logger.info(
+                    f"Starting Node.js server (attempt {attempt + 1}/{self._max_retries})")
+
+                # Create stdio client and session
+                self._stdio_client = stdio_client(server_params)
+                read_stream, write_stream = await self._stdio_client.__aenter__()
+                self.session = ClientSession(read_stream, write_stream)
+                await self.session.__aenter__()
+
+                # Initialize session with timeout
+                await asyncio.wait_for(
+                    self.session.initialize(),
+                    timeout=self._initialization_timeout
+                )
+                logger.info("Server initialized successfully")
+                return
+
+            except asyncio.TimeoutError:
+                logger.error("Server initialization timed out")
+                await self.terminate()
+                if attempt < self._max_retries - 1:
+                    await asyncio.sleep(self._retry_delay)
+                    continue
+                raise MCPInitializationError("Server initialization timed out")
+
+            except Exception as e:
+                logger.warning(
+                    f"Server start attempt {attempt + 1} failed: {e}")
+                await self.terminate()
+                if attempt < self._max_retries - 1:
+                    await asyncio.sleep(self._retry_delay)
+                else:
+                    raise MCPInitializationError(
+                        f"Failed to start server after retries: {e}")
+
+    @property
+    def is_initialized(self):
+        """Check if the service is initialized."""
+        return self._initialized
 
     async def get_tools(self):
         """Retrieve tools from the MCP toolkit."""
         if not self.toolkit:
             await self.initialize()
         return self.toolkit.get_tools()
-
-    async def close_session(self):
-        """Close the MCP session."""
-        if self.session:
-            await self.session.close()
-            if self._stdio_client:
-                await self._stdio_client.__aexit__(None, None, None)
-            self.session = None
-            self.toolkit = None
-            logger.info("MCP session closed.")

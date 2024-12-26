@@ -3,16 +3,14 @@
 import logging
 import json
 from typing import List, Dict, Any, Optional, Union, AsyncGenerator, Tuple
-from datetime import datetime
 import uuid
 import asyncio
-import aiohttp
 import httpx
 
 from ollama import AsyncClient
 from app.core.config import config
 from app.models.chat import ChatMessage
-from app.models.model import Model, ModelDetails
+from app.models.model import Model
 from app.models.completion import CompletionResponse
 
 logger = logging.getLogger(__name__)

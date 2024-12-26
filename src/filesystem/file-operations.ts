@@ -2,7 +2,6 @@ import * as path from "path";
 import * as fs from "fs/promises";
 import glob from "glob";
 import { promisify } from "util";
-import { minimatch } from "minimatch";
 import { createTwoFilesPatch } from "diff";
 
 const globAsync = promisify<string, glob.IOptions, string[]>(glob);

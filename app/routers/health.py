@@ -43,8 +43,25 @@ async def health_check(
         pipelines = [f for f in functions if f.get(
             "type") == FunctionType.PIPELINE]
 
+        # Get service states
+        service_states = getattr(request.app.state, 'service_states', {})
+        services_status = {}
+        overall_status = "healthy"
+
+        for service_name, state in service_states.items():
+            service_info = {
+                "status": state.status.name.lower(),
+                "status_icon": state.status.value,
+                "error": str(state.error) if state.error else None
+            }
+            services_status[service_name] = service_info
+
+            # Update overall status if any critical service is down
+            if service_name in ['mcp', 'chroma'] and state.status.name in ['FAILED', 'OFFLINE']:
+                overall_status = "degraded"
+
         return {
-            "status": "healthy",
+            "status": overall_status,
             "system": {
                 "memory": {
                     "total": memory.total,
@@ -58,6 +75,7 @@ async def health_check(
                 }
             },
             "components": {
+                "services": services_status,
                 "models": {
                     "status": "healthy" if ollama_healthy else "unhealthy",
                     "count": len(models),

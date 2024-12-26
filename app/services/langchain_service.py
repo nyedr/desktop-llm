@@ -1,10 +1,7 @@
 import logging
 from typing import List, Dict, Any, Optional
-from langchain.schema.retriever import BaseRetriever
-from langchain_community.chat_models import ChatOpenAI
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.schema import Document
 from langchain_community.llms import Ollama
 
 from app.core.config import config
