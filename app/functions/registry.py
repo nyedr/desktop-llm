@@ -164,12 +164,33 @@ class FunctionRegistry:
         functions = []
         for func in self._functions.values():
             try:
+                # Get field values using the helper function that handles Pydantic v1/v2 differences
+                func_type = get_field_default(func, 'type')
+                name = get_field_default(func, 'name')
+                description = get_field_default(func, 'description')
+
+                # Skip if required fields are undefined
+                if func_type is None or name is None:
+                    logger.warning(
+                        f"Skipping function with undefined required fields: {func}")
+                    continue
+
+                # Build function data with only defined values
                 func_data = {
-                    "name": func.model_fields['name'].default,
-                    "description": func.model_fields['description'].default,
-                    "type": func.model_fields['type'].default,
-                    "parameters": func.model_fields['parameters'].default if 'parameters' in func.model_fields else None
+                    "name": str(name),  # Ensure name is a string
+                    "type": func_type.value if isinstance(func_type, FunctionType) else str(func_type),
                 }
+
+                # Add description if defined
+                if description is not None:
+                    func_data["description"] = str(description)
+
+                # Add parameters if they exist and are defined
+                if pydantic_field_exists(func, 'parameters'):
+                    parameters = get_field_default(func, 'parameters')
+                    if parameters is not None:
+                        func_data["parameters"] = parameters
+
                 functions.append(func_data)
                 logger.debug(f"[LIST] Added function: {func_data}")
             except Exception as e:
@@ -177,8 +198,11 @@ class FunctionRegistry:
                     f"[LIST] Error getting metadata for function {func}: {e}", exc_info=True)
 
         logger.info(f"[LIST] Found {len(functions)} functions")
-        logger.debug(
-            f"[LIST] Full function list: {json.dumps(functions, indent=2)}")
+        try:
+            logger.debug(
+                f"[LIST] Full function list: {json.dumps(functions, indent=2)}")
+        except Exception as e:
+            logger.error(f"Error serializing functions list: {e}")
         return functions
 
     async def discover_functions(self, directory: Path) -> None:

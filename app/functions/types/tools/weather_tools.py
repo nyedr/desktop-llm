@@ -1,29 +1,27 @@
-"""Tools for weather-related operations."""
+"""Weather-related tools."""
 
-from typing import Dict, Any
-from app.functions.base import Tool, FunctionType
+import logging
+from typing import Dict, Any, ClassVar, List
+from app.functions.base import Tool, FunctionType, register_function, InputValidationError
 from pydantic import Field
 
+logger = logging.getLogger(__name__)
 
+
+@register_function(
+    func_type=FunctionType.TOOL,
+    name="get_current_weather",
+    description="Get current weather information for a location"
+)
 class WeatherTool(Tool):
-    """Tool for getting current weather information."""
-
-    name: str = Field(
-        default="get_current_weather",
-        description="Get current weather information for a location"
-    )
-    description: str = Field(
-        default="Get current weather information for a location",
-        description="Brief description of the tool's purpose"
-    )
+    """Tool for getting weather information."""
     type: FunctionType = Field(
-        default=FunctionType.TOOL,
-        description="Type of function"
-    )
-    config: Dict[str, Any] = Field(
-        default={"default_unit": "fahrenheit"},
-        description="Configuration for the weather tool"
-    )
+        default=FunctionType.TOOL, description="Tool type")
+    name: str = Field(
+        default="get_current_weather", description="Name of the weather tool")
+    description: str = Field(
+        default="Get current weather information for a location", description="Description of what the tool does")
+
     parameters: Dict[str, Any] = Field(
         default={
             "type": "object",
@@ -41,29 +39,89 @@ class WeatherTool(Tool):
             },
             "required": ["location"]
         },
-        description="Parameters for the weather tool"
+        description="Parameters schema for the weather tool"
     )
 
-    async def execute(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Get current weather for a location.
+    # Parameter normalization mappings
+    UNIT_MAPPINGS: ClassVar[Dict[str, List[str]]] = {
+        "celsius": ["Celsius", "CELSIUS", "C", "c", "centigrade"],
+        "fahrenheit": ["Fahrenheit", "FAHRENHEIT", "F", "f"]
+    }
+
+    def normalize_parameters(self, args: Dict[str, Any]) -> Dict[str, Any]:
+        """Normalize weather tool parameters.
 
         Args:
-            args: Dictionary containing location and optional unit
+            args: Original tool arguments
 
         Returns:
-            Current weather information
+            Normalized arguments
         """
-        location = args["location"]
-        unit = args.get("unit", self.config["default_unit"])
+        normalized = args.copy()
 
-        # TODO: Implement actual weather API call
-        weather = {
-            "location": location,
-            "temperature": 72 if unit == "fahrenheit" else 22,
-            "unit": unit,
-            "conditions": "sunny",
-            "humidity": 45,
-            "wind_speed": 8
-        }
+        # Normalize temperature unit
+        if "unit" in normalized:
+            unit = str(normalized["unit"]).lower()
+            for standard, variants in self.UNIT_MAPPINGS.items():
+                if unit in [v.lower() for v in variants]:
+                    normalized["unit"] = standard
+                    break
 
-        return weather
+        # Normalize location
+        if "location" in normalized:
+            location = normalized["location"]
+            # Remove extra spaces and standardize format
+            location = " ".join(location.split())
+            # Capitalize major words
+            normalized["location"] = location.title()
+
+        return normalized
+
+    def _fix_validation_error(self, error: InputValidationError, args: Dict[str, Any]) -> Dict[str, Any]:
+        """Fix common validation errors in weather parameters.
+
+        Args:
+            error: The validation error
+            args: Current arguments
+
+        Returns:
+            Fixed arguments
+        """
+        fixed = args.copy()
+
+        # Check if the error is about the unit parameter
+        if "unit" in error.details.get("invalid_params", []):
+            # Default to fahrenheit if unit is invalid
+            fixed["unit"] = "fahrenheit"
+            logger.info(
+                f"Fixed invalid unit in weather parameters: {args['unit']} -> fahrenheit")
+
+        return fixed
+
+    async def _execute(self, args: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute the weather tool with the given arguments.
+
+        Args:
+            args: Normalized tool arguments
+
+        Returns:
+            Weather information
+
+        Raises:
+            ExecutionError: If weather data cannot be retrieved
+        """
+        try:
+            # Your existing weather API call implementation
+            # This is a placeholder - replace with actual API call
+            return {
+                "location": args["location"],
+                "temperature": 72,
+                "unit": args.get("unit", "fahrenheit"),
+                "conditions": "sunny",
+                "humidity": 45,
+                "wind_speed": 8
+            }
+
+        except Exception as e:
+            logger.error(f"Error getting weather data: {e}", exc_info=True)
+            raise

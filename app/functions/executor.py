@@ -1,13 +1,11 @@
 """Function executor for running registered functions."""
 
-import asyncio
 import logging
 import json
-from typing import Dict, Any, List, Optional, Type
+from typing import Dict, Any, List
 from jsonschema import validate, ValidationError as JsonSchemaValidationError
 
 from app.functions.base import (
-    BaseFunction,
     FunctionError,
     ValidationError,
     TimeoutError,

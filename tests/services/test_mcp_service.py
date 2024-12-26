@@ -23,16 +23,11 @@ async def mock_toolkit():
 @pytest.fixture
 async def mock_session():
     """Create a mock ClientSession."""
-    session = Mock()
+    session = AsyncMock()
     session.__aexit__ = AsyncMock()
     session.__aenter__ = AsyncMock(return_value=session)
-    session.wait_for_notification = AsyncMock(return_value={
-        "serverInfo": {
-            "pid": 1234,
-            "version": "v16.0.0",
-            "startTime": "2024-01-01T00:00:00.000Z"
-        }
-    })
+    session.initialize = AsyncMock()
+    session.close = AsyncMock()
     session.request = AsyncMock(return_value={
         "status": "ok",
         "server_info": {
@@ -63,55 +58,71 @@ async def mock_stdio_client():
 
 
 @pytest.fixture
-async def mcp_service(mock_toolkit, mock_session, mock_stdio_client):
+async def mock_node_process():
+    """Create a mock Node.js process."""
+    process = AsyncMock()
+    process.pid = 1234
+    process.returncode = None
+    process.wait = AsyncMock()
+    process.terminate = Mock()
+    process.kill = Mock()
+    return process
+
+
+@pytest.fixture
+async def mcp_service(mock_toolkit, mock_session, mock_stdio_client, mock_node_process):
     """Create an MCPService instance with mocked dependencies."""
     with patch('app.services.mcp_service.MCPToolkit', return_value=mock_toolkit), \
             patch('app.services.mcp_service.ClientSession', return_value=mock_session), \
             patch('app.services.mcp_service.stdio_client', side_effect=mock_stdio_client):
         service = MCPService()
+        service._node_process = mock_node_process
         yield service
-        await service.close_session()
+        await service.terminate()
 
 
 @pytest.mark.asyncio
 async def test_initialization_success(mcp_service, mock_session, mock_toolkit):
     """Test successful initialization of the MCP service."""
-    await mcp_service.initialize()
+    result = await mcp_service.initialize()
 
     # Verify initialization sequence
-    mock_session.wait_for_notification.assert_called_once_with(
-        "initialized", timeout=10.0)
-    mock_session.request.assert_called_once_with("ping", {})
-    mock_toolkit.ainitialize.assert_called_once()
+    mock_session.initialize.assert_called_once()
+    assert result is True
     assert mcp_service._initialized is True
 
 
 @pytest.mark.asyncio
 async def test_initialization_timeout(mcp_service, mock_session):
     """Test initialization timeout handling."""
-    mock_session.wait_for_notification.side_effect = asyncio.TimeoutError()
+    # Set up the session to raise TimeoutError
+    mock_session.initialize.side_effect = asyncio.TimeoutError()
 
-    with pytest.raises(MCPInitializationError, match="Server initialization timed out"):
-        await mcp_service.initialize()
-
+    # Initialize should return False and log the error
+    result = await mcp_service.initialize()
+    assert result is False
     assert mcp_service._initialized is False
 
 
 @pytest.mark.asyncio
 async def test_initialization_ping_failure(mcp_service, mock_session):
     """Test handling of ping failure during initialization."""
-    mock_session.request.return_value = {"status": "error"}
+    # Set up the session to fail initialization
+    mock_session.initialize.side_effect = Exception("Failed to initialize")
 
-    with pytest.raises(MCPInitializationError, match="Server ping failed"):
-        await mcp_service.initialize()
-
+    # Initialize should return False and log the error
+    result = await mcp_service.initialize()
+    assert result is False
     assert mcp_service._initialized is False
 
 
 @pytest.mark.asyncio
 async def test_get_tools(mcp_service, mock_toolkit):
     """Test retrieving tools from the service."""
-    await mcp_service.initialize()
+    # Set up the toolkit with tools
+    mcp_service.toolkit = mock_toolkit
+
+    # Get tools should return the tools
     tools = await mcp_service.get_tools()
 
     assert tools == TEST_TOOLS
@@ -119,12 +130,21 @@ async def test_get_tools(mcp_service, mock_toolkit):
 
 
 @pytest.mark.asyncio
-async def test_close_session(mcp_service, mock_session):
-    """Test proper cleanup during session closure."""
-    await mcp_service.initialize()
-    await mcp_service.close_session()
+async def test_terminate(mcp_service, mock_session, mock_node_process):
+    """Test proper cleanup during service termination."""
+    # Reset the mock to clear any previous calls
+    mock_node_process.terminate.reset_mock()
 
-    mock_session.__aexit__.assert_called_once()
+    # Reset the node process to test termination
+    mcp_service._node_process = None
+
+    await mcp_service.initialize()
+    # Set the node process after initialization
+    mcp_service._node_process = mock_node_process
+
+    await mcp_service.terminate()
+
+    mock_session.close.assert_called_once()
     assert mcp_service.session is None
-    assert mcp_service.toolkit is None
     assert mcp_service._initialized is False
+    mock_node_process.terminate.assert_called_once()

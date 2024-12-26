@@ -1,7 +1,7 @@
 """Function management endpoints."""
 
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, Request, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 import importlib
@@ -39,6 +39,14 @@ class ExecuteFunctionRequest(BaseModel):
     arguments: Dict[str, Any] = Field(...,
                                       description="Arguments to pass to the function")
     timeout: int = Field(30, description="Execution timeout in seconds")
+
+
+class FunctionResponse(BaseModel):
+    """Response model for function data."""
+    name: str
+    type: str
+    description: Optional[str] = None
+    parameters: Optional[Dict[str, Any]] = None
 
 
 @router.post("/register", response_model=dict)
@@ -138,7 +146,7 @@ async def unregister_function(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("")
+@router.get("", response_model=List[FunctionResponse])
 async def list_functions(
     request: Request,
     function_service: FunctionService = Depends(get_function_service)

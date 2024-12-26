@@ -2,19 +2,75 @@
 
 import logging
 import psutil
-from typing import Dict, Any
+from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, Request, Depends
+from pydantic import BaseModel, Field
 
 from app.dependencies.providers import get_model_service, get_function_service
 from app.services.model_service import ModelService
 from app.services.function_service import FunctionService
 from app.functions.base import FunctionType
 
+
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/health")
+class ServiceState(BaseModel):
+    """Service state model."""
+    status: str
+    status_icon: str
+    error: Optional[str] = None
+
+
+class SystemMetrics(BaseModel):
+    """System metrics model."""
+    memory: Dict[str, Any] = Field(
+        description="Memory metrics including total, available, and percent usage")
+    disk: Dict[str, Any] = Field(
+        description="Disk metrics including total, free, and percent usage")
+
+
+class OllamaStatus(BaseModel):
+    """Ollama status model."""
+    connected: bool
+    message: str
+    base_url: str
+
+
+class ModelsComponent(BaseModel):
+    """Models component status."""
+    status: str
+    count: int
+    available: List[str]
+    ollama_status: OllamaStatus
+
+
+class FunctionComponent(BaseModel):
+    """Function component status."""
+    status: str
+    count: int
+    registered: List[str]
+
+
+class Components(BaseModel):
+    """Components status model."""
+    services: Dict[str, ServiceState]
+    models: ModelsComponent
+    tools: FunctionComponent
+    filters: FunctionComponent
+    pipelines: FunctionComponent
+
+
+class HealthResponse(BaseModel):
+    """Health check response model."""
+    status: str
+    system: SystemMetrics
+    components: Components
+    error: Optional[str] = None
+
+
+@router.get("/health", response_model=HealthResponse)
 async def health_check(
     request: Request,
     model_service: ModelService = Depends(get_model_service),
@@ -37,11 +93,12 @@ async def health_check(
         functions = function_service.list_functions()
 
         # Separate functions by type
-        tools = [f for f in functions if f.get("type") == FunctionType.TOOL]
+        tools = [f for f in functions if f.get(
+            "type") == FunctionType.TOOL.value]
         filters = [f for f in functions if f.get(
-            "type") == FunctionType.FILTER]
+            "type") == FunctionType.FILTER.value]
         pipelines = [f for f in functions if f.get(
-            "type") == FunctionType.PIPELINE]
+            "type") == FunctionType.PIPELINE.value]
 
         # Get service states
         service_states = getattr(request.app.state, 'service_states', {})
