@@ -33,6 +33,108 @@ This guide provides comprehensive documentation for developing functions in the 
    - Model interaction utilities
    - Application constants and settings
 
+### Important Implementation Notes
+
+#### Tool Parameters Definition
+
+When creating new tools, you must use Pydantic's `Field` to properly define tool parameters. This ensures they are correctly exposed in the function registry and API.
+
+```python
+from typing import Dict, Any, Literal
+from app.functions.base import Tool, FunctionType
+from pydantic import Field, ConfigDict
+
+@register_function(
+    func_type=FunctionType.TOOL,
+    name="my_tool",
+    description="Description of what the tool does"
+)
+class MyTool(Tool):
+    """Tool documentation."""
+
+    # Required: Allow arbitrary types if using custom service classes
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    # Required: Define type, name, and description using Field
+    type: Literal[FunctionType.TOOL] = Field(
+        default=FunctionType.TOOL,
+        description="Tool type"
+    )
+    name: str = Field(
+        default="my_tool",
+        description="Name of the tool"
+    )
+    description: str = Field(
+        default="Description of what the tool does",
+        description="Description of what the tool does"
+    )
+
+    # Required: Define parameters schema using Field
+    parameters: Dict[str, Any] = Field(
+        default={
+            "type": "object",
+            "properties": {
+                "param1": {
+                    "type": "string",
+                    "description": "Description of param1"
+                }
+            },
+            "required": ["param1"]
+        },
+        description="Parameters schema for the tool"
+    )
+
+    # Important: Any instance variables must also be declared as Fields
+    my_service: MyService = Field(
+        default_factory=MyService,  # Use default_factory for class instances
+        exclude=True  # Exclude from schema if not needed in API
+    )
+```
+
+**Common Mistakes to Avoid:**
+
+- ❌ Don't define parameters as a class variable without Field:
+  ```python
+  parameters = {  # Wrong: won't be properly exposed
+      "type": "object",
+      "properties": {...}
+  }
+  ```
+- ❌ Don't use ClassVar for parameters:
+  ```python
+  parameters: ClassVar[Dict[str, Any]] = {...}  # Wrong: won't work with Pydantic
+  ```
+- ❌ Don't put parameters in the register_function decorator:
+  ```python
+  @register_function(
+      parameters={...}  # Wrong: not supported by decorator
+  )
+  ```
+- ❌ Don't initialize instance variables in **init** without declaring them as Fields:
+  ```python
+  def __init__(self):
+      self.my_service = MyService()  # Wrong: will raise "object has no field" error
+  ```
+- ❌ Don't forget to allow arbitrary types when using custom services:
+  ```python
+  class MyTool(Tool):  # Wrong: will fail with custom service types
+      my_service: MyService = Field(default_factory=MyService)
+  ```
+
+**Correct Pattern:**
+
+- ✅ Use Pydantic's Field for all tool attributes
+- ✅ Include proper type annotations
+- ✅ Provide default values and descriptions
+- ✅ Keep registration separate from parameter definition
+- ✅ Declare all instance variables as Fields with proper defaults
+- ✅ Add model_config when using custom service types:
+  ```python
+  class MyTool(Tool):
+      model_config = ConfigDict(arbitrary_types_allowed=True)
+      my_service: MyService = Field(default_factory=MyService)
+  ```
+
 ### Function Types
 
 The system supports three main types of functions, defined in `app/functions/base.py`:

@@ -2,7 +2,6 @@ import chromadb
 from chromadb.config import Settings
 import logging
 from typing import List, Dict, Any, Optional
-from chromadb.api.models.Collection import Collection
 from sentence_transformers import SentenceTransformer
 import uuid
 

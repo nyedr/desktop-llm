@@ -4,8 +4,9 @@
 
 ### Random todos
 
-- [ ] Make the application services non-blocking to improve partition tolerance
-- [ ] Thoroughly test the filesystem server
+- [x] Make the application services non-blocking to improve partition tolerance
+- [ ] Test the chroma vector database
+- [ ] Create tools that control the chroma vector database
 
 ### Streaming and Tool Execution
 

@@ -50,10 +50,6 @@ def mock_config():
         CHROMA_COLLECTION_NAME = "test_collection"
         CHROMA_EMBEDDING_MODEL = "all-MiniLM-L6-v2"  # Using a smaller model for tests
 
-        # MCP settings
-        MCP_SERVER_FILESYSTEM_PATH = "./test_data/filesystem/dist/index.js"
-        MCP_SERVER_FILESYSTEM_COMMAND = "node"
-        WORKSPACE_DIR = "./test_data"
     return MockConfig()
 
 
