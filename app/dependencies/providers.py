@@ -1,14 +1,14 @@
 """Service providers and dependencies."""
-from typing import Optional, Dict, Any
-from fastapi import Depends, Request
+from typing import Optional
+from fastapi import Request
 
-from app.core.config import config
 from app.services.model_service import ModelService
 from app.services.function_service import FunctionService
 from app.services.agent import Agent
 from app.services.chroma_service import ChromaService
 from app.services.mcp_service import MCPService
 from app.services.langchain_service import LangChainService
+from app.core.service_locator import get_service_locator
 
 
 class Providers:
@@ -58,6 +58,8 @@ class Providers:
         """Get or create MCP service instance."""
         if cls._mcp_service is None:
             cls._mcp_service = MCPService()
+            # Register with service locator
+            get_service_locator().register_service("mcp_service", cls._mcp_service)
         return cls._mcp_service
 
     @classmethod
@@ -67,8 +69,8 @@ class Providers:
             cls._langchain_service = LangChainService()
         return cls._langchain_service
 
-# FastAPI dependency functions
 
+# FastAPI dependency functions
 
 def get_model_service(request: Request) -> ModelService:
     """Get model service instance."""

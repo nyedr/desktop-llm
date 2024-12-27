@@ -198,11 +198,6 @@ class FunctionRegistry:
                     f"[LIST] Error getting metadata for function {func}: {e}", exc_info=True)
 
         logger.info(f"[LIST] Found {len(functions)} functions")
-        try:
-            logger.debug(
-                f"[LIST] Full function list: {json.dumps(functions, indent=2)}")
-        except Exception as e:
-            logger.error(f"Error serializing functions list: {e}")
         return functions
 
     async def discover_functions(self, directory: Path) -> None:

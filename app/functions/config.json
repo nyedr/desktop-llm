@@ -85,6 +85,131 @@
       },
       "enabled": true,
       "dependencies": []
+    },
+    {
+      "name": "read_file",
+      "module_path": "app.functions.types.tools.filesystem_tools",
+      "function_name": "ReadFileTool",
+      "type": "tool",
+      "description": "Read contents of a file",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path to the file to read"
+          }
+        },
+        "required": ["path"]
+      },
+      "enabled": true,
+      "dependencies": []
+    },
+    {
+      "name": "write_file",
+      "module_path": "app.functions.types.tools.filesystem_tools",
+      "function_name": "WriteFileTool",
+      "type": "tool",
+      "description": "Write content to a file",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path to write the file to"
+          },
+          "content": {
+            "type": "string",
+            "description": "Content to write to the file"
+          }
+        },
+        "required": ["path", "content"]
+      },
+      "enabled": true,
+      "dependencies": []
+    },
+    {
+      "name": "list_directory",
+      "module_path": "app.functions.types.tools.filesystem_tools",
+      "function_name": "ListDirectoryTool",
+      "type": "tool",
+      "description": "List contents of a directory",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path to the directory to list"
+          }
+        },
+        "required": ["path"]
+      },
+      "enabled": true,
+      "dependencies": []
+    },
+    {
+      "name": "search_files",
+      "module_path": "app.functions.types.tools.filesystem_tools",
+      "function_name": "SearchFilesTool",
+      "type": "tool",
+      "description": "Search for files matching a pattern",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "Pattern to search for"
+          },
+          "exclude_patterns": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Patterns to exclude from search"
+          }
+        },
+        "required": ["pattern"]
+      },
+      "enabled": true,
+      "dependencies": []
+    },
+    {
+      "name": "web_scrape",
+      "module_path": "app.functions.types.tools.web_scrape_tool",
+      "function_name": "WebScrapeTool",
+      "type": "tool",
+      "description": "Scrape and process web pages using Jina Reader (r.jina.ai)",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL of the web page to scrape"
+          }
+        },
+        "required": ["url"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "The scraped content from the webpage"
+          },
+          "title": {
+            "type": "string",
+            "description": "The extracted title from the content"
+          },
+          "url": {
+            "type": "string",
+            "description": "The original URL that was scraped"
+          },
+          "cleaned": {
+            "type": "boolean",
+            "description": "Whether the content was cleaned of URLs"
+          }
+        }
+      },
+      "enabled": true,
+      "dependencies": ["requests"]
     }
   ],
   "filters": [

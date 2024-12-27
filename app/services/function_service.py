@@ -18,8 +18,6 @@ class FunctionService:
         self.executor = executor
         logger.info(
             "[INIT] FunctionService initialized with registry and executor")
-        logger.debug(
-            f"[INIT] Initial functions in registry: {list(self.registry._functions.keys())}")
 
     def register_function(
         self,
@@ -31,13 +29,6 @@ class FunctionService:
     ) -> None:
         """Register a function for execution."""
         logger.info(f"[REGISTER] Starting function registration: {name}")
-        logger.debug(f"[REGISTER] Function details:")
-        logger.debug(f"  - Name: {name}")
-        logger.debug(f"  - Description: {description}")
-        logger.debug(f"  - Input schema: {input_schema}")
-        logger.debug(f"  - Output schema: {output_schema}")
-        logger.debug(
-            f"  - Function class: {function_class.__name__ if function_class else None}")
 
         try:
             if function_class:
@@ -122,9 +113,6 @@ class FunctionService:
                 logger.error(
                     f"[SCHEMAS] Error processing function schema for {func.get('name', 'unknown')}: {e}", exc_info=True)
 
-        logger.info(f"[SCHEMAS] Generated {len(schemas)} tool schemas")
-        logger.debug(
-            f"[SCHEMAS] Final schemas: {json.dumps(schemas, indent=2)}")
         return schemas
 
     async def execute_function(self, name: str, args: Dict[str, Any]) -> Dict[str, Any]:
@@ -166,8 +154,6 @@ class FunctionService:
             if func:
                 logger.debug(
                     f"[GET] Found function {name} of type {func.model_fields['type'].default}")
-                logger.debug(f"[GET] Function class: {func.__name__}")
-                logger.debug(f"[GET] Function fields: {func.model_fields}")
             else:
                 logger.warning(f"[GET] Function {name} not found in registry")
             return func

@@ -40,7 +40,9 @@ logging.getLogger('httpcore').setLevel(logging.WARNING)
 logging.getLogger('chromadb').setLevel(logging.WARNING)
 logging.getLogger('urllib3').setLevel(logging.WARNING)
 logging.getLogger('sentence_transformers').setLevel(logging.WARNING)
-logging.getLogger('app.functions.registry').setLevel(logging.INFO)
+# Set function registry logger to DEBUG for more detailed logs
+logging.getLogger('app.functions.registry').setLevel(logging.DEBUG)
+logging.getLogger('app.functions.types.tools').setLevel(logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
@@ -123,7 +125,7 @@ async def register_default_functions(function_service):
 
             logger.info("Function discovery complete ✅")
             functions = function_registry.list_functions()
-            logger.info(f"Registered functions: {functions}")
+            logger.info(f"Registered {len(functions)} functions")
         except Exception as e:
             logger.error(f"Error discovering functions ❌: {e}", exc_info=True)
             raise

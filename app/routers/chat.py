@@ -29,6 +29,7 @@ async def stream_chat_response(
     """Generate streaming chat response."""
     request_id = str(id(request))
     logger.info(f"[{request_id}] Starting chat stream")
+    tool_call_in_progress = False
 
     try:
         # Get available functions
@@ -40,8 +41,6 @@ async def stream_chat_response(
             if function_schemas:
                 logger.info(
                     f"[{request_id}] Available tools: {[f['function']['name'] for f in function_schemas]}")
-                logger.debug(
-                    f"[{request_id}] Tool schemas: {json.dumps(function_schemas, indent=2)}")
             else:
                 logger.warning(f"[{request_id}] No tool schemas available")
 
@@ -187,6 +186,10 @@ async def stream_chat_response(
 
             if not is_test and await request.is_disconnected():
                 logger.info(f"[{request_id}] Client disconnected")
+                if tool_call_in_progress:
+                    logger.info(
+                        f"[{request_id}] Waiting for tool call to complete")
+                    continue  # Let the tool call finish
                 break
 
             if response:
@@ -207,6 +210,7 @@ async def stream_chat_response(
                             "event": "message",
                             "data": json.dumps(filtered_response)
                         }
+                        tool_call_in_progress = False  # Tool call completed
                     # Stream assistant messages chunk by chunk
                     elif response.get("role") == "assistant":
                         # Create filtered chunk with required fields
@@ -219,6 +223,7 @@ async def stream_chat_response(
                             filtered_chunk["tool_calls"] = response["tool_calls"]
                             logger.info(
                                 f"[{request_id}] Tool calls detected: {json.dumps(response['tool_calls'], indent=2)}")
+                            tool_call_in_progress = True  # Tool call starting
 
                         # Apply outlet filters in reverse priority order
                         for filter_func in sorted(filters, key=lambda f: f.priority or 0, reverse=True):
@@ -253,6 +258,8 @@ async def stream_chat_response(
                                     "event": "error",
                                     "data": json.dumps({"error": f"Error executing tool: {str(e)}"})
                                 }
+                            finally:
+                                tool_call_in_progress = False  # Tool call completed
                     else:
                         yield {
                             "event": "message",

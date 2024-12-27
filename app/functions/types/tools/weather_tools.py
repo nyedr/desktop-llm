@@ -44,8 +44,8 @@ class WeatherTool(Tool):
 
     # Parameter normalization mappings
     UNIT_MAPPINGS: ClassVar[Dict[str, List[str]]] = {
-        "celsius": ["Celsius", "CELSIUS", "C", "c", "centigrade"],
-        "fahrenheit": ["Fahrenheit", "FAHRENHEIT", "F", "f"]
+        "celsius": ["Celsius", "CELSIUS", "C", "c", "centigrade", "metric"],
+        "fahrenheit": ["Fahrenheit", "FAHRENHEIT", "F", "f", "imperial"]
     }
 
     def normalize_parameters(self, args: Dict[str, Any]) -> Dict[str, Any]:

@@ -304,6 +304,7 @@ def register_function(
     """
     def decorator(cls: type) -> type:
         """Register the function class."""
+        # Store function configuration
         cls._function_config = FunctionConfig(
             name=name,
             description=description,
@@ -311,5 +312,36 @@ def register_function(
             priority=priority,
             config=config or {}
         )
+
+        # Set the default values for the class fields
+        if hasattr(cls, 'model_fields'):  # Pydantic v2
+            if 'name' in cls.model_fields:
+                cls.model_fields['name'].default = name
+            if 'description' in cls.model_fields:
+                cls.model_fields['description'].default = description
+            if 'type' in cls.model_fields:
+                cls.model_fields['type'].default = func_type
+        else:  # Pydantic v1
+            if hasattr(cls, '__fields__'):
+                if 'name' in cls.__fields__:
+                    cls.__fields__['name'].default = name
+                    cls.__fields__['name'].field_info.default = name
+                if 'description' in cls.__fields__:
+                    cls.__fields__['description'].default = description
+                    cls.__fields__[
+                        'description'].field_info.default = description
+                if 'type' in cls.__fields__:
+                    cls.__fields__['type'].default = func_type
+                    cls.__fields__['type'].field_info.default = func_type
+
+        # Set class-level attributes
+        cls.name = name
+        cls.description = description
+        cls.type = func_type
+
+        # Register the function with the registry
+        from app.functions.registry import function_registry
+        function_registry.register(cls)
+
         return cls
     return decorator

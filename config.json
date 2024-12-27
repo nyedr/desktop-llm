@@ -1,5 +1,5 @@
 {
-  "llm_model_name": "qwen2.5:7b-instruct-q8_0",
+  "llm_model_name": "qwen2.5-7b-25k:latest",
   "vocab_size": 152064,
   "max_position_embeddings": 4096,
   "special_tokens": {
@@ -44,65 +44,6 @@
               }
             },
             "required": ["location"]
-          }
-        }
-      },
-      {
-        "type": "function",
-        "function": {
-          "name": "generate_embedding",
-          "description": "Generate an embedding vector for an image",
-          "parameters": {
-            "type": "object",
-            "properties": {
-              "image_path": {
-                "type": "string",
-                "description": "Path to the image file"
-              },
-              "model_name": {
-                "type": "string",
-                "description": "Name of the embedding model to use. Defaults to default-embedding-model."
-              }
-            },
-            "required": ["image_path"]
-          }
-        }
-      },
-      {
-        "type": "function",
-        "function": {
-          "name": "generate_search_query",
-          "description": "Generate a search query based on image description",
-          "parameters": {
-            "type": "object",
-            "properties": {
-              "image_description": {
-                "type": "string",
-                "description": "Description of the image"
-              }
-            },
-            "required": ["image_description"]
-          }
-        }
-      },
-      {
-        "type": "function",
-        "function": {
-          "name": "generate_tags",
-          "description": "Generate tags based on image description",
-          "parameters": {
-            "type": "object",
-            "properties": {
-              "image_description": {
-                "type": "string",
-                "description": "Description of the image"
-              },
-              "max_tags": {
-                "type": "integer",
-                "description": "Maximum number of tags to generate. Defaults to 10."
-              }
-            },
-            "required": ["image_description"]
           }
         }
       }

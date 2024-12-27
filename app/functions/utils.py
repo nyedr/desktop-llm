@@ -124,14 +124,6 @@ APP_CONSTANTS = {
     "GENERATION_REQUEST_TIMEOUT": config.GENERATION_REQUEST_TIMEOUT
 }
 
-# User settings (placeholder - should be loaded from user config)
-USER_SETTINGS = {
-    "model": config.DEFAULT_MODEL,
-    "temperature": config.MODEL_TEMPERATURE,
-    "max_tokens": config.MAX_TOKENS,
-    "function_calls_enabled": config.FUNCTION_CALLS_ENABLED
-}
-
 __all__ = [
     'get_last_user_message',
     'get_last_assistant_message',
