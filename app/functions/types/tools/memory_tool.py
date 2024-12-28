@@ -16,11 +16,11 @@ logger = logging.getLogger(__name__)
         "properties": {
             "text": {
                 "type": "string",
-                "description": "The text content to store as a memory"
+                "description": "The text content to store as a memory, should be about the user or related to the user"
             },
             "metadata": {
                 "type": "object",
-                "description": "Optional metadata to store with the memory",
+                "description": "Optional metadata to store with the memory, should add additional context to the memory",
                 "additionalProperties": True
             }
         },

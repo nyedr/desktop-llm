@@ -20,15 +20,14 @@ from slowapi.util import get_remote_address
 from slowapi.middleware import SlowAPIMiddleware
 from fastapi.responses import JSONResponse
 
-from app.core.config import config
 from app.dependencies.providers import Providers
 from app.routers import chat, functions, completion, health
 from app.functions.registry import function_registry
 
 # Configure logging
 logging.basicConfig(
-    level=config.LOG_LEVEL,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler()
     ]
@@ -40,9 +39,6 @@ logging.getLogger('httpcore').setLevel(logging.WARNING)
 logging.getLogger('chromadb').setLevel(logging.WARNING)
 logging.getLogger('urllib3').setLevel(logging.WARNING)
 logging.getLogger('sentence_transformers').setLevel(logging.WARNING)
-# Set function registry logger to DEBUG for more detailed logs
-logging.getLogger('app.functions.registry').setLevel(logging.DEBUG)
-logging.getLogger('app.functions.types.tools').setLevel(logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
@@ -69,11 +65,10 @@ class ServiceState:
 
     def set_status(self, status: ServiceStatus, error: Exception = None):
         """Update service status and error state."""
-        self.status = status
-        self.error = error
-        logger.info(f"Service status updated: {self.status.value}")
+        if self.status != status:  # Only log status changes
+            logger.info(f"Service status: {self.status.value}")
         if error:
-            logger.error(f"Service error: {error}", exc_info=True)
+            logger.error(f"Service error: {error}")
 
 
 async def initialize_service(service_name: str, get_service_fn, state: ServiceState) -> bool:
@@ -87,13 +82,10 @@ async def initialize_service(service_name: str, get_service_fn, state: ServiceSt
             await service.initialize()
 
         state.set_status(ServiceStatus.READY)
-        logger.info(
-            f"{service_name} initialized successfully {ServiceStatus.READY.value}")
+        logger.info(f"{service_name} initialized")
         return True
     except Exception as e:
         state.set_status(ServiceStatus.FAILED, e)
-        logger.error(
-            f"{service_name} initialization failed {ServiceStatus.FAILED.value}: {e}", exc_info=True)
         return False
 
 
@@ -102,10 +94,8 @@ async def register_default_functions(function_service):
     try:
         # Add workspace root to Python path
         workspace_root = str(Path(__file__).parent.parent)
-        logger.info(f"Adding workspace root to Python path: {workspace_root}")
         if workspace_root not in sys.path:
             sys.path.insert(0, workspace_root)
-            logger.debug(f"Updated Python path: {sys.path}")
 
         try:
             # Discover all function types
@@ -123,27 +113,24 @@ async def register_default_functions(function_service):
             pipelines_dir = base_dir / "functions" / "types" / "pipelines"
             await function_registry.discover_functions(pipelines_dir)
 
-            logger.info("Function discovery complete ✅")
             functions = function_registry.list_functions()
             logger.info(f"Registered {len(functions)} functions")
         except Exception as e:
-            logger.error(f"Error discovering functions ❌: {e}", exc_info=True)
+            logger.error(f"Error discovering functions: {e}")
             raise
 
         # Remove workspace root from Python path
         if workspace_root in sys.path:
             sys.path.remove(workspace_root)
-            logger.info(
-                f"Removed workspace root from Python path: {workspace_root}")
 
     except Exception as e:
-        logger.error(f"Error registering functions ❌: {e}", exc_info=True)
+        logger.error(f"Error registering functions: {e}")
         raise
 
 
 async def cleanup_services(service_states: Dict[str, ServiceState], is_shutting_down: bool) -> None:
     """Clean up services in reverse order."""
-    logger.info("Starting service cleanup...")
+    logger.info("Cleaning up services...")
     for service_name, state in reversed(list(service_states.items())):
         if state.service and state.status == ServiceStatus.READY:
             try:
@@ -155,7 +142,7 @@ async def cleanup_services(service_states: Dict[str, ServiceState], is_shutting_
                 logger.error(f"Error cleaning up {service_name} service: {e}")
                 if is_shutting_down:
                     state.set_status(ServiceStatus.FAILED, e)
-    logger.info("Application shutdown complete")
+    logger.info("Shutdown complete")
 
 
 # Initialize service states
@@ -172,120 +159,53 @@ service_states = {
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Lifespan context manager for FastAPI application."""
+    app.state.service_states = service_states
+
     try:
-        # Initialize Chroma service
-        try:
-            chroma_service = Providers.get_chroma_service()
-            service_states["chroma"].service = chroma_service
-            service_states["chroma"].set_status(ServiceStatus.INITIALIZING)
-            await chroma_service.initialize()
-            service_states["chroma"].set_status(ServiceStatus.READY)
-            logger.info(
-                f"Chroma Service initialized {ServiceStatus.READY.value}")
-        except Exception as e:
-            service_states["chroma"].set_status(ServiceStatus.FAILED, e)
-            logger.error(
-                f"Failed to initialize Chroma Service {ServiceStatus.FAILED.value}: {e}", exc_info=True)
+        # Initialize base services first
+        chroma_success = await initialize_service("Chroma", Providers.get_chroma_service, service_states['chroma'])
+        mcp_success = await initialize_service("MCP", Providers.get_mcp_service, service_states['mcp'])
 
-        # Initialize MCP service
-        try:
-            mcp_service = Providers.get_mcp_service()
-            service_states["mcp"].service = mcp_service
-            service_states["mcp"].set_status(ServiceStatus.INITIALIZING)
-            await mcp_service.initialize()
-            service_states["mcp"].set_status(ServiceStatus.READY)
-            logger.info(f"MCP Service initialized {ServiceStatus.READY.value}")
-        except Exception as e:
-            service_states["mcp"].set_status(ServiceStatus.FAILED, e)
-            logger.error(
-                f"Failed to initialize MCP Service {ServiceStatus.FAILED.value}: {e}", exc_info=True)
+        # Initialize LangChain with dependencies
+        langchain_state = service_states['langchain']
+        if chroma_success and mcp_success:
+            try:
+                langchain_state.set_status(ServiceStatus.INITIALIZING)
+                langchain_service = Providers.get_langchain_service()
+                langchain_state.service = langchain_service
 
-        # Initialize LangChain service
-        try:
-            langchain_service = Providers.get_langchain_service()
-            service_states["langchain"].service = langchain_service
-            service_states["langchain"].set_status(ServiceStatus.INITIALIZING)
-            await langchain_service.initialize(chroma_service, mcp_service)
-            service_states["langchain"].set_status(ServiceStatus.READY)
-            logger.info(
-                f"LangChain Service initialized {ServiceStatus.READY.value}")
-        except Exception as e:
-            service_states["langchain"].set_status(ServiceStatus.FAILED, e)
+                await langchain_service.initialize(
+                    service_states['chroma'].service,
+                    service_states['mcp'].service
+                )
+                langchain_state.set_status(ServiceStatus.READY)
+                logger.info("LangChain Service initialized")
+            except Exception as e:
+                langchain_state.set_status(ServiceStatus.FAILED, e)
+                logger.error(f"Failed to initialize LangChain Service: {e}")
+        else:
+            langchain_state.set_status(ServiceStatus.FAILED)
             logger.error(
-                f"Failed to initialize LangChain Service {ServiceStatus.FAILED.value}: {e}", exc_info=True)
+                "LangChain Service initialization skipped - dependencies not ready")
 
-        # Initialize model service
-        try:
-            model_service = Providers.get_model_service()
-            service_states["model"].service = model_service
-            service_states["model"].set_status(ServiceStatus.INITIALIZING)
-            await model_service.check_ollama_health(request_id=str(uuid.uuid4()))
-            service_states["model"].set_status(ServiceStatus.READY)
-            logger.info(
-                f"Model Service initialized {ServiceStatus.READY.value}")
-        except Exception as e:
-            service_states["model"].set_status(ServiceStatus.FAILED, e)
-            logger.error(
-                f"Failed to initialize Model Service {ServiceStatus.FAILED.value}: {e}", exc_info=True)
-
-        # Initialize function service
-        try:
-            function_service = Providers.get_function_service()
-            service_states["function"].service = function_service
-            service_states["function"].set_status(ServiceStatus.INITIALIZING)
-            await register_default_functions(function_service)
-            service_states["function"].set_status(ServiceStatus.READY)
-            logger.info(
-                f"Function Service initialized {ServiceStatus.READY.value}")
-        except Exception as e:
-            service_states["function"].set_status(ServiceStatus.FAILED, e)
-            logger.error(
-                f"Failed to initialize Function Service {ServiceStatus.FAILED.value}: {e}", exc_info=True)
-
-        # Initialize agent
-        try:
-            agent = Providers.get_agent()
-            service_states["agent"].service = agent
-            service_states["agent"].set_status(ServiceStatus.INITIALIZING)
-            service_states["agent"].set_status(ServiceStatus.READY)
-            logger.info(f"Agent initialized {ServiceStatus.READY.value}")
-        except Exception as e:
-            service_states["agent"].set_status(ServiceStatus.FAILED, e)
-            logger.error(
-                f"Failed to initialize Agent {ServiceStatus.FAILED.value}: {e}", exc_info=True)
+        # Initialize remaining services
+        await initialize_service("Model", Providers.get_model_service, service_states['model'])
+        await initialize_service("Function", Providers.get_function_service, service_states['function'])
+        await initialize_service("Agent", Providers.get_agent, service_states['agent'])
 
         # Log final service states
-        logger.info("\nService Status Summary:")
         for service_name, state in service_states.items():
-            status_msg = f"{service_name.upper()}: {state.status.value}"
-            if state.error:
-                status_msg += f" - Error: {str(state.error)}"
-            logger.info(status_msg)
+            logger.info(f"{service_name} service status: {state.status.value}")
 
-        try:
-            yield
-        except asyncio.CancelledError:
-            logger.debug("Application received cancellation signal")
-            raise
-        except Exception as e:
-            logger.error(
-                f"Error during application runtime: {e}", exc_info=True)
-            raise
+        yield
 
-    except asyncio.CancelledError:
-        logger.debug("Application startup cancelled")
-        raise
-    except Exception as e:
-        logger.error(f"Error during application startup: {e}", exc_info=True)
-        raise
     finally:
         # Cleanup services in reverse order
-        logger.info("Starting service cleanup...")
+        logger.info("Cleaning up services...")
         for service_name in reversed(list(service_states.keys())):
             state = service_states[service_name]
             if state.service and state.status == ServiceStatus.READY:
                 try:
-                    # Handle both cleanup and close_session methods
                     if hasattr(state.service, 'cleanup'):
                         await state.service.cleanup()
                     elif hasattr(state.service, 'close_session'):
@@ -293,9 +213,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
                     state.set_status(ServiceStatus.OFFLINE)
                 except Exception as e:
                     logger.error(
-                        f"Error cleaning up {service_name} service: {e}", exc_info=True)
+                        f"Error cleaning up {service_name} service: {e}")
                     state.set_status(ServiceStatus.FAILED, e)
-        logger.info("Application shutdown complete")
+        logger.info("Shutdown complete")
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -340,8 +260,7 @@ async def log_requests(request: Request, call_next):
         logger.info(f"[{request_id}] {response.status_code}")
         return response
     except Exception as e:
-        logger.error(
-            f"[{request_id}] Error processing request: {e}", exc_info=True)
+        logger.error(f"[{request_id}] Error processing request: {e}")
         raise
 
 # Include routers with API prefix
@@ -355,7 +274,7 @@ app.include_router(health.router, prefix=api_prefix, tags=["health"])
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Global exception handler."""
-    logger.error(f"Global exception handler caught: {exc}", exc_info=True)
+    logger.error(f"Global exception: {exc}")
     return JSONResponse(
         status_code=500,
         content={"error": str(exc)}

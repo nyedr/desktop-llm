@@ -18,16 +18,11 @@ def find_global_node_modules() -> Path:
     Find the global node_modules directory by checking common installation paths.
     Prioritizes NVM if available, falls back to global npm location.
     """
-    # User's home directory
     home = Path(os.path.expanduser("~"))
 
-    # Common paths for node_modules (in order of preference)
     possible_paths = [
-        # NVM installation (if using NVM for Windows)
         home / "AppData" / "Roaming" / "nvm" / "v20.14.0" / "node_modules",
-        # Global NPM installation (Windows default)
         home / "AppData" / "Roaming" / "npm" / "node_modules",
-        # Alternate NPM locations
         Path("C:/Program Files/nodejs/node_modules"),
         Path("C:/Program Files (x86)/nodejs/node_modules")
     ]
@@ -35,21 +30,17 @@ def find_global_node_modules() -> Path:
     # Check if Node.js is available
     node_cmd = shutil.which("node")
     if not node_cmd:
-        logger.warning("Node.js not found in PATH. Please install Node.js")
-    else:
-        logger.debug(f"Found Node.js at: {node_cmd}")
+        logger.warning("Node.js not found in PATH")
+        return possible_paths[1]  # Return default path
 
     # Find first existing path
     for path in possible_paths:
         if path.exists():
-            logger.debug(f"Found global node_modules at: {path}")
             return path
 
-    # Default to npm global if nothing found (will be validated when used)
-    default_path = possible_paths[1]  # Global NPM installation path
-    logger.warning(
-        f"No existing node_modules found. Using default path: {default_path}"
-    )
+    # Default to npm global if nothing found
+    default_path = possible_paths[1]
+    logger.warning(f"Using default node_modules path: {default_path}")
     return default_path
 
 

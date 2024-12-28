@@ -69,20 +69,7 @@ class MyTool(Tool):
         description="Description of what the tool does"
     )
 
-    # Required: Define parameters schema using Field
-    parameters: Dict[str, Any] = Field(
-        default={
-            "type": "object",
-            "properties": {
-                "param1": {
-                    "type": "string",
-                    "description": "Description of param1"
-                }
-            },
-            "required": ["param1"]
-        },
-        description="Parameters schema for the tool"
-    )
+    # Parameters are now defined in the register_function decorator
 
     # Important: Any instance variables must also be declared as Fields
     my_service: MyService = Field(
