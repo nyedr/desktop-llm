@@ -79,7 +79,7 @@ class MultiStepPipeline(Pipeline):
             "original_count": len(messages),
             "user_messages": len(user_messages),
             "processed": [msg.content for msg in processed_messages if msg.role == "user"],
-            "total_length": sum(len(msg.content) for msg in processed_messages if msg.role == "user")
+            "total_length": sum(len(msg.content.split(" (Length: ")[0]) for msg in processed_messages if msg.role == "user")
         }
 
         return {

@@ -142,31 +142,45 @@ async def stream_chat_response(
                 logger.warning(
                     f"[{request_id}] Failed to add memory context: {e}")
 
-        # Apply pipeline
+        # Apply pipeline and ensure messages are preserved
+        processed_messages = chat_request.messages
+        pipeline_summary = None
+
         if pipeline:
             logger.debug(f"[{request_id}] Applying pipeline: {pipeline.name}")
             try:
-                data = await pipeline.pipe({"messages": chat_request.messages})
-                logger.debug(f"[{request_id}] Pipeline result: {data}")
+                # Ensure messages are ChatMessage instances
+                messages = [
+                    ChatMessage(**msg) if isinstance(msg, dict) else msg
+                    for msg in chat_request.messages
+                ]
+                pipeline_data = await pipeline.pipe({"messages": messages})
+                logger.debug(
+                    f"[{request_id}] Pipeline result: {pipeline_data}")
 
-                # Update messages if pipeline modified them
-                if "messages" in data:
-                    chat_request.messages = data["messages"]
+                # Ensure messages are preserved even if pipeline returns empty
+                if "messages" in pipeline_data and pipeline_data["messages"]:
+                    processed_messages = pipeline_data["messages"]
+                else:
+                    logger.warning(
+                        f"[{request_id}] Pipeline returned empty messages, using original messages")
 
-                # Stream pipeline results
-                if "summary" in data:
+                # Store summary for streaming
+                if "summary" in pipeline_data:
+                    pipeline_summary = pipeline_data["summary"]
+
                     # Send initial summary event
                     yield {
                         "event": "pipeline",
                         "data": json.dumps({
-                            "summary": data["summary"],
+                            "summary": pipeline_summary,
                             "status": "processing"
                         })
                     }
 
                     # Process detailed results if available
-                    if isinstance(data["summary"], dict):
-                        for key, value in data["summary"].items():
+                    if isinstance(pipeline_summary, dict):
+                        for key, value in pipeline_summary.items():
                             if isinstance(value, list):
                                 for item in value:
                                     if item:  # Only send non-empty items
@@ -185,7 +199,7 @@ async def stream_chat_response(
                         "event": "pipeline",
                         "data": json.dumps({
                             "status": "complete",
-                            "summary": data["summary"]
+                            "summary": pipeline_summary
                         })
                     }
             except Exception as e:
@@ -214,7 +228,7 @@ async def stream_chat_response(
             yield {"event": "error", "data": json.dumps({"error": f"Model {model} not available"})}
             return
 
-        # Stream chat completion
+        # Stream chat completion using processed messages
         logger.info(
             f"[{request_id}] Starting chat with model {model}, tools enabled: {chat_request.enable_tools}")
         if function_schemas:
@@ -223,7 +237,7 @@ async def stream_chat_response(
 
         first_response = True
         async for response in agent.chat(
-            messages=chat_request.messages,
+            messages=processed_messages,
             model=model,
             temperature=chat_request.temperature or config.MODEL_TEMPERATURE,
             max_tokens=chat_request.max_tokens or config.MAX_TOKENS,

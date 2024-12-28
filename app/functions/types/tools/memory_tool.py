@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 @register_function(
     func_type=FunctionType.TOOL,
     name="add_memory",
-    description="Add a text entry to the long-term memory storage"
+    description="Add a text entry to the long-term memory storage, use this to store information that you should remember (e.g. user information, preferences, etc.)"
 )
 class AddMemoryTool(Tool):
     """Tool for adding memories to the Chroma database."""
@@ -26,7 +26,7 @@ class AddMemoryTool(Tool):
         description="Name of the memory tool"
     )
     description: str = Field(
-        default="Add a text entry to the long-term memory storage",
+        default="Add a text entry to the long-term memory storage, use this to store information that you should remember (e.g. user information, preferences, etc.)",
         description="Description of what the tool does"
     )
     parameters: Dict[str, Any] = Field(

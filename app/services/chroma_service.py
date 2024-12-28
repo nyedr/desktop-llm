@@ -88,7 +88,20 @@ class ChromaService:
 
             # Get existing embeddings
             results = self.collection.get(include=["embeddings"])
-            if not results["embeddings"]:
+            if not results:
+                return False
+
+            # Convert embeddings to numpy array if they exist
+            embeddings = results.get("embeddings")
+            if embeddings is None:
+                return False
+
+            # Convert to numpy array if not already
+            if not isinstance(embeddings, np.ndarray):
+                embeddings = np.array(embeddings)
+
+            # Check if embeddings array is empty
+            if embeddings.size == 0:
                 return False
 
             # Calculate similarity scores
