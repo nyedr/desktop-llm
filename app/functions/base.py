@@ -90,6 +90,7 @@ class FunctionConfig(BaseModel):
     type: FunctionType
     priority: Optional[int] = None
     config: Dict[str, Any] = {}
+    parameters: Dict[str, Any] = {}
 
 
 class FunctionParameters(BaseModel):
@@ -101,9 +102,11 @@ class FunctionParameters(BaseModel):
 
 class BaseFunction(BaseModel):
     """Base class for all functions."""
-    name: str = Field(..., description="Name of the function")
-    description: str = Field(..., description="Description of the function")
-    type: FunctionType = Field(..., description="Type of the function")
+    name: str = Field(default="", description="Name of the function")
+    description: str = Field(
+        default="", description="Description of the function")
+    type: FunctionType = Field(
+        default=FunctionType.TOOL, description="Type of the function")
     parameters: Dict[str, Any] = Field(
         default={}, description="Parameters schema for the function")
     config: Dict[str, Any] = Field(
@@ -288,7 +291,8 @@ def register_function(
     name: str,
     description: str,
     priority: Optional[int] = None,
-    config: Optional[Dict[str, Any]] = None
+    config: Optional[Dict[str, Any]] = None,
+    parameters: Optional[Dict[str, Any]] = None
 ) -> Callable[[type], type]:
     """Decorator to register a function with the registry.
 
@@ -310,7 +314,8 @@ def register_function(
             description=description,
             type=func_type,
             priority=priority,
-            config=config or {}
+            config=config or {},
+            parameters=parameters or {}
         )
 
         # Set the default values for the class fields
@@ -321,6 +326,8 @@ def register_function(
                 cls.model_fields['description'].default = description
             if 'type' in cls.model_fields:
                 cls.model_fields['type'].default = func_type
+            if 'parameters' in cls.model_fields:
+                cls.model_fields['parameters'].default = parameters or {}
         else:  # Pydantic v1
             if hasattr(cls, '__fields__'):
                 if 'name' in cls.__fields__:
@@ -333,6 +340,10 @@ def register_function(
                 if 'type' in cls.__fields__:
                     cls.__fields__['type'].default = func_type
                     cls.__fields__['type'].field_info.default = func_type
+                if 'parameters' in cls.__fields__:
+                    cls.__fields__['parameters'].default = parameters or {}
+                    cls.__fields__[
+                        'parameters'].field_info.default = parameters or {}
 
         # Set class-level attributes
         cls.name = name

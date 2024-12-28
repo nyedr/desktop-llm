@@ -11,42 +11,29 @@ from pydantic import Field
     name="calculator",
     description="Performs basic arithmetic calculations",
     priority=None,
-    config={"max_precision": 10}
+    config={"max_precision": 10},
+    parameters={
+        "type": "object",
+        "properties": {
+            "operation": {
+                "type": "string",
+                "enum": ["add", "subtract", "multiply", "divide"],
+                "description": "The arithmetic operation to perform"
+            },
+            "a": {
+                "type": "number",
+                "description": "First operand"
+            },
+            "b": {
+                "type": "number",
+                "description": "Second operand"
+            }
+        },
+        "required": ["operation", "a", "b"]
+    }
 )
 class CalculatorTool(Tool):
     """Tool for performing basic arithmetic operations."""
-
-    name: str = Field(default="calculator",
-                      description="Name of the calculator tool")
-    description: str = Field(
-        default="Performs basic arithmetic calculations",
-        description="Description of the calculator tool"
-    )
-    type: Literal[FunctionType.TOOL] = Field(
-        default=FunctionType.TOOL, description="Tool type")
-
-    parameters: Dict[str, Any] = Field(
-        default={
-            "type": "object",
-            "properties": {
-                "operation": {
-                    "type": "string",
-                    "enum": ["add", "subtract", "multiply", "divide"],
-                    "description": "The arithmetic operation to perform"
-                },
-                "a": {
-                    "type": "number",
-                    "description": "First operand"
-                },
-                "b": {
-                    "type": "number",
-                    "description": "Second operand"
-                }
-            },
-            "required": ["operation", "a", "b"]
-        },
-        description="Parameters for the calculator tool"
-    )
 
     _operations = {
         "add": operator.add,

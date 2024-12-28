@@ -10,43 +10,28 @@ logger = logging.getLogger(__name__)
 @register_function(
     func_type=FunctionType.TOOL,
     name="add_memory",
-    description="Add a text entry to the long-term memory storage, use this to store information that you should remember (e.g. user information, preferences, etc.)"
+    description="Add a text entry to the long-term memory storage, use this to store information that you should remember (e.g. user information, preferences, etc.)",
+    parameters={
+        "type": "object",
+        "properties": {
+            "text": {
+                "type": "string",
+                "description": "The text content to store as a memory"
+            },
+            "metadata": {
+                "type": "object",
+                "description": "Optional metadata to store with the memory",
+                "additionalProperties": True
+            }
+        },
+        "required": ["text"]
+    }
 )
 class AddMemoryTool(Tool):
     """Tool for adding memories to the Chroma database."""
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    type: Literal[FunctionType.TOOL] = Field(
-        default=FunctionType.TOOL,
-        description="Tool type"
-    )
-    name: str = Field(
-        default="add_memory",
-        description="Name of the memory tool"
-    )
-    description: str = Field(
-        default="Add a text entry to the long-term memory storage, use this to store information that you should remember (e.g. user information, preferences, etc.)",
-        description="Description of what the tool does"
-    )
-    parameters: Dict[str, Any] = Field(
-        default={
-            "type": "object",
-            "properties": {
-                "text": {
-                    "type": "string",
-                    "description": "The text content to store as a memory"
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "Optional metadata to store with the memory",
-                    "additionalProperties": True
-                }
-            },
-            "required": ["text"]
-        },
-        description="Parameters schema for the memory tool"
-    )
     chroma_service: ChromaService = Field(
         default_factory=ChromaService,
         exclude=True

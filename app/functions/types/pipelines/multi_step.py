@@ -18,20 +18,6 @@ from pydantic import Field
 class MultiStepPipeline(Pipeline):
     """Pipeline that processes data through multiple defined steps."""
 
-    name: str = Field(default="multi_step_processor",
-                      description="Name of the pipeline")
-    description: str = Field(
-        default="Processes data through multiple steps", description="Description of the pipeline")
-    type: Literal[FunctionType.PIPELINE] = Field(
-        default=FunctionType.PIPELINE, description="Pipeline type")
-    config: Dict[str, Any] = Field(
-        default={
-            "max_steps": 3,
-            "timeout_per_step": 30
-        },
-        description="Configuration for the pipeline"
-    )
-
     async def pipe(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Process data through multiple steps.
 

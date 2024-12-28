@@ -11,36 +11,26 @@ logger = logging.getLogger(__name__)
 @register_function(
     func_type=FunctionType.TOOL,
     name="get_current_weather",
-    description="Get current weather information for a location"
+    description="Get current weather information for a location",
+    parameters={
+        "type": "object",
+        "properties": {
+            "location": {
+                "type": "string",
+                "description": "Location to get weather for"
+            },
+            "unit": {
+                "type": "string",
+                "enum": ["celsius", "fahrenheit"],
+                "description": "Temperature unit",
+                "default": "fahrenheit"
+            }
+        },
+        "required": ["location"]
+    }
 )
 class WeatherTool(Tool):
     """Tool for getting weather information."""
-    type: FunctionType = Field(
-        default=FunctionType.TOOL, description="Tool type")
-    name: str = Field(
-        default="get_current_weather", description="Name of the weather tool")
-    description: str = Field(
-        default="Get current weather information for a location", description="Description of what the tool does")
-
-    parameters: Dict[str, Any] = Field(
-        default={
-            "type": "object",
-            "properties": {
-                "location": {
-                    "type": "string",
-                    "description": "Location to get weather for"
-                },
-                "unit": {
-                    "type": "string",
-                    "enum": ["celsius", "fahrenheit"],
-                    "description": "Temperature unit",
-                    "default": "fahrenheit"
-                }
-            },
-            "required": ["location"]
-        },
-        description="Parameters schema for the weather tool"
-    )
 
     # Parameter normalization mappings
     UNIT_MAPPINGS: ClassVar[Dict[str, List[str]]] = {

@@ -25,31 +25,20 @@ def clean_urls(text: str) -> str:
 @register_function(
     func_type=FunctionType.TOOL,
     name="web_scrape",
-    description="Scrape and process web pages using Jina Reader (r.jina.ai)"
+    description="Scrape and process web pages using Jina Reader (r.jina.ai)",
+    parameters={
+        "type": "object",
+        "properties": {
+            "url": {
+                "type": "string",
+                "description": "URL of the web page to scrape"
+            }
+        },
+        "required": ["url"]
+    }
 )
 class WebScrapeTool(Tool):
     """Tool for scraping web content using Jina Reader."""
-    type: Literal[FunctionType.TOOL] = Field(
-        default=FunctionType.TOOL, description="Tool type")
-    name: str = Field(default="web_scrape",
-                      description="Name of the web scrape tool")
-    description: str = Field(
-        default="Scrape and process web pages using Jina Reader with configurable cleaning and caching",
-        description="Description of what the tool does"
-    )
-    parameters: Dict[str, Any] = Field(
-        default={
-            "type": "object",
-            "properties": {
-                "url": {
-                    "type": "string",
-                    "description": "URL of the web page to scrape"
-                }
-            },
-            "required": ["url"]
-        },
-        description="Parameters schema for the web scrape tool"
-    )
 
     async def execute(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Execute the web scraping command."""

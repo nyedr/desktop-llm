@@ -18,23 +18,6 @@ from pydantic import Field
 class TextModifierFilter(Filter):
     """Filter that modifies text content in both inlet and outlet."""
 
-    name: str = Field(default="text_modifier",
-                      description="Name of the filter")
-    description: str = Field(
-        default="Modifies text content in both inlet and outlet",
-        description="Description of the filter"
-    )
-    type: Literal[FunctionType.FILTER] = Field(
-        default=FunctionType.FILTER, description="Filter type")
-    priority: int = Field(default=1, description="Filter priority")
-    config: Dict[str, Any] = Field(
-        default={
-            "prefix": "[Modified] ",
-            "suffix": " [End]"
-        },
-        description="Configuration for the filter"
-    )
-
     async def inlet(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Process incoming messages.
 
