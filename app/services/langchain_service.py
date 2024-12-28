@@ -17,7 +17,7 @@ from app.context.llm_context import LLMContextManager  # Import at runtime
 
 # Forward references for type checking
 if TYPE_CHECKING:
-    from app.models.chat import ChatMessage
+    from app.models.chat import StrictChatMessage, ChatMessage
 
 logger = logging.getLogger(__name__)
 
@@ -101,10 +101,12 @@ class LangChainService:
                 f"Error during LangChain Service cleanup: {e}", exc_info=True)
             raise
 
-    def _get_message_value(self, message: Union[Dict[str, Any], 'ChatMessage'], key: str, default: Any = None) -> Any:
-        """Safely get a value from either a dict or ChatMessage object."""
+    def _get_message_value(self, message: Union[Dict[str, Any], 'ChatMessage', 'StrictChatMessage'], key: str, default: Any = None) -> Any:
+        """Safely get a value from either a dict, ChatMessage or StrictChatMessage object."""
         if isinstance(message, dict):
             return message.get(key, default)
+        if isinstance(message, ChatMessage):
+            message = message.to_strict()
         return getattr(message, key, default)
 
     async def query_memory(
@@ -185,7 +187,7 @@ class LangChainService:
 
     async def process_conversation(
         self,
-        messages: List[Union[Dict[str, Any], 'ChatMessage']],
+        messages: List[Union[Dict[str, Any], 'ChatMessage', 'StrictChatMessage']],
         metadata_filter: Optional[Dict[str, Any]] = None,
         top_k: int = 5
     ) -> List[Dict[str, Any]]:
@@ -240,7 +242,7 @@ class LangChainService:
 
     async def store_conversation_summary(
         self,
-        messages: List[Union[Dict[str, Any], 'ChatMessage']],
+        messages: List[Union[Dict[str, Any], 'ChatMessage', 'StrictChatMessage']],
         metadata: Optional[Dict[str, Any]] = None
     ) -> Optional[str]:
         """Summarize and store a conversation in Chroma.

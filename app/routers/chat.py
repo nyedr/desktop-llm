@@ -1,7 +1,7 @@
 """Chat router."""
 import json
 import logging
-from typing import List, Optional, AsyncGenerator, Any, Dict
+from typing import List, Optional, AsyncGenerator, Any, Dict, Union
 from fastapi import APIRouter, Request, Depends
 from sse_starlette.sse import EventSourceResponse
 from app.core.config import config
@@ -18,7 +18,7 @@ from app.services.function_service import FunctionService
 from app.services.langchain_service import LangChainService
 from app.services.chroma_service import ChromaService
 from app.models.chat import (
-    ChatRequest, ChatMessage, ChatStreamEvent
+    ChatRequest, ChatMessage, ChatStreamEvent, StrictChatMessage
 )
 from app.functions.base import FunctionType, Filter
 import asyncio
@@ -334,7 +334,7 @@ async def stream_chat_response(
                                         yield ChatStreamEvent(
                                             event="pipeline",
                                             data=json.dumps({
-                                                "type": key,
+                                                "content_type": key,
                                                 "content": item,
                                                 "status": "processing"
                                             })
@@ -450,7 +450,7 @@ async def chat_stream(
 
 class ChatRequest(BaseModel):
     """Chat request model."""
-    messages: List[ChatMessage]
+    messages: List[Union[ChatMessage, StrictChatMessage]]
     model: Optional[str] = None
     temperature: Optional[float] = None
     max_tokens: Optional[int] = None

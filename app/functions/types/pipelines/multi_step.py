@@ -20,7 +20,10 @@ class MultiStepPipeline(Pipeline):
     def _ensure_chat_message(self, msg: Any) -> ChatMessage:
         """Convert dictionary to ChatMessage if needed."""
         if isinstance(msg, dict):
-            return ChatMessage(**msg)
+            # Create a copy of the message dict without metadata
+            msg_data = {k: v for k, v in msg.items()
+                        if k in ChatMessage.model_fields}
+            return ChatMessage(**msg_data)
         return msg
 
     async def pipe(self, data: Dict[str, Any]) -> Dict[str, Any]:
