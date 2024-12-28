@@ -1,12 +1,13 @@
 .env
 
-/chroma_data
 
 /data
 
 /test_data
 
+.cursorrules
 
+.clinerules
 
 /src/filesystem/dist
 

@@ -40,9 +40,11 @@ class Providers:
         if cls._agent is None:
             model_service = cls.get_model_service()
             function_service = cls.get_function_service()
+            langchain_service = cls.get_langchain_service()
             cls._agent = Agent(
                 model_service=model_service,
-                function_service=function_service
+                function_service=function_service,
+                langchain_service=langchain_service
             )
         return cls._agent
 

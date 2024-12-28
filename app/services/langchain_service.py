@@ -1,18 +1,29 @@
+"""Service for integrating LangChain with Chroma and memory operations."""
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, TYPE_CHECKING, Union
+from datetime import datetime
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.llms import Ollama
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain.schema import Document
+from langchain.chains.summarize import load_summarize_chain
 
 from app.core.config import config
 from app.services.chroma_service import ChromaService
 from app.services.mcp_service import MCPService
+from app.context.llm_context import LLMContextManager  # Import at runtime
+
+# Forward references for type checking
+if TYPE_CHECKING:
+    from app.models.chat import ChatMessage
 
 logger = logging.getLogger(__name__)
 
 
 class LangChainService:
-    """Service for integrating LangChain with Chroma and MCP."""
+    """Service for integrating LangChain with Chroma and memory operations."""
 
     def __init__(self):
         """Initialize the LangChain service."""
@@ -21,10 +32,16 @@ class LangChainService:
         self.retriever = None
         self.llm = None
         self.embeddings = None
+        self.summarize_chain = None
+        self._initialized = False
 
     async def initialize(self, chroma_service: ChromaService, mcp_service: MCPService):
         """Initialize the service with required dependencies."""
         try:
+            if self._initialized:
+                logger.warning("LangChain Service already initialized")
+                return
+
             logger.info("Initializing LangChain Service...")
             self.chroma_service = chroma_service
             self.mcp_service = mcp_service
@@ -48,139 +65,236 @@ class LangChainService:
                 embedding_function=self.embeddings
             ).as_retriever()
 
+            # Initialize summarization chain
+            self.summarize_chain = load_summarize_chain(
+                llm=self.llm,
+                chain_type="map_reduce",
+                verbose=True
+            )
+
+            self._initialized = True
             logger.info("LangChain Service initialized successfully")
 
         except Exception as e:
-            logger.error(f"Failed to initialize LangChain Service: {e}")
+            logger.error(
+                f"Failed to initialize LangChain Service: {e}", exc_info=True)
             raise
 
-    async def query_memory(self, query: str) -> Dict[str, Any]:
-        """Query the memory store with a question."""
+    async def cleanup(self):
+        """Cleanup resources."""
         try:
-            if not self.retriever or not self.llm:
-                raise ValueError("LangChain Service not initialized")
+            if not self._initialized:
+                return
 
-            docs = await self.retriever.aget_relevant_documents(query)
-            response = await self.llm.ainvoke({
-                "query": query,
-                "docs": docs
-            })
-            return {
-                "result": response["result"],
-                "source_documents": docs
-            }
-        except Exception as e:
-            logger.error(f"Failed to query memory: {e}")
-            raise
-
-    async def save_file_to_memory(self, file_path: str) -> None:
-        """Read a file using MCP and save its content to Chroma."""
-        try:
-            if not self.mcp_service or not self.chroma_service:
-                raise ValueError("Services not initialized")
-
-            # Get file tools from MCP
-            tools = await self.mcp_service.get_tools()
-            read_tool = next(
-                (tool for tool in tools if "read_file" in tool.name), None)
-
-            if not read_tool:
-                raise ValueError("Read file tool not found")
-
-            # Read file content using MCP
-            result = await read_tool.ainvoke({
-                "relative_workspace_path": file_path,
-                "should_read_entire_file": True,
-                "start_line_one_indexed": 1,
-                "end_line_one_indexed_inclusive": 999999  # Large number to read entire file
-            })
-
-            if not result or "content" not in result:
-                raise ValueError(f"Failed to read file: {file_path}")
-
-            # Save to Chroma with metadata
-            await self.chroma_service.add_memory(
-                result["content"],
-                {"source": "file", "file_path": file_path}
-            )
-
-            logger.info(f"Saved file {file_path} to memory")
+            # Clean up any resources that need to be released
+            self.chroma_service = None
+            self.mcp_service = None
+            self.retriever = None
+            self.llm = None
+            self.embeddings = None
+            self.summarize_chain = None
+            self._initialized = False
+            logger.info("LangChain Service cleaned up successfully")
 
         except Exception as e:
-            logger.error(f"Failed to save file to memory: {e}")
+            logger.error(
+                f"Error during LangChain Service cleanup: {e}", exc_info=True)
             raise
 
-    async def query_files_in_memory(self, query: str, top_k: int = 5) -> List[str]:
-        """Query the memory store for relevant files."""
-        try:
-            if not self.chroma_service:
-                raise ValueError("ChromaService not initialized")
+    def _get_message_value(self, message: Union[Dict[str, Any], 'ChatMessage'], key: str, default: Any = None) -> Any:
+        """Safely get a value from either a dict or ChatMessage object."""
+        if isinstance(message, dict):
+            return message.get(key, default)
+        return getattr(message, key, default)
 
-            # Query memories with metadata filter for files
-            results = await self.chroma_service.retrieve_with_metadata(
-                query,
-                {"source": "file"},
-                top_k=top_k
-            )
-
-            # Extract file paths from results
-            file_paths = [
-                result["metadata"]["file_path"]
-                for result in results
-                if "file_path" in result.get("metadata", {})
-            ]
-
-            return file_paths
-
-        except Exception as e:
-            logger.error(f"Failed to query files in memory: {e}")
-            raise
-
-    async def process_directory(
+    async def query_memory(
         self,
-        directory_path: str,
-        file_extensions: Optional[List[str]] = None
-    ) -> None:
-        """Process all files in a directory and save them to memory."""
+        query: str,
+        context: Optional[List[Union[Dict[str, Any], 'ChatMessage']]] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """Query the memory store with a question.
+
+        Args:
+            query: The question to ask
+            context: Optional context messages to include
+            **kwargs: Additional arguments for the query
+
+        Returns:
+            Dictionary containing the response and source documents
+        """
         try:
-            if not self.mcp_service:
-                raise ValueError("MCPService not initialized")
+            if not self._initialized:
+                raise RuntimeError("LangChain Service not initialized")
 
-            # Get directory listing tools from MCP
-            tools = await self.mcp_service.get_tools()
-            list_tool = next(
-                (tool for tool in tools if "list_dir" in tool.name), None)
+            # Use the context manager to retrieve memories if no context provided
+            if not context:
+                async with LLMContextManager(
+                    self.chroma_service,
+                    self,
+                    [{"role": "user", "content": query}],
+                    metadata_filter=kwargs.get("metadata_filter"),
+                    top_k=kwargs.get("top_k", 5)
+                ) as context_manager:
+                    context = context_manager.get_context_messages()
 
-            if not list_tool:
-                raise ValueError("List directory tool not found")
+            # Format the context into a string
+            formatted_context = "\n".join([
+                f"{self._get_message_value(msg, 'role', 'unknown')}: {self._get_message_value(msg, 'content', '')}"
+                for msg in (context or [])
+            ])
 
-            # List directory contents
-            result = await list_tool.ainvoke({
-                "relative_workspace_path": directory_path
+            # Create a prompt template with systematic structure
+            prompt_template = ChatPromptTemplate.from_messages([
+                ("system",
+                 "You are a helpful assistant. Use the following context to answer the question:\n\nContext:\n{context}"),
+                ("user",
+                 "Question: {question}\n\nProvide a clear and concise answer based on the context above.")
+            ])
+
+            # Chain the prompt, llm, and output parser
+            chain = prompt_template | self.llm | StrOutputParser()
+
+            # Invoke the chain with query and context
+            response = await chain.ainvoke({
+                "question": query,
+                "context": formatted_context
             })
 
-            if not result or "entries" not in result:
-                raise ValueError(f"Failed to list directory: {directory_path}")
+            # Extract source documents from context
+            source_documents = []
+            for msg in (context or []):
+                role = self._get_message_value(msg, "role")
+                content = self._get_message_value(msg, "content", "")
+                if role == "system" and "Memory from" in content:
+                    source_documents.append(
+                        Document(
+                            page_content=content,
+                            metadata={"type": "memory"}
+                        )
+                    )
 
-            # Filter files by extension if specified
-            files = [
-                entry["name"]
-                for entry in result["entries"]
-                if entry["type"] == "file" and
-                (not file_extensions or any(
-                    entry["name"].endswith(ext) for ext in file_extensions
-                ))
-            ]
-
-            # Process each file
-            for file_name in files:
-                file_path = f"{directory_path}/{file_name}"
-                await self.save_file_to_memory(file_path)
-
-            logger.info(
-                f"Processed {len(files)} files from directory {directory_path}"
-            )
+            return {
+                "result": response,
+                "source_documents": source_documents
+            }
 
         except Exception as e:
-            logger.error(f"Failed to process directory: {e}")
+            logger.error(f"Failed to query memory: {e}", exc_info=True)
             raise
+
+    async def process_conversation(
+        self,
+        messages: List[Union[Dict[str, Any], 'ChatMessage']],
+        metadata_filter: Optional[Dict[str, Any]] = None,
+        top_k: int = 5
+    ) -> List[Dict[str, Any]]:
+        """Process conversation history and retrieve relevant memories.
+
+        Args:
+            messages: List of conversation messages
+            metadata_filter: Optional filter for memory retrieval
+            top_k: Number of memories to retrieve
+
+        Returns:
+            List of messages with context prepended
+        """
+        try:
+            if not self._initialized:
+                raise RuntimeError("LangChain Service not initialized")
+
+            async with LLMContextManager(
+                self.chroma_service,
+                self,
+                messages,
+                metadata_filter=metadata_filter,
+                top_k=top_k
+            ) as context_manager:
+                return context_manager.get_context_messages()
+
+        except Exception as e:
+            logger.error(f"Failed to process conversation: {e}", exc_info=True)
+            return messages
+
+    async def summarize_text(self, text: str) -> Optional[str]:
+        """Summarize a piece of text using LangChain's summarization chain.
+
+        Args:
+            text: Text to summarize
+
+        Returns:
+            Summarized text or None if summarization fails
+        """
+        try:
+            if not self._initialized:
+                raise RuntimeError("LangChain Service not initialized")
+
+            # Split text into documents for map-reduce summarization
+            docs = [Document(page_content=text)]
+            summary = await self.summarize_chain.arun(docs)
+            return summary.strip()
+
+        except Exception as e:
+            logger.error(f"Failed to summarize text: {e}", exc_info=True)
+            return None
+
+    async def store_conversation_summary(
+        self,
+        messages: List[Union[Dict[str, Any], 'ChatMessage']],
+        metadata: Optional[Dict[str, Any]] = None
+    ) -> Optional[str]:
+        """Summarize and store a conversation in Chroma.
+
+        Args:
+            messages: List of conversation messages
+            metadata: Optional metadata for the summary
+
+        Returns:
+            ID of the stored summary or None if operation fails
+        """
+        try:
+            if not self._initialized:
+                raise RuntimeError("LangChain Service not initialized")
+
+            # Combine messages into a single text
+            conversation_text = "\n".join([
+                f"{self._get_message_value(msg, 'role', 'unknown')}: {self._get_message_value(msg, 'content', '')}"
+                for msg in messages
+            ])
+
+            # Generate summary
+            summary = await self.summarize_text(conversation_text)
+            if not summary:
+                return None
+
+            # Add metadata
+            full_metadata = {
+                "type": "conversation_summary",
+                "timestamp": datetime.now().isoformat(),
+                "message_count": len(messages),
+                **(metadata or {})
+            }
+
+            # Check for duplicates before storing
+            existing_memories = await self.chroma_service.retrieve_memories(
+                summary,
+                top_k=3,
+                score_threshold=0.95
+            )
+
+            if existing_memories:
+                logger.debug("Found similar existing memory, skipping storage")
+                return None
+
+            # Store in Chroma
+            summary_id = await self.chroma_service.add_memory(
+                summary,
+                metadata=full_metadata
+            )
+            logger.info(f"Stored conversation summary with ID: {summary_id}")
+            return summary_id
+
+        except Exception as e:
+            logger.error(
+                f"Failed to store conversation summary: {e}", exc_info=True)
+            return None

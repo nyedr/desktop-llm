@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from app.services.function_service import FunctionService
 from app.services.model_service import ModelService
+from app.services.langchain_service import LangChainService
 from app.core.config import config
 from app.models.chat import ChatMessage
 
@@ -26,12 +27,14 @@ class Agent:
         self,
         model_service: ModelService,
         function_service: FunctionService,
+        langchain_service: Optional[LangChainService] = None,
         model: str = config.DEFAULT_MODEL,
         temperature: float = config.MODEL_TEMPERATURE,
         max_tokens: int = config.MAX_TOKENS
     ):
         self.model_service = model_service
         self.function_service = function_service
+        self.langchain_service = langchain_service
         self.model = model
         self.temperature = temperature
         self.max_tokens = max_tokens
@@ -71,9 +74,12 @@ class Agent:
         max_tokens: Optional[int] = None,
         stream: bool = True,
         tools: Optional[List[Dict[str, Any]]] = None,
-        enable_tools: bool = False
+        enable_tools: bool = False,
+        enable_memory: bool = True,
+        memory_filter: Optional[Dict[str, Any]] = None,
+        top_k_memories: int = 5
     ) -> AsyncGenerator[str, None]:
-        """Generate chat completions."""
+        """Generate chat completions with optional memory context."""
         try:
             if enable_tools and tools:
                 logger.debug(
@@ -87,6 +93,18 @@ class Agent:
 
             # Keep track of messages for the conversation
             conversation = list(messages)
+
+            # Add memory context if enabled and LangChain service is available
+            if enable_memory and self.langchain_service:
+                try:
+                    conversation = await self.langchain_service.process_conversation(
+                        conversation,
+                        metadata_filter=memory_filter,
+                        top_k=top_k_memories
+                    )
+                    logger.debug("Added memory context to conversation")
+                except Exception as e:
+                    logger.warning(f"Failed to add memory context: {e}")
 
             # Get response from model service
             async for response in self.model_service.chat(

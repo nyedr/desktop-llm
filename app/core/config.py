@@ -7,7 +7,7 @@ class AppConfig(BaseSettings):
     """Application-wide configuration settings."""
     OLLAMA_BASE_URLS: List[str] = Field(default=["http://localhost:11434"])
     OPENAI_API_KEY: str = Field(default="")
-    DEFAULT_MODEL: str = Field(default="qwen2.5-coder:14b-instruct-q4_K_M")
+    DEFAULT_MODEL: str = Field(default="granite3.1-8b-24k:latest")
     MODEL_TEMPERATURE: float = Field(default=0.7)
     MAX_TOKENS: int = Field(default=4096)
     MODEL_REQUEST_TIMEOUT: int = Field(default=30)
@@ -23,6 +23,7 @@ class AppConfig(BaseSettings):
     SSE_PING_INTERVAL: int = Field(default=15)
     # Milliseconds to wait before retrying connection
     SSE_RETRY_TIMEOUT: int = Field(default=5000)
+    TOKENIZER_MODEL: str = Field(default="gpt2")
 
     # Chroma Settings
     CHROMA_PERSIST_DIRECTORY: str = Field(default="chroma_data")

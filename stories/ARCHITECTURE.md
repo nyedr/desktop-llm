@@ -220,7 +220,7 @@ Key environment variables:
 
 ```
 OLLAMA_BASE_URLS=["http://localhost:11434"]
-DEFAULT_MODEL="qwen2.5-coder:14b-instruct-q4_K_M"
+DEFAULT_MODEL="granite3.1-8b-24k"
 MODEL_TEMPERATURE=0.7
 MAX_TOKENS=4096
 FUNCTION_CALLS_ENABLED=true

@@ -131,7 +131,7 @@
       "module_path": "app.functions.types.tools.memory_tool",
       "function_name": "AddMemoryTool",
       "type": "tool",
-      "description": "Add a text entry to the long-term memory storage",
+      "description": "Add a text entry to the long-term memory storage, use this to store information that you should remember (e.g. user information, preferences, etc.)",
       "parameters": {
         "type": "object",
         "properties": {

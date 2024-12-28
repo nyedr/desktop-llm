@@ -40,6 +40,12 @@ class ChatRequest(BaseModel):
         None, description="List of filters to apply")
     pipeline: Optional[str] = Field(
         None, description="Pipeline to process the request")
+    enable_memory: bool = Field(
+        True, description="Whether to enable memory usage")
+    memory_filter: Optional[Dict[str, Any]] = Field(
+        None, description="Filter for memory usage")
+    top_k_memories: Optional[int] = Field(
+        5, description="Top k memories to consider")
 
     @field_validator("messages")
     def validate_messages(cls, v):

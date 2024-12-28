@@ -1,5 +1,5 @@
 {
-  "llm_model_name": "qwen2.5-7b-25k:latest",
+  "llm_model_name": "granite3.1-8b-24k",
   "vocab_size": 152064,
   "max_position_embeddings": 4096,
   "special_tokens": {
