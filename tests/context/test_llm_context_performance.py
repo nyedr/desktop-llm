@@ -52,53 +52,68 @@ def large_memories():
 @pytest.mark.asyncio
 async def test_truncation_performance(mock_chroma_service, mock_langchain_service, large_conversation):
     """Test performance of context truncation with large conversations."""
-    context_manager = LLMContextManager(
-        mock_chroma_service,
-        mock_langchain_service,
-        large_conversation,
-        max_context_tokens=1000
-    )
+    # Test with different token limits
+    for max_tokens in [500, 1000, 2000, 4000]:
+        context_manager = LLMContextManager(
+            mock_chroma_service,
+            mock_langchain_service,
+            large_conversation,
+            max_context_tokens=max_tokens
+        )
 
-    start_time = time.time()
-    async with context_manager:
-        messages = context_manager.get_context_messages()
-    end_time = time.time()
+        start_time = time.time()
+        async with context_manager:
+            messages = context_manager.get_context_messages()
+        end_time = time.time()
 
-    truncation_time = end_time - start_time
-    print(f"Truncation time: {truncation_time:.2f} seconds")
+        truncation_time = end_time - start_time
+        print(
+            f"Truncation time for {max_tokens} tokens: {truncation_time:.4f} seconds")
 
-    # Verify truncation was effective
-    total_tokens = sum(
-        context_manager.count_message_tokens(msg)
-        for msg in messages
-    )
-    assert total_tokens <= 1000
-    assert truncation_time < 1.0  # Should complete in under 1 second
+        # Verify truncation was effective
+        total_tokens = sum(
+            context_manager.count_message_tokens(msg)
+            for msg in messages
+        )
+        assert total_tokens <= max_tokens
+        assert truncation_time < 1.0  # Should complete in under 1 second
+
+        # Verify message integrity after truncation
+        assert len(messages) > 0
+        assert all(isinstance(msg, dict) for msg in messages)
+        assert all("role" in msg and "content" in msg for msg in messages)
 
 
 @pytest.mark.asyncio
 async def test_memory_retrieval_performance(mock_chroma_service, mock_langchain_service, large_memories):
     """Test performance of memory retrieval and processing."""
-    mock_chroma_service.retrieve_memories.return_value = large_memories
+    # Test with different memory set sizes
+    for memory_size in [10, 50, 100, 200]:
+        mock_chroma_service.retrieve_memories.return_value = large_memories[:memory_size]
 
-    context_manager = LLMContextManager(
-        mock_chroma_service,
-        mock_langchain_service,
-        [{"role": "user", "content": "Test message"}]
-    )
+        context_manager = LLMContextManager(
+            mock_chroma_service,
+            mock_langchain_service,
+            [{"role": "user", "content": "Test message"}]
+        )
 
-    start_time = time.time()
-    async with context_manager:
-        messages = context_manager.get_context_messages()
-    end_time = time.time()
+        start_time = time.time()
+        async with context_manager:
+            messages = context_manager.get_context_messages()
+        end_time = time.time()
 
-    retrieval_time = end_time - start_time
-    print(f"Memory retrieval time: {retrieval_time:.2f} seconds")
+        retrieval_time = end_time - start_time
+        print(
+            f"Memory retrieval time for {memory_size} memories: {retrieval_time:.4f} seconds")
 
-    # Verify memory processing was effective
-    memory_messages = [msg for msg in messages if msg["role"] == "system"]
-    assert len(memory_messages) > 0
-    assert retrieval_time < 1.0  # Should complete in under 1 second
+        # Verify memory processing was effective
+        memory_messages = [msg for msg in messages if msg["role"] == "system"]
+        assert len(memory_messages) > 0
+        assert retrieval_time < 1.0  # Should complete in under 1 second
+
+        # Verify memory content integrity
+        assert all(isinstance(msg, dict) for msg in memory_messages)
+        assert all("content" in msg for msg in memory_messages)
 
 
 @pytest.mark.asyncio
@@ -113,46 +128,63 @@ async def test_concurrent_access(mock_chroma_service, mock_langchain_service):
         async with context_manager:
             return context_manager.get_context_messages()
 
-    # Create multiple conversations
-    conversations = [
-        [{"role": "user", "content": f"Message {i}"}]
-        for i in range(10)
-    ]
+    # Test with different levels of concurrency
+    for num_concurrent in [10, 20, 50, 100]:
+        # Create multiple conversations
+        conversations = [
+            [{"role": "user", "content": f"Message {i}"}]
+            for i in range(num_concurrent)
+        ]
 
-    start_time = time.time()
-    # Process conversations concurrently
-    tasks = [process_conversation(conv) for conv in conversations]
-    results = await asyncio.gather(*tasks)
-    end_time = time.time()
+        start_time = time.time()
+        # Process conversations concurrently
+        tasks = [process_conversation(conv) for conv in conversations]
+        results = await asyncio.gather(*tasks)
+        end_time = time.time()
 
-    concurrent_time = end_time - start_time
-    print(f"Concurrent processing time: {concurrent_time:.2f} seconds")
+        concurrent_time = end_time - start_time
+        print(
+            f"Concurrent processing time for {num_concurrent} requests: {concurrent_time:.4f} seconds")
 
-    # Verify all conversations were processed
-    assert len(results) == 10
-    assert concurrent_time < 2.0  # Should complete in under 2 seconds
+        # Verify all conversations were processed
+        assert len(results) == num_concurrent
+        assert concurrent_time < 5.0  # Should complete in under 5 seconds
+
+        # Verify result integrity
+        assert all(isinstance(result, list) for result in results)
+        assert all(len(result) > 0 for result in results)
 
 
 @pytest.mark.asyncio
 async def test_memory_storage_performance(mock_chroma_service, mock_langchain_service, large_conversation):
     """Test performance of memory storage during teardown."""
-    context_manager = LLMContextManager(
-        mock_chroma_service,
-        mock_langchain_service,
-        large_conversation
-    )
+    # Test with different conversation sizes
+    for conv_size in [10, 50, 100, 200]:
+        context_manager = LLMContextManager(
+            mock_chroma_service,
+            mock_langchain_service,
+            large_conversation[:conv_size]
+        )
 
-    start_time = time.time()
-    async with context_manager:
-        pass  # Let the context manager handle teardown
-    end_time = time.time()
+        start_time = time.time()
+        async with context_manager:
+            pass  # Let the context manager handle teardown
+        end_time = time.time()
 
-    storage_time = end_time - start_time
-    print(f"Memory storage time: {storage_time:.2f} seconds")
+        storage_time = end_time - start_time
+        print(
+            f"Memory storage time for {conv_size} messages: {storage_time:.4f} seconds")
 
-    # Verify storage was called
-    mock_chroma_service.add_memory.assert_called_once()
-    assert storage_time < 1.0  # Should complete in under 1 second
+        # Verify storage was called
+        mock_chroma_service.add_memory.assert_called()
+        assert storage_time < 1.0  # Should complete in under 1 second
+
+        # Verify metadata integrity
+        call_args = mock_chroma_service.add_memory.call_args
+        metadata = call_args[1]["metadata"]
+        assert metadata["type"] == "conversation_summary"
+        assert "timestamp" in metadata
+        assert metadata["message_count"] == conv_size
 
 
 @pytest.mark.asyncio
@@ -164,67 +196,104 @@ async def test_token_counting_performance(mock_chroma_service, mock_langchain_se
         []
     )
 
-    start_time = time.time()
-    for message in large_conversation:
-        context_manager.count_message_tokens(message)
-    end_time = time.time()
+    # Test with different batch sizes
+    for batch_size in [10, 50, 100, 200]:
+        start_time = time.time()
+        for message in large_conversation[:batch_size]:
+            context_manager.count_message_tokens(message)
+        end_time = time.time()
 
-    counting_time = end_time - start_time
-    print(f"Token counting time: {counting_time:.2f} seconds")
+        counting_time = end_time - start_time
+        print(
+            f"Token counting time for {batch_size} messages: {counting_time:.4f} seconds")
 
-    # Token counting should be relatively fast
-    assert counting_time < 1.0  # Should complete in under 1 second
+        # Token counting should be relatively fast
+        assert counting_time < 1.0  # Should complete in under 1 second
+
+        # Verify token counts are positive
+        for message in large_conversation[:batch_size]:
+            assert context_manager.count_message_tokens(message) > 0
 
 
 @pytest.mark.asyncio
 async def test_prompt_engineering_performance(mock_chroma_service, mock_langchain_service, large_memories):
     """Test performance of prompt engineering with large memory sets."""
-    mock_chroma_service.retrieve_memories.return_value = large_memories
+    # Test with different memory set sizes
+    for memory_size in [10, 50, 100, 200]:
+        mock_chroma_service.retrieve_memories.return_value = large_memories[:memory_size]
 
-    context_manager = LLMContextManager(
-        mock_chroma_service,
-        mock_langchain_service,
-        [{"role": "user", "content": "Test message"}]
-    )
+        context_manager = LLMContextManager(
+            mock_chroma_service,
+            mock_langchain_service,
+            [{"role": "user", "content": "Test message"}]
+        )
 
-    start_time = time.time()
-    async with context_manager:
-        messages = context_manager.get_context_messages()
-        # Force prompt engineering by accessing messages
-        _ = [msg["content"] for msg in messages]
-    end_time = time.time()
+        start_time = time.time()
+        async with context_manager:
+            messages = context_manager.get_context_messages()
+            # Force prompt engineering by accessing messages
+            _ = [msg["content"] for msg in messages]
+        end_time = time.time()
 
-    engineering_time = end_time - start_time
-    print(f"Prompt engineering time: {engineering_time:.2f} seconds")
+        engineering_time = end_time - start_time
+        print(
+            f"Prompt engineering time for {memory_size} memories: {engineering_time:.4f} seconds")
 
-    # Verify prompt engineering was effective
-    assert any("[Relevant Memory]" in msg["content"] for msg in messages)
-    assert engineering_time < 1.0  # Should complete in under 1 second
+        # Verify prompt engineering was effective
+        assert any("[Relevant Memory]" in msg["content"] for msg in messages)
+        assert engineering_time < 1.0  # Should complete in under 1 second
+
+        # Verify message structure integrity
+        assert all(isinstance(msg, dict) for msg in messages)
+        assert all("role" in msg and "content" in msg for msg in messages)
 
 
 @pytest.mark.asyncio
 async def test_memory_filter_performance(mock_chroma_service, mock_langchain_service, large_memories):
     """Test performance of memory filtering operations."""
-    mock_chroma_service.retrieve_memories.return_value = large_memories
+    # Test with different filter complexities
+    filters = [
+        {"type": "memory"},
+        {"type": "memory", "timestamp": {"$gt": "2024-01-01"}},
+        {"type": {"$in": ["memory", "user_preference"]}},
+        {"type": "memory", "relevance_score": {"$gt": 0.8}}
+    ]
 
-    context_manager = LLMContextManager(
-        mock_chroma_service,
-        mock_langchain_service,
-        [{"role": "user", "content": "Test message"}]
-    )
+    for filter in filters:
+        mock_chroma_service.retrieve_memories.return_value = large_memories
 
-    start_time = time.time()
-    async with context_manager:
-        # Apply memory filter
-        filtered_memories = await context_manager._filter_memories(
-            large_memories,
-            {"type": "memory"}
+        context_manager = LLMContextManager(
+            mock_chroma_service,
+            mock_langchain_service,
+            [{"role": "user", "content": "Test message"}]
         )
-    end_time = time.time()
 
-    filtering_time = end_time - start_time
-    print(f"Memory filtering time: {filtering_time:.2f} seconds")
+        start_time = time.time()
+        async with context_manager:
+            # Apply memory filter
+            filtered_memories = await context_manager._filter_memories(
+                large_memories,
+                filter
+            )
+        end_time = time.time()
 
-    # Verify filtering was effective
-    assert len(filtered_memories) <= len(large_memories)
-    assert filtering_time < 1.0  # Should complete in under 1 second
+        filtering_time = end_time - start_time
+        print(
+            f"Memory filtering time for {filter}: {filtering_time:.4f} seconds")
+
+        # Verify filtering was effective
+        assert len(filtered_memories) <= len(large_memories)
+        assert filtering_time < 1.0  # Should complete in under 1 second
+
+        # Verify filter criteria were applied
+        for memory in filtered_memories:
+            metadata = memory.get("metadata", {})
+            if "type" in filter:
+                assert metadata.get("type") == filter["type"]
+            if "timestamp" in filter:
+                assert metadata.get("timestamp") > filter["timestamp"]["$gt"]
+            if "$in" in filter:
+                assert metadata.get("type") in filter["$in"]
+            if "relevance_score" in filter:
+                assert memory.get("relevance_score",
+                                  0) > filter["relevance_score"]["$gt"]

@@ -156,6 +156,8 @@ async def test_error_handling(mock_chroma_service, mock_langchain_service, sampl
     # Simulate Chroma service error
     mock_chroma_service.retrieve_memories.side_effect = Exception(
         "Chroma error")
+    mock_langchain_service.query_memory.side_effect = Exception(
+        "LangChain error")
 
     context_manager = LLMContextManager(
         mock_chroma_service,
@@ -163,11 +165,36 @@ async def test_error_handling(mock_chroma_service, mock_langchain_service, sampl
         sample_messages
     )
 
+    # Test initialization error
+    with patch('app.context.llm_context.AutoTokenizer.from_pretrained', side_effect=Exception("Tokenizer error")):
+        context_manager = LLMContextManager(
+            mock_chroma_service,
+            mock_langchain_service,
+            sample_messages
+        )
+        async with context_manager:
+            messages = context_manager.get_context_messages()
+            assert messages == sample_messages
+
+    # Test memory retrieval error
+    context_manager = LLMContextManager(
+        mock_chroma_service,
+        mock_langchain_service,
+        sample_messages
+    )
     async with context_manager:
         messages = context_manager.get_context_messages()
-
-        # Verify we still get the original messages on error
         assert messages == sample_messages
+
+    # Test teardown error
+    context_manager = LLMContextManager(
+        mock_chroma_service,
+        mock_langchain_service,
+        sample_messages
+    )
+    async with context_manager:
+        pass
+    mock_chroma_service.add_memory.assert_not_called()
 
 
 @pytest.mark.asyncio
@@ -198,6 +225,38 @@ async def test_memory_storage(mock_chroma_service, mock_langchain_service, sampl
 
 
 @pytest.mark.asyncio
+async def test_token_counting(mock_chroma_service, mock_langchain_service):
+    """Test token counting functionality."""
+    context_manager = LLMContextManager(
+        mock_chroma_service,
+        mock_langchain_service,
+        []
+    )
+
+    # Test with empty string
+    assert context_manager.count_tokens("") == 0
+
+    # Test with simple text
+    assert context_manager.count_tokens("Hello world") > 0
+
+    # Test with long text
+    long_text = " ".join(["word"] * 1000)
+    assert context_manager.count_tokens(long_text) > 100
+
+    # Test message token counting
+    message = {
+        "role": "user",
+        "content": "Hello world",
+        "name": "TestUser"
+    }
+    assert context_manager.count_message_tokens(message) > 0
+
+    # Test with ChatMessage object
+    chat_message = ChatMessage(role="user", content="Hello", name="Test")
+    assert context_manager.count_message_tokens(chat_message) > 0
+
+
+@pytest.mark.asyncio
 async def test_image_message_processing(mock_chroma_service, mock_langchain_service):
     """Test processing of messages with images."""
     image_message = {
@@ -212,9 +271,26 @@ async def test_image_message_processing(mock_chroma_service, mock_langchain_serv
         [image_message]
     )
 
+    # Test dict message
     processed = await context_manager._process_image_message(image_message)
     assert processed["metadata"]["has_image"]
     assert "[Image attached]" in processed["content"]
+
+    # Test ChatMessage object
+    chat_message = ChatMessage(
+        role="user",
+        content="Check this image",
+        images=["base64_image_data"]
+    )
+    processed = await context_manager._process_image_message(chat_message)
+    assert processed["metadata"]["has_image"]
+    assert "[Image attached]" in processed["content"]
+
+    # Test error handling
+    with patch.object(context_manager, '_process_image_message', side_effect=Exception("Processing error")):
+        processed = await context_manager._process_image_message(image_message)
+        assert processed["role"] == "user"
+        assert "Check this image" in processed["content"]
 
 
 @pytest.mark.asyncio
@@ -232,9 +308,26 @@ async def test_file_message_processing(mock_chroma_service, mock_langchain_servi
         [file_message]
     )
 
+    # Test dict message
     processed = await context_manager._process_file_message(file_message)
     assert processed["metadata"]["has_file"]
     assert "file.txt" in processed["content"]
+
+    # Test ChatMessage object
+    chat_message = ChatMessage(
+        role="user",
+        content="Check this file",
+        file_path="/path/to/file.txt"
+    )
+    processed = await context_manager._process_file_message(chat_message)
+    assert processed["metadata"]["has_file"]
+    assert "file.txt" in processed["content"]
+
+    # Test error handling
+    with patch.object(context_manager, '_process_file_message', side_effect=Exception("Processing error")):
+        processed = await context_manager._process_file_message(file_message)
+        assert processed["role"] == "user"
+        assert "Check this file" in processed["content"]
 
 
 @pytest.mark.asyncio
@@ -271,6 +364,101 @@ async def test_function_call_processing(mock_chroma_service, mock_langchain_serv
         assert any(
             "get_weather function" in msg["content"] for msg in messages)
         assert any("72°F" in msg["content"] for msg in messages)
+
+    # Test with missing preceding assistant message
+    conversation = [
+        {"role": "user", "content": "What's the weather like?"},
+        {"role": "function", "name": "get_weather", "content": "Sunny, 72°F"}
+    ]
+
+    context_manager = LLMContextManager(
+        mock_chroma_service,
+        mock_langchain_service,
+        conversation
+    )
+
+    async with context_manager:
+        messages = context_manager.get_context_messages()
+        assert any(
+            "get_weather function" in msg["content"] for msg in messages)
+
+
+@pytest.mark.asyncio
+async def test_prompt_engineering(mock_chroma_service, mock_langchain_service, sample_messages, sample_memories):
+    """Test prompt engineering with memories and conversation history."""
+    mock_chroma_service.retrieve_memories.return_value = sample_memories
+
+    context_manager = LLMContextManager(
+        mock_chroma_service,
+        mock_langchain_service,
+        sample_messages
+    )
+
+    async with context_manager:
+        messages = context_manager.get_context_messages()
+
+        # Verify base system prompt is included
+        assert any(
+            msg["role"] == "system" and "AI assistant" in msg["content"]
+            for msg in messages
+        )
+
+        # Verify memory context is included
+        assert any(
+            msg["role"] == "system" and "relevant context" in msg["content"]
+            for msg in messages
+        )
+
+        # Verify conversation history is preserved
+        assert any(
+            msg["role"] == "user" and "weather" in msg["content"]
+            for msg in messages
+        )
+
+
+@pytest.mark.asyncio
+async def test_context_size_management_edge_cases(mock_chroma_service, mock_langchain_service):
+    """Test edge cases in context size management."""
+    # Test with empty conversation
+    context_manager = LLMContextManager(
+        mock_chroma_service,
+        mock_langchain_service,
+        [],
+        max_context_tokens=100
+    )
+    async with context_manager:
+        messages = context_manager.get_context_messages()
+        assert len(messages) > 0  # Should still have system prompts
+
+    # Test with very small token limit
+    context_manager = LLMContextManager(
+        mock_chroma_service,
+        mock_langchain_service,
+        [{"role": "user", "content": "Hi"}],
+        max_context_tokens=10
+    )
+    async with context_manager:
+        messages = context_manager.get_context_messages()
+        total_tokens = sum(
+            context_manager.count_message_tokens(msg)
+            for msg in messages
+        )
+        assert total_tokens <= 10
+
+    # Test with exactly matching token limit
+    context_manager = LLMContextManager(
+        mock_chroma_service,
+        mock_langchain_service,
+        [{"role": "user", "content": "Hello world"}],
+        max_context_tokens=context_manager.count_tokens("Hello world")
+    )
+    async with context_manager:
+        messages = context_manager.get_context_messages()
+        total_tokens = sum(
+            context_manager.count_message_tokens(msg)
+            for msg in messages
+        )
+        assert total_tokens <= context_manager.count_tokens("Hello world")
 
 
 @pytest.mark.asyncio

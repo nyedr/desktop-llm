@@ -5,8 +5,6 @@
 
 /test_data
 
-/chroma_data
-
 .cursorrules
 
 .clinerules
@@ -45,4 +43,4 @@
 
 startup_debug.log
 
-.cursorrules
+/chroma_data

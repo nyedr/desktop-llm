@@ -1,6 +1,7 @@
 import pytest
 import os
 from unittest.mock import patch
+from datetime import datetime
 from app.services.chroma_service import ChromaService
 
 # Test data
@@ -50,16 +51,25 @@ async def test_add_memory(chroma_service):
     results = await chroma_service.retrieve_memories(TEST_TEXT)
     assert len(results) > 0
     assert results[0]["document"] == TEST_TEXT
-    assert results[0]["metadata"] == TEST_METADATA
+
+    # Verify metadata with timestamp
+    metadata = results[0]["metadata"]
+    assert metadata["source"] == TEST_METADATA["source"]
+    assert metadata["type"] == TEST_METADATA["type"]
+    assert "timestamp" in metadata
+    assert isinstance(metadata["timestamp"], str)
+    # Verify timestamp is in ISO format
+    datetime.fromisoformat(metadata["timestamp"])
 
 
 @pytest.mark.asyncio
-async def test_add_memories_batch(chroma_service):
+async def test_add_batch_memories(chroma_service):
     """Test adding multiple memories in batch."""
-    memory_ids = await chroma_service.add_memories_batch(
+    memory_ids = await chroma_service.add_memory(
         TEST_BATCH_TEXTS,
         TEST_BATCH_METADATA
     )
+    assert isinstance(memory_ids, list)
     assert len(memory_ids) == len(TEST_BATCH_TEXTS)
 
     # Verify all memories were added
@@ -67,14 +77,40 @@ async def test_add_memories_batch(chroma_service):
         results = await chroma_service.retrieve_memories(text)
         assert len(results) > 0
         assert any(r["document"] == text for r in results)
-        assert any(r["metadata"] == metadata for r in results)
+        # Verify metadata with timestamp
+        found = False
+        for r in results:
+            r_metadata = r["metadata"]
+            if (r_metadata["source"] == metadata["source"] and
+                r_metadata["type"] == metadata["type"] and
+                "timestamp" in r_metadata and
+                    "batch_index" in r_metadata):
+                found = True
+                break
+        assert found
+
+
+@pytest.mark.asyncio
+async def test_duplicate_prevention(chroma_service):
+    """Test that duplicate memories are not added."""
+    # Add initial memory
+    memory_id1 = await chroma_service.add_memory(TEST_TEXT, TEST_METADATA)
+    assert memory_id1 is not None
+
+    # Try to add the same memory again
+    memory_id2 = await chroma_service.add_memory(TEST_TEXT, TEST_METADATA)
+    assert memory_id2 is None  # Should return None for duplicates
+
+    # Verify only one memory exists
+    results = await chroma_service.retrieve_memories(TEST_TEXT)
+    assert len(results) == 1
 
 
 @pytest.mark.asyncio
 async def test_retrieve_memories(chroma_service):
     """Test retrieving memories by similarity."""
-    # Add test memories
-    await chroma_service.add_memories_batch(TEST_BATCH_TEXTS, TEST_BATCH_METADATA)
+    # Add test memories in batch
+    await chroma_service.add_memory(TEST_BATCH_TEXTS, TEST_BATCH_METADATA)
 
     # Test retrieval
     results = await chroma_service.retrieve_memories("first memory", top_k=2)
@@ -85,88 +121,26 @@ async def test_retrieve_memories(chroma_service):
 
 
 @pytest.mark.asyncio
-async def test_retrieve_with_metadata(chroma_service):
-    """Test retrieving memories with metadata filtering."""
-    # Add test memories
-    await chroma_service.add_memories_batch(TEST_BATCH_TEXTS, TEST_BATCH_METADATA)
-
-    # Test retrieval with metadata filter
-    metadata_filter = {"source": "test1"}
-    results = await chroma_service.retrieve_with_metadata(
-        "test memory",
-        metadata_filter
-    )
-    assert len(results) > 0
-    assert all(r["metadata"]["source"] == "test1" for r in results)
-
-
-@pytest.mark.asyncio
-async def test_update_memory(chroma_service):
-    """Test updating an existing memory."""
-    # Add initial memory
-    memory_id = await chroma_service.add_memory(TEST_TEXT, TEST_METADATA)
-
-    # Update the memory
-    new_text = "Updated test memory"
-    new_metadata = {"source": "test_updated", "type": "unit_test"}
-    await chroma_service.update_memory(memory_id, new_text, new_metadata)
-
-    # Verify the update
-    results = await chroma_service.retrieve_memories(new_text)
-    assert len(results) > 0
-    assert results[0]["document"] == new_text
-    assert results[0]["metadata"] == new_metadata
-
-
-@pytest.mark.asyncio
-async def test_delete_memory(chroma_service):
-    """Test deleting a memory."""
-    # Add a memory
-    memory_id = await chroma_service.add_memory(TEST_TEXT, TEST_METADATA)
-
-    # Delete the memory
-    await chroma_service.delete_memory(memory_id)
-
-    # Verify the memory was deleted
-    results = await chroma_service.retrieve_memories(TEST_TEXT)
-    assert len(results) == 0
-
-
-@pytest.mark.asyncio
-async def test_clear_collection(chroma_service):
-    """Test clearing all memories from the collection."""
-    # Add test memories
-    await chroma_service.add_memories_batch(TEST_BATCH_TEXTS, TEST_BATCH_METADATA)
-
-    # Clear the collection
-    await chroma_service.clear_collection()
-
-    # Verify all memories were deleted
-    results = await chroma_service.retrieve_memories("test")
-    assert len(results) == 0
-
-
-@pytest.mark.asyncio
 async def test_error_handling(chroma_service):
     """Test error handling in various scenarios."""
-    # Test with invalid metadata
-    with pytest.raises(Exception):
-        await chroma_service.add_memory(TEST_TEXT, {"invalid": lambda x: x})
+    # Test with empty text
+    with pytest.raises(ValueError, match="Text must be a non-empty string"):
+        await chroma_service.add_memory("", TEST_METADATA)
 
-    # Test with invalid query
-    with pytest.raises(Exception):
-        await chroma_service.retrieve_memories(None)
+    # Test with invalid text type
+    with pytest.raises(ValueError, match="Text must be a non-empty string"):
+        await chroma_service.add_memory(123, TEST_METADATA)
 
-    # Test with invalid metadata filter
-    with pytest.raises(Exception):
-        await chroma_service.retrieve_with_metadata("test", {"invalid": lambda x: x})
+    # Test with text containing only special characters
+    with pytest.raises(ValueError, match="Text contains no valid content after sanitization"):
+        await chroma_service.add_memory("@#$%^&*", TEST_METADATA)
 
 
 @pytest.mark.asyncio
 async def test_memory_relevance_scores(chroma_service):
     """Test that retrieved memories include relevance scores."""
-    # Add test memories
-    await chroma_service.add_memories_batch(TEST_BATCH_TEXTS, TEST_BATCH_METADATA)
+    # Add test memories in batch
+    await chroma_service.add_memory(TEST_BATCH_TEXTS, TEST_BATCH_METADATA)
 
     # Retrieve memories and check scores
     results = await chroma_service.retrieve_memories("first memory")

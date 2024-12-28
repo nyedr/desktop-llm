@@ -121,7 +121,7 @@ class ChromaService:
         self,
         text: Union[str, List[str]],
         metadata: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]] = None
-    ) -> Union[str, List[str]]:
+    ) -> Union[str, List[str], None]:
         """Add one or more memories to the vector store.
 
         Args:
@@ -129,7 +129,7 @@ class ChromaService:
             metadata: Optional metadata for the entries
 
         Returns:
-            Single memory ID or list of memory IDs
+            Single memory ID, list of memory IDs, or None if duplicate
         """
         try:
             if not self.collection:
@@ -137,6 +137,10 @@ class ChromaService:
 
             # Handle single entry case
             if isinstance(text, str):
+                # Validate input
+                if not text or not isinstance(text, str):
+                    raise ValueError("Text must be a non-empty string")
+
                 # Check for duplicates before adding
                 if await self._is_duplicate_memory(text):
                     logger.debug(f"Skipping duplicate memory: {text[:50]}...")
@@ -144,9 +148,14 @@ class ChromaService:
                 return await self._add_single_memory(text, metadata)
 
             # Handle batch case
+            if not text:
+                raise ValueError("Text list cannot be empty")
+
             unique_texts = []
             unique_metadatas = []
             for i, t in enumerate(text):
+                if not t or not isinstance(t, str):
+                    raise ValueError(f"Invalid text at index {i}")
                 if not await self._is_duplicate_memory(t):
                     unique_texts.append(t)
                     if metadata and i < len(metadata):
@@ -176,10 +185,6 @@ class ChromaService:
         Returns:
             Memory ID
         """
-        # Validate and sanitize input
-        if not text or not isinstance(text, str):
-            raise ValueError("Text must be a non-empty string")
-
         # Remove special characters except basic punctuation
         sanitized_text = re.sub(r"[^\w\s.,!?']", "", text).strip()
         if not sanitized_text:
@@ -226,10 +231,19 @@ class ChromaService:
         Returns:
             List of memory IDs
         """
+        # Sanitize texts
+        sanitized_texts = []
+        for text in texts:
+            sanitized = re.sub(r"[^\w\s.,!?']", "", text).strip()
+            if not sanitized:
+                raise ValueError(
+                    "Text contains no valid content after sanitization")
+            sanitized_texts.append(sanitized)
+
         # Generate embeddings
         embeddings = [
             self.embeddings.encode(text).tolist()
-            for text in texts
+            for text in sanitized_texts
         ]
 
         # Generate IDs
@@ -253,11 +267,11 @@ class ChromaService:
         # Add to collection
         self.collection.add(
             ids=memory_ids,
-            documents=texts,
+            documents=sanitized_texts,
             embeddings=embeddings,
             metadatas=full_metadatas
         )
-        logger.debug(f"Added {len(texts)} memories in batch")
+        logger.debug(f"Added {len(memory_ids)} memories in batch")
         return memory_ids
 
     async def retrieve_memories(
@@ -283,28 +297,27 @@ class ChromaService:
             # Generate query embedding
             query_embedding = self.embeddings.encode(query).tolist()
 
-            # Query collection
+            # Query the collection
             results = self.collection.query(
                 query_embeddings=[query_embedding],
                 n_results=top_k,
                 include=["documents", "metadatas", "distances"]
             )
 
-            # Format and filter results
-            memories = []
-            for i in range(len(results["documents"][0])):
-                relevance_score = 1 - results["distances"][0][i]
-                if relevance_score >= score_threshold:
-                    memories.append({
-                        "document": results["documents"][0][i],
-                        "metadata": results["metadatas"][0][i] if results["metadatas"][0] else {},
-                        "relevance_score": relevance_score
-                    })
+            # Format results
+            formatted_results = []
+            if results["ids"] and results["ids"][0]:  # Check if we have results
+                for i in range(len(results["ids"][0])):
+                    # Convert distance to similarity score (cosine distance to similarity)
+                    similarity = 1 - results["distances"][0][i]
+                    if similarity >= score_threshold:
+                        formatted_results.append({
+                            "document": results["documents"][0][i],
+                            "metadata": results["metadatas"][0][i],
+                            "relevance_score": similarity
+                        })
 
-            logger.debug(
-                f"Retrieved {len(memories)} memories for query: '{query}'"
-            )
-            return memories
+            return sorted(formatted_results, key=lambda x: x["relevance_score"], reverse=True)
 
         except Exception as e:
             logger.error(f"Failed to retrieve memories: {e}", exc_info=True)
@@ -345,20 +358,21 @@ class ChromaService:
 
             # Format and filter results
             memories = []
-            for i in range(len(results["documents"][0])):
-                relevance_score = 1 - results["distances"][0][i]
-                if relevance_score >= score_threshold:
-                    memories.append({
-                        "document": results["documents"][0][i],
-                        "metadata": results["metadatas"][0][i] if results["metadatas"][0] else {},
-                        "relevance_score": relevance_score
-                    })
+            if results["ids"] and results["ids"][0]:
+                for i in range(len(results["ids"][0])):
+                    relevance_score = 1 - results["distances"][0][i]
+                    if relevance_score >= score_threshold:
+                        memories.append({
+                            "document": results["documents"][0][i],
+                            "metadata": results["metadatas"][0][i],
+                            "relevance_score": relevance_score
+                        })
 
             logger.debug(
                 f"Retrieved {len(memories)} memories for query: '{query}' "
                 f"with metadata filter: {metadata_filter}"
             )
-            return memories
+            return sorted(memories, key=lambda x: x["relevance_score"], reverse=True)
 
         except Exception as e:
             logger.error(
@@ -382,20 +396,35 @@ class ChromaService:
             if not self.collection:
                 await self.initialize()
 
+            # Validate and sanitize input
+            if not new_text or not isinstance(new_text, str):
+                raise ValueError("Text must be a non-empty string")
+
+            # Remove special characters except basic punctuation
+            sanitized_text = re.sub(r"[^\w\s.,!?']", "", new_text).strip()
+            if not sanitized_text:
+                raise ValueError(
+                    "Text contains no valid content after sanitization")
+
             # Generate new embedding
-            new_embedding = self.embeddings.encode(new_text).tolist()
+            new_embedding = self.embeddings.encode(sanitized_text).tolist()
 
             # Prepare updated metadata
             full_metadata = {
+                "timestamp": datetime.now().isoformat(),
+                "type": "memory",
                 "updated_at": datetime.now().isoformat(),
-                **(new_metadata or {})
+                **{
+                    k: v if v is not None else ""
+                    for k, v in (new_metadata or {}).items()
+                }
             }
 
             # Update in collection
             self.collection.update(
                 ids=[memory_id],
                 embeddings=[new_embedding],
-                documents=[new_text],
+                documents=[sanitized_text],
                 metadatas=[full_metadata]
             )
             logger.debug(f"Updated memory with ID: {memory_id}")
@@ -421,26 +450,13 @@ class ChromaService:
             logger.error(f"Failed to delete memory: {e}", exc_info=True)
             raise
 
-    async def clear_collection(self, backup: bool = True):
-        """Clear all memories from the collection.
-
-        Args:
-            backup: Whether to create a backup before clearing
-        """
+    async def clear_collection(self):
+        """Clear all memories from the collection."""
         try:
             if not self.collection:
                 await self.initialize()
-
-            if backup:
-                # TODO: Implement backup functionality
-                pass
-
-            # Get all IDs in the collection
-            results = self.collection.get()
-            if results["ids"]:
-                self.collection.delete(ids=results["ids"])
+            self.collection.delete(where={})
             logger.info("Cleared all memories from collection")
-
         except Exception as e:
             logger.error(f"Failed to clear collection: {e}", exc_info=True)
             raise
