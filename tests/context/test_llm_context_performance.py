@@ -6,7 +6,7 @@ from unittest.mock import Mock, AsyncMock
 from concurrent.futures import ThreadPoolExecutor
 
 from app.context.llm_context import LLMContextManager
-from app.models.chat import ChatMessage
+from app.models.chat import StrictChatMessage
 
 
 @pytest.fixture

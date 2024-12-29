@@ -18,7 +18,7 @@ from app.services.function_service import FunctionService
 from app.services.langchain_service import LangChainService
 from app.services.chroma_service import ChromaService
 from app.models.chat import (
-    ChatRequest, ChatMessage, ChatStreamEvent, StrictChatMessage
+    ChatRequest, ChatStreamEvent, StrictChatMessage
 )
 from app.functions.base import FunctionType, Filter
 import asyncio
@@ -450,7 +450,7 @@ async def chat_stream(
 
 class ChatRequest(BaseModel):
     """Chat request model."""
-    messages: List[Union[ChatMessage, StrictChatMessage]]
+    messages: List[StrictChatMessage]
     model: Optional[str] = None
     temperature: Optional[float] = None
     max_tokens: Optional[int] = None

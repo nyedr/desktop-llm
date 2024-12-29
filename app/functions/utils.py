@@ -3,7 +3,7 @@
 import logging
 from typing import Dict, Any, List, Optional, Union, AsyncGenerator
 from app.core.config import config
-from app.models.chat import ChatMessage
+from app.models.chat import AssistantMessage, StrictChatMessage, SystemMessage, ToolMessage, UserMessage
 from app.services.model_service import ModelService
 
 logger = logging.getLogger(__name__)
@@ -70,8 +70,48 @@ async def get_all_models() -> List[str]:
         return []
 
 
+def ensure_strict_message(msg: Any) -> StrictChatMessage:
+    """Convert input to StrictChatMessage, filtering invalid fields.
+
+    Args:
+        msg: Input message (dict or StrictChatMessage)
+
+    Returns:
+        Properly typed StrictChatMessage instance
+    """
+    if isinstance(msg, StrictChatMessage):
+        return msg
+
+    if not isinstance(msg, dict):
+        raise ValueError(f"Invalid message type: {type(msg)}")
+
+    role = msg.get('role')
+    if role == 'user':
+        # Filter for UserMessage fields
+        msg_data = {k: v for k, v in msg.items()
+                    if k in UserMessage.model_fields}
+        return UserMessage(**msg_data)
+    elif role == 'assistant':
+        # Filter for AssistantMessage fields
+        msg_data = {k: v for k, v in msg.items()
+                    if k in AssistantMessage.model_fields}
+        return AssistantMessage(**msg_data)
+    elif role == 'system':
+        # Filter for SystemMessage fields
+        msg_data = {k: v for k, v in msg.items()
+                    if k in SystemMessage.model_fields}
+        return SystemMessage(**msg_data)
+    elif role == 'tool':
+        # Filter for ToolMessage fields
+        msg_data = {k: v for k, v in msg.items()
+                    if k in ToolMessage.model_fields}
+        return ToolMessage(**msg_data)
+    else:
+        raise ValueError(f"Invalid message role: {role}")
+
+
 async def generate_chat_completion(
-    messages: List[Union[Dict[str, Any], ChatMessage]],
+    messages: List[StrictChatMessage],
     model: Optional[str] = None,
     temperature: Optional[float] = None,
     max_tokens: Optional[int] = None,

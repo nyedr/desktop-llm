@@ -2,7 +2,7 @@
 
 import pytest
 from httpx import AsyncClient, ASGITransport
-from app.models.chat import ChatRequest, ChatMessage
+from app.models.chat import ChatRequest, StrictChatMessage
 from unittest.mock import patch, AsyncMock
 from app.main import app
 import json
@@ -76,7 +76,7 @@ async def test_chat_stream_start(mock_agent_chat, mock_get_all_models, async_tes
     mock_agent_chat.return_value = mock_chat_generator()
 
     request = ChatRequest(
-        messages=[ChatMessage(role="user", content="Hello")],
+        messages=[StrictChatMessage(role="user", content="Hello")],
         model="test-model",
         enable_tools=False
     )
@@ -191,7 +191,7 @@ async def test_chat_with_tools(mock_agent_chat, mock_get_all_models, async_test_
     mock_agent_chat.return_value = mock_chat_generator(tool_calls=tool_calls)
 
     request = ChatRequest(
-        messages=[ChatMessage(
+        messages=[StrictChatMessage(
             role="user", content="What's the weather in New York?")],
         model="test-model",
         enable_tools=True
@@ -276,7 +276,7 @@ async def test_chat_with_filters(mock_agent_chat, mock_get_all_models, async_tes
     mock_agent_chat.return_value = mock_chat_generator()
 
     request = ChatRequest(
-        messages=[ChatMessage(role="user", content="Hello")],
+        messages=[StrictChatMessage(role="user", content="Hello")],
         model="test-model",
         filters=["sanitize", "translate"]  # Example filters
     )
@@ -317,7 +317,7 @@ async def test_chat_error_handling(mock_agent_chat, mock_get_all_models, async_t
         error=Exception("Model service error"))
 
     request = ChatRequest(
-        messages=[ChatMessage(role="user", content="Hello")],
+        messages=[StrictChatMessage(role="user", content="Hello")],
         model="test-model"
     )
 
@@ -358,7 +358,7 @@ async def test_chat_model_selection(mock_agent_chat, mock_get_all_models, async_
 
     # Test valid model selection
     request = ChatRequest(
-        messages=[ChatMessage(role="user", content="Hello")],
+        messages=[StrictChatMessage(role="user", content="Hello")],
         model="model2",
         temperature=0.7,
         max_tokens=100

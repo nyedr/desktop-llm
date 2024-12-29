@@ -7,7 +7,7 @@ from app.services.function_service import FunctionService
 from app.services.model_service import ModelService
 from app.services.langchain_service import LangChainService
 from app.core.config import config
-from app.models.chat import StrictChatMessage, ChatMessage
+from app.models.chat import StrictChatMessage
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,7 @@ class Agent:
 
     async def chat(
         self,
-        messages: List[Union[Dict[str, Any], ChatMessage, StrictChatMessage]],
+        messages: List[Union[Dict[str, Any], StrictChatMessage]],
         model: Optional[str] = None,
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,

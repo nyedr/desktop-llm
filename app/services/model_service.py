@@ -9,7 +9,7 @@ import httpx
 
 from ollama import AsyncClient
 from app.core.config import config
-from app.models.chat import StrictChatMessage, ChatMessage
+from app.models.chat import StrictChatMessage
 from app.models.model import Model
 from app.models.completion import CompletionResponse
 
@@ -174,7 +174,7 @@ class ModelService:
 
     async def chat(
         self,
-        messages: List[Union[Dict[str, Any], StrictChatMessage, ChatMessage]],
+        messages: List[Union[Dict[str, Any], StrictChatMessage]],
         model: str = config.DEFAULT_MODEL,
         temperature: float = config.MODEL_TEMPERATURE,
         max_tokens: int = config.MAX_TOKENS,
@@ -201,10 +201,12 @@ class ModelService:
             # Convert messages to the expected format
             formatted_messages = []
             for msg in messages:
-                if isinstance(msg, (ChatMessage, StrictChatMessage)):
-                    strict_msg = msg.to_strict() if isinstance(msg, ChatMessage) else msg
-                    formatted_messages.append(
-                        msg.model_dump(exclude_none=True))
+                if isinstance(msg, StrictChatMessage):
+                    message_dict = msg.model_dump(exclude_none=True)
+                    # Convert role enum to string
+                    if 'role' in message_dict:
+                        message_dict['role'] = str(message_dict['role'])
+                    formatted_messages.append(message_dict)
                 else:
                     formatted_messages.append(msg)
 

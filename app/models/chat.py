@@ -41,6 +41,10 @@ class ChatRole(str, Enum):
     SYSTEM = "system"
     TOOL = "tool"
 
+    def __str__(self):
+        """Return the string value of the enum."""
+        return self.value
+
 
 class Function(BaseModel):
     """Function data for tool calls."""
@@ -122,100 +126,9 @@ StrictChatMessage = Union[AssistantMessage,
                           UserMessage, SystemMessage, ToolMessage]
 
 
-class ChatMessage(BaseModel):
-    """A chat message with backward compatibility.
-
-    Warning: This class is deprecated and will be removed in a future release.
-    Please use the strict message types (AssistantMessage, UserMessage, etc.) instead.
-    """
-    role: str = Field(..., description="The role of the message sender")
-    content: str = Field(...,
-                         description="The content of the message", min_length=1)
-    name: Optional[str] = Field(
-        None, description="Name of the sender (optional)")
-    tool_calls: Optional[List[Dict[str, Any]]] = Field(
-        None, description="Tool calls made by the assistant")
-    tool_call_id: Optional[str] = Field(
-        None, description="ID of the tool call this message is responding to")
-    images: Optional[List[str]] = Field(
-        None, description="Base64-encoded images attached to the message (only valid for user messages)")
-    type: Optional[Literal["chunk"]] = Field(
-        None, description="Type of message (e.g., chunk for streaming)")
-
-    model_config = ConfigDict(extra="forbid")
-
-    def __init__(self, **data):
-        warnings.warn(
-            "ChatMessage is deprecated and will be removed in a future release. "
-            "Please use the strict message types (AssistantMessage, UserMessage, etc.) instead.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        super().__init__(**data)
-
-    @field_validator("images")
-    def validate_images_for_user_role(cls, v, values):
-        """Validate images are only present for user messages."""
-        if v is not None and values.get("role") != "user":
-            raise ValueError("Images are only allowed for user messages")
-        return v
-
-    @field_validator("tool_calls")
-    def validate_tool_calls_for_assistant(cls, v, values):
-        """Validate tool calls are only present for assistant messages."""
-        if v is not None and values.get("role") != "assistant":
-            raise ValueError(
-                "tool_calls can only be present for assistant messages")
-        return v
-
-    @field_validator("role")
-    def validate_role(cls, v):
-        """Validate role matches ChatRole enum."""
-        try:
-            ChatRole(v)
-        except ValueError:
-            raise ValueError(
-                f"Invalid role: {v}. Must be one of {[r.value for r in ChatRole]}")
-        return v
-
-    def to_strict(self) -> StrictChatMessage:
-        """Convert to a strict message type."""
-        base_data = {
-            "role": ChatRole(self.role),
-            "content": self.content,
-        }
-
-        if self.role == "assistant":
-            return AssistantMessage(
-                **base_data,
-                type=self.type,
-                tool_calls=[ToolCall(**tc) for tc in (self.tool_calls or [])]
-            )
-        elif self.role == "tool":
-            return ToolMessage(
-                **base_data,
-                name=self.name or "unknown_tool",
-                tool_call_id=self.tool_call_id
-            )
-        elif self.role == "user":
-            return UserMessage(**base_data, images=self.images)
-        else:  # system
-            return SystemMessage(**base_data)
-
-    @classmethod
-    def from_strict(cls, message: StrictChatMessage) -> "ChatMessage":
-        """Create from a strict message type."""
-        base_fields = message.model_dump()
-        if isinstance(message, AssistantMessage):
-            base_fields["tool_calls"] = [
-                tc.model_dump() for tc in (message.tool_calls or [])
-            ]
-        return cls(**base_fields)
-
-
 class ChatRequest(BaseModel):
     """Chat request data."""
-    messages: List[Union[ChatMessage, StrictChatMessage]]
+    messages: List[StrictChatMessage]
     model: Optional[str] = Field(None, description="The model to use for chat")
     temperature: Optional[float] = Field(
         None, description="Sampling temperature")

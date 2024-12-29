@@ -4,8 +4,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime
 
 from app.context.llm_context import LLMContextManager
-from app.models.chat import ChatMessage
-from app.core.config import config
+from app.models.chat import StrictChatMessage
 
 
 @pytest.fixture
@@ -88,8 +87,8 @@ async def test_process_text_message():
     assert processed["name"] == "John"
     assert processed["metadata"]["type"] == "text"
 
-    # Test with ChatMessage
-    chat_msg = ChatMessage(role="user", content="Hello", name="John")
+    # Test with StrictChatMessage
+    chat_msg = StrictChatMessage(role="user", content="Hello", name="John")
     processed = context_manager._process_text_message(chat_msg)
     assert processed["role"] == "user"
     assert processed["content"] == "Hello"
@@ -251,8 +250,8 @@ async def test_token_counting(mock_chroma_service, mock_langchain_service):
     }
     assert context_manager.count_message_tokens(message) > 0
 
-    # Test with ChatMessage object
-    chat_message = ChatMessage(role="user", content="Hello", name="Test")
+    # Test with StrictChatMessage object
+    chat_message = StrictChatMessage(role="user", content="Hello", name="Test")
     assert context_manager.count_message_tokens(chat_message) > 0
 
 
@@ -276,8 +275,8 @@ async def test_image_message_processing(mock_chroma_service, mock_langchain_serv
     assert processed["metadata"]["has_image"]
     assert "[Image attached]" in processed["content"]
 
-    # Test ChatMessage object
-    chat_message = ChatMessage(
+    # Test StrictChatMessage object
+    chat_message = StrictChatMessage(
         role="user",
         content="Check this image",
         images=["base64_image_data"]
@@ -313,8 +312,8 @@ async def test_file_message_processing(mock_chroma_service, mock_langchain_servi
     assert processed["metadata"]["has_file"]
     assert "file.txt" in processed["content"]
 
-    # Test ChatMessage object
-    chat_message = ChatMessage(
+    # Test StrictChatMessage object
+    chat_message = StrictChatMessage(
         role="user",
         content="Check this file",
         file_path="/path/to/file.txt"

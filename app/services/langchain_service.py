@@ -17,7 +17,7 @@ from app.context.llm_context import LLMContextManager  # Import at runtime
 
 # Forward references for type checking
 if TYPE_CHECKING:
-    from app.models.chat import StrictChatMessage, ChatMessage
+    from app.models.chat import StrictChatMessage
 
 logger = logging.getLogger(__name__)
 
@@ -101,18 +101,17 @@ class LangChainService:
                 f"Error during LangChain Service cleanup: {e}", exc_info=True)
             raise
 
-    def _get_message_value(self, message: Union[Dict[str, Any], 'ChatMessage', 'StrictChatMessage'], key: str, default: Any = None) -> Any:
-        """Safely get a value from either a dict, ChatMessage or StrictChatMessage object."""
+    def _get_message_value(self, message: Union[Dict[str, Any], 'StrictChatMessage'], key: str, default: Any = None) -> Any:
+        """Safely get a value from either a dict or StrictChatMessage object."""
         if isinstance(message, dict):
             return message.get(key, default)
-        if isinstance(message, ChatMessage):
-            message = message.to_strict()
         return getattr(message, key, default)
 
     async def query_memory(
         self,
         query: str,
-        context: Optional[List[Union[Dict[str, Any], 'ChatMessage']]] = None,
+        context: Optional[List[Union[Dict[str, Any],
+                                     'StrictChatMessage']]] = None,
         **kwargs
     ) -> Dict[str, Any]:
         """Query the memory store with a question.
@@ -187,7 +186,7 @@ class LangChainService:
 
     async def process_conversation(
         self,
-        messages: List[Union[Dict[str, Any], 'ChatMessage', 'StrictChatMessage']],
+        messages: List[Union[Dict[str, Any], 'StrictChatMessage']],
         metadata_filter: Optional[Dict[str, Any]] = None,
         top_k: int = 5
     ) -> List[Dict[str, Any]]:
@@ -242,7 +241,7 @@ class LangChainService:
 
     async def store_conversation_summary(
         self,
-        messages: List[Union[Dict[str, Any], 'ChatMessage', 'StrictChatMessage']],
+        messages: List[Union[Dict[str, Any], 'StrictChatMessage']],
         metadata: Optional[Dict[str, Any]] = None
     ) -> Optional[str]:
         """Summarize and store a conversation in Chroma.

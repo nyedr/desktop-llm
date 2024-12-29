@@ -2,7 +2,7 @@
 
 from typing import Dict, Any
 from app.functions.base import Pipeline, FunctionType, register_function
-from app.models.chat import ChatMessage
+from app.functions.utils import ensure_strict_message
 
 
 @register_function(
@@ -17,15 +17,6 @@ from app.models.chat import ChatMessage
 class MultiStepPipeline(Pipeline):
     """Pipeline that processes data through multiple defined steps."""
 
-    def _ensure_chat_message(self, msg: Any) -> ChatMessage:
-        """Convert dictionary to ChatMessage if needed."""
-        if isinstance(msg, dict):
-            # Create a copy of the message dict without metadata
-            msg_data = {k: v for k, v in msg.items()
-                        if k in ChatMessage.model_fields}
-            return ChatMessage(**msg_data)
-        return msg
-
     async def pipe(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Process data through multiple steps.
 
@@ -39,8 +30,8 @@ class MultiStepPipeline(Pipeline):
         if not messages:
             return data
 
-        # Convert all messages to ChatMessage objects
-        messages = [self._ensure_chat_message(msg) for msg in messages]
+        # Convert all messages to StrictChatMessage objects
+        messages = [ensure_strict_message(msg) for msg in messages]
 
         # Step 1: Collect all user messages
         user_messages = [
@@ -54,14 +45,17 @@ class MultiStepPipeline(Pipeline):
             if msg.role == "user":
                 # Process user messages
                 processed_content = f"{msg.content} (Length: {len(msg.content)})"
-                new_message = ChatMessage(
-                    role=msg.role,
-                    content=processed_content,
-                    name=msg.name,
-                    tool_calls=msg.tool_calls,
-                    tool_call_id=msg.tool_call_id,
-                    images=msg.images
-                )
+                # Create specific message type based on role
+                if msg.role == "user":
+                    from app.models.chat import UserMessage
+                    new_message = UserMessage(
+                        role=msg.role,
+                        content=processed_content,
+                        images=msg.images
+                    )
+                else:
+                    # For non-user messages, keep original
+                    new_message = msg
                 processed_messages.append(new_message)
             else:
                 # Keep non-user messages unchanged

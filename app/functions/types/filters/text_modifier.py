@@ -2,7 +2,7 @@
 
 from typing import Dict, Any
 from app.functions.base import Filter, FunctionType, register_function
-from app.models.chat import ChatMessage
+from app.models.chat import StrictChatMessage
 import logging
 
 logger = logging.getLogger(__name__)
@@ -44,12 +44,12 @@ class TextModifierFilter(Filter):
 
         modified_messages = []
         for message in messages:
-            # Handle both dictionary and ChatMessage objects
+            # Handle both dictionary and StrictChatMessage objects
             role = message.role if isinstance(
-                message, ChatMessage) else message["role"]
+                message, StrictChatMessage) else message["role"]
 
             if role == "user":
-                if isinstance(message, ChatMessage):
+                if isinstance(message, StrictChatMessage):
                     message = message.model_dump()
                 else:
                     message = message.copy()

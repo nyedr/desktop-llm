@@ -10,7 +10,7 @@ from app.core.config import config
 # Forward references for type checking
 if TYPE_CHECKING:
     from app.services.langchain_service import LangChainService
-    from app.models.chat import ChatMessage
+    from app.models.chat import StrictChatMessage
 
 logger = logging.getLogger(__name__)
 
@@ -123,11 +123,11 @@ class LLMContextManager:
             return len(text.split())
         return len(self.tokenizer.encode(text))
 
-    def _get_message_value(self, message: Union[Dict[str, Any], 'ChatMessage'], key: str, default: Any = None) -> Any:
-        """Safely get a value from either a dict or ChatMessage object.
+    def _get_message_value(self, message: Union[Dict[str, Any], 'StrictChatMessage'], key: str, default: Any = None) -> Any:
+        """Safely get a value from either a dict or StrictChatMessage object.
 
         Args:
-            message: The message object (dict or ChatMessage)
+            message: The message object (dict or StrictChatMessage)
             key: The key to retrieve
             default: Default value if key not found
 
@@ -138,11 +138,11 @@ class LLMContextManager:
             return message.get(key, default)
         return getattr(message, key, default)
 
-    def count_message_tokens(self, message: Union[Dict[str, Any], 'ChatMessage']) -> int:
-        """Count tokens in a message dictionary or ChatMessage.
+    def count_message_tokens(self, message: Union[Dict[str, Any], 'StrictChatMessage']) -> int:
+        """Count tokens in a message dictionary or StrictChatMessage object.
 
         Args:
-            message: Message dictionary or ChatMessage object
+            message: Message dictionary or StrictChatMessage object
 
         Returns:
             Total token count for the message
@@ -212,7 +212,7 @@ class LLMContextManager:
             logger.error(f"Error processing user inputs: {e}", exc_info=True)
             self.processed_inputs = self.conversation_history
 
-    async def _process_image_message(self, msg: Union[Dict[str, Any], 'ChatMessage']) -> Dict[str, Any]:
+    async def _process_image_message(self, msg: Union[Dict[str, Any], 'StrictChatMessage']) -> Dict[str, Any]:
         """Process a message containing images with potential OCR or description."""
         content = str(self._get_message_value(msg, "content", ""))
         if self._get_message_value(msg, "images"):
@@ -224,7 +224,7 @@ class LLMContextManager:
             "metadata": {"has_image": True}
         }
 
-    async def _process_file_message(self, msg: Union[Dict[str, Any], 'ChatMessage']) -> Dict[str, Any]:
+    async def _process_file_message(self, msg: Union[Dict[str, Any], 'StrictChatMessage']) -> Dict[str, Any]:
         """Process a message containing file references with content extraction."""
         content = str(self._get_message_value(msg, "content", ""))
         if self._get_message_value(msg, "file_path"):
@@ -236,7 +236,7 @@ class LLMContextManager:
             "metadata": {"has_file": True}
         }
 
-    def _process_text_message(self, msg: Union[Dict[str, Any], 'ChatMessage']) -> Dict[str, Any]:
+    def _process_text_message(self, msg: Union[Dict[str, Any], 'StrictChatMessage']) -> Dict[str, Any]:
         """Process a regular text message with normalization."""
         return {
             "role": str(self._get_message_value(msg, "role")),
