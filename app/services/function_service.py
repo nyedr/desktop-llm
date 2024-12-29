@@ -3,7 +3,7 @@
 import logging
 from typing import Dict, Any, Optional, List, Type
 from app.functions import function_registry, executor
-from app.functions.base import BaseFunction, Tool, FunctionType
+from app.functions.base import BaseFunction, Tool, FunctionType, ToolResponse
 import json
 
 logger = logging.getLogger(__name__)
@@ -115,20 +115,85 @@ class FunctionService:
 
         return schemas
 
-    async def execute_function(self, name: str, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute a registered function."""
-        logger.info(f"[EXECUTE] Executing function: {name}")
-        logger.debug(f"[EXECUTE] Arguments: {json.dumps(args, indent=2)}")
+    async def execute_function(self, function_name: str, function_args: Dict[str, Any]) -> ToolResponse:
+        """Execute a function by name with given arguments.
+
+        Args:
+            function_name: Name of the function to execute
+            function_args: Arguments to pass to the function
+
+        Returns:
+            ToolResponse with the result or error
+        """
+        logger.info(f"[EXECUTE] Executing function: {function_name}")
 
         try:
-            result = await self.executor.execute(name, args)
-            logger.info(f"[EXECUTE] Function {name} execution completed")
-            logger.debug(f"[EXECUTE] Result: {json.dumps(result, indent=2)}")
-            return result
+            function_class = self.get_function(function_name)
+            if not function_class:
+                return ToolResponse(
+                    success=False,
+                    result=None,
+                    error=f"Function {function_name} not found",
+                    tool_name=function_name
+                )
+
+            if function_class.model_fields['type'].default != FunctionType.TOOL:
+                return ToolResponse(
+                    success=False,
+                    result=None,
+                    error=f"Function {function_name} is not a tool",
+                    tool_name=function_name
+                )
+
+            function_instance = function_class()
+            try:
+                result = await function_instance.execute(args=function_args)
+            except TypeError as e:
+                # Handle case where execute() doesn't accept args parameter
+                try:
+                    result = await function_instance.execute(**function_args)
+                except Exception as inner_e:
+                    return ToolResponse(
+                        success=False,
+                        result=None,
+                        error=str(inner_e),
+                        tool_name=function_name
+                    )
+
+            # If result is already a ToolResponse, return it
+            if isinstance(result, ToolResponse):
+                # Log the result as a dict for JSON serialization
+                log_data = {
+                    "success": result.success,
+                    "result": result.result,
+                    "error": result.error,
+                    "tool_name": result.tool_name,
+                    "metadata": result.metadata
+                }
+                logger.debug(
+                    f"[EXECUTE] Result: {json.dumps(log_data, indent=2)}")
+                return result
+
+            # Convert raw result to ToolResponse
+            tool_response = ToolResponse(
+                success=True,
+                result=result,
+                error=None,
+                tool_name=function_name
+            )
+            logger.debug(
+                f"[EXECUTE] Raw result converted: {json.dumps({'result': result}, indent=2)}")
+            return tool_response
+
         except Exception as e:
             logger.error(
-                f"[EXECUTE] Error executing function {name}: {e}", exc_info=True)
-            raise
+                f"[EXECUTE] Error executing function {function_name}: {e}")
+            return ToolResponse(
+                success=False,
+                result=None,
+                error=str(e),
+                tool_name=function_name
+            )
 
     async def handle_tool_calls(self, tool_calls: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Handle multiple tool calls in sequence."""

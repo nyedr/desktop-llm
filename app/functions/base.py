@@ -1,10 +1,10 @@
 """Base classes and types for the function system."""
 
 from enum import Enum
-from typing import Dict, Any, Optional, List, Callable, TypeVar, Literal
-import asyncio
+from typing import Dict, Any, Optional, List, Callable, TypeVar, Literal, Union
 import logging
 from pydantic import BaseModel, Field
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +100,50 @@ class FunctionParameters(BaseModel):
     required: List[str] = []
 
 
+class FunctionResponse(BaseModel):
+    """Base class for function responses."""
+    success: bool = Field(
+        default=True, description="Whether the function executed successfully")
+    error: Optional[str] = Field(
+        default=None, description="Error message if execution failed")
+    metadata: Dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata about the execution")
+
+
+class ToolResponse(FunctionResponse):
+    """Response from tool execution."""
+    result: Any = Field(..., description="The result of the tool execution")
+    tool_name: str = Field(...,
+                           description="Name of the tool that was executed")
+    execution_time: float = Field(
+        default=0.0, description="Time taken to execute the tool in seconds")
+
+
+class FilterResponse(FunctionResponse):
+    """Response from filter execution."""
+    modified_data: Dict[str, Any] = Field(...,
+                                          description="The modified data after filtering")
+    filter_name: str = Field(...,
+                             description="Name of the filter that was executed")
+    changes_made: bool = Field(
+        default=False, description="Whether any changes were made to the data")
+
+
+class PipelineResponse(FunctionResponse):
+    """Response from pipeline execution."""
+    results: List[Dict[str, Any]] = Field(
+        default_factory=list, description="Results from each step in the pipeline")
+    pipeline_name: str = Field(...,
+                               description="Name of the pipeline that was executed")
+    steps_completed: int = Field(
+        default=0, description="Number of steps completed in the pipeline")
+    total_steps: int = Field(
+        default=0, description="Total number of steps in the pipeline")
+
+
+FunctionResult = Union[ToolResponse, FilterResponse, PipelineResponse]
+
+
 class BaseFunction(BaseModel):
     """Base class for all functions."""
     name: str = Field(default="", description="Name of the function")
@@ -112,7 +156,7 @@ class BaseFunction(BaseModel):
     config: Dict[str, Any] = Field(
         default={}, description="Configuration for the function")
 
-    async def execute(self, args: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, args: Dict[str, Any]) -> FunctionResult:
         """Execute the function with the given arguments."""
         raise NotImplementedError
 
@@ -122,62 +166,25 @@ class Tool(BaseFunction):
     type: Literal[FunctionType.TOOL] = Field(
         default=FunctionType.TOOL, description="Tool type")
 
-    # Default retry configuration
-    retry_config: Dict[str, Any] = {
-        "max_retries": 3,
-        "retry_delay": 1.0,  # seconds
-        "retry_on_errors": [InputValidationError, TimeoutError]
-    }
-
-    async def execute(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute the tool with retry logic.
-
-        Args:
-            args: Tool arguments
-
-        Returns:
-            Tool execution results
-
-        Raises:
-            ExecutionError: If all retries fail
-        """
-        retries = 0
-        last_error = None
-        normalized_args = self.normalize_parameters(args)
-
-        while retries <= self.retry_config["max_retries"]:
-            try:
-                if retries > 0:
-                    logger.info(
-                        f"Retrying {self.name} (attempt {retries}/{self.retry_config['max_retries']})")
-
-                return await self._execute(normalized_args)
-
-            except tuple(self.retry_config["retry_on_errors"]) as e:
-                last_error = e
-                retries += 1
-
-                if retries <= self.retry_config["max_retries"]:
-                    # Try to fix the error if possible
-                    normalized_args = await self._handle_error(e, normalized_args)
-                    await asyncio.sleep(self.retry_config["retry_delay"])
-
-                continue
-
-            except Exception as e:
-                # Don't retry on unexpected errors
-                raise ExecutionError(
-                    f"Unexpected error in {self.name}: {str(e)}",
-                    function_name=self.name,
-                    original_error=e
-                )
-
-        # If we get here, all retries failed
-        raise ExecutionError(
-            f"All retries failed for {self.name}. Last error: {str(last_error)}",
-            function_name=self.name,
-            original_error=last_error
-        )
+    async def execute(self, args: Dict[str, Any]) -> ToolResponse:
+        """Execute the tool with retry logic."""
+        start_time = time.time()
+        try:
+            result = await self._execute(self.normalize_parameters(args))
+            return ToolResponse(
+                success=True,
+                result=result,
+                tool_name=self.name,
+                execution_time=time.time() - start_time
+            )
+        except Exception as e:
+            return ToolResponse(
+                success=False,
+                error=str(e),
+                tool_name=self.name,
+                execution_time=time.time() - start_time,
+                result=None
+            )
 
     async def _execute(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Actual tool implementation to be overridden by subclasses.
@@ -198,35 +205,6 @@ class Tool(BaseFunction):
 
         Returns:
             Normalized arguments
-        """
-        return args
-
-    async def _handle_error(self, error: Exception, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle errors and attempt to fix parameters. Can be overridden by subclasses.
-
-        Args:
-            error: The error that occurred
-            args: Current arguments
-
-        Returns:
-            Modified arguments for retry
-        """
-        if isinstance(error, InputValidationError):
-            # Try to fix validation errors
-            return self._fix_validation_error(error, args)
-
-        # Return original args if we don't know how to fix the error
-        return args
-
-    def _fix_validation_error(self, error: InputValidationError, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Attempt to fix validation errors. Can be overridden by subclasses.
-
-        Args:
-            error: The validation error
-            args: Current arguments
-
-        Returns:
-            Fixed arguments
         """
         return args
 
@@ -264,12 +242,24 @@ class Filter(BaseFunction):
         """
         raise NotImplementedError
 
-    async def execute(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute the filter with the given arguments.
-
-        This is a compatibility method that uses inlet by default.
-        """
-        return await self.inlet(args)
+    async def execute(self, args: Dict[str, Any]) -> FilterResponse:
+        """Execute the filter."""
+        try:
+            modified_data = await self.inlet(args)
+            return FilterResponse(
+                success=True,
+                modified_data=modified_data,
+                filter_name=self.name,
+                changes_made=modified_data != args
+            )
+        except Exception as e:
+            return FilterResponse(
+                success=False,
+                error=str(e),
+                filter_name=self.name,
+                modified_data=args,
+                changes_made=False
+            )
 
 
 class Pipeline(BaseFunction):
@@ -281,9 +271,37 @@ class Pipeline(BaseFunction):
         """Process data through the pipeline steps."""
         raise NotImplementedError
 
-    async def execute(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute the pipeline with the given arguments."""
-        return await self.pipe(args)
+    async def execute(self, args: Dict[str, Any]) -> PipelineResponse:
+        """Execute the pipeline."""
+        try:
+            results = []
+            step_count = 0
+            total_steps = len(self._get_pipeline_steps())
+
+            async for step_result in self.pipe(args):
+                results.append(step_result)
+                step_count += 1
+
+            return PipelineResponse(
+                success=True,
+                results=results,
+                pipeline_name=self.name,
+                steps_completed=step_count,
+                total_steps=total_steps
+            )
+        except Exception as e:
+            return PipelineResponse(
+                success=False,
+                error=str(e),
+                pipeline_name=self.name,
+                steps_completed=step_count,
+                total_steps=total_steps,
+                results=results
+            )
+
+    def _get_pipeline_steps(self) -> List[str]:
+        """Get list of pipeline steps. Override in subclass."""
+        return []
 
 
 def register_function(

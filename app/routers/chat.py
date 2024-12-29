@@ -13,6 +13,11 @@ from app.dependencies.providers import (
     get_langchain_service,
     get_chroma_service
 )
+from app.functions.filters import apply_filters
+from app.functions.utils import (
+    validate_tool_response,
+    create_error_response
+)
 from app.services.agent import Agent
 from app.services.model_service import ModelService
 from app.services.function_service import FunctionService
@@ -21,7 +26,12 @@ from app.services.chroma_service import ChromaService
 from app.models.chat import (
     ChatRequest, ChatStreamEvent, StrictChatMessage
 )
-from app.functions.base import FunctionType, Filter
+from app.functions.base import (
+    FunctionType,
+    Filter,
+    ToolResponse,
+    ValidationError
+)
 import asyncio
 from pydantic import BaseModel
 from app.models.memory import MemoryType
@@ -46,52 +56,6 @@ def convert_to_dict(obj: Any) -> Union[Dict[str, Any], List[Any], Any]:
     elif isinstance(obj, list):
         return [convert_to_dict(item) for item in obj]
     return obj
-
-
-async def apply_filters(
-    filters: List[Filter],
-    data: Dict[str, Any],
-    request_id: str,
-    direction: str = "outlet"
-) -> Dict[str, Any]:
-    """Apply filters to data in a consistent way.
-
-    Args:
-        filters: List of filters to apply
-        data: Data to filter
-        request_id: ID of the current request for logging
-        direction: Direction of filtering ("inlet" or "outlet")
-
-    Returns:
-        Filtered data
-
-    Raises:
-        Exception: If filter application fails
-    """
-    if not filters:
-        return data
-
-    # Ensure we're working with a dictionary
-    if hasattr(data, "model_dump"):
-        data = data.model_dump()
-
-    sorted_filters = sorted(filters, key=lambda f: f.priority or 0)
-    filtered_data = data
-
-    for filter_func in sorted_filters:
-        try:
-            if direction == "inlet":
-                filtered_data = await filter_func.inlet(filtered_data)
-            else:
-                filtered_data = await filter_func.outlet(filtered_data)
-        except Exception as e:
-            logger.error(
-                f"[{request_id}] Error in filter {filter_func.__class__.__name__} {direction}: {e}",
-                exc_info=True
-            )
-            continue
-
-    return filtered_data
 
 
 async def setup_chat_components(
@@ -157,30 +121,54 @@ async def setup_chat_components(
 
 async def handle_tool_response(
     request_id: str,
-    response: Dict[str, Any],
-    tool_call_in_progress: bool
-) -> tuple[ChatStreamEvent, bool]:
+    response: Union[Dict[str, Any], ToolResponse]
+) -> ChatStreamEvent:
     """Handle tool/function response.
 
     Args:
         request_id: ID of the current request
-        response: Tool response data
-        tool_call_in_progress: Whether a tool call is in progress
+        response: Tool response data (dict or ToolResponse)
 
     Returns:
-        Tuple of (event to send, updated tool_call_in_progress flag)
+        event to send
     """
     logger.info(f"[{request_id}] Processing tool/function response")
     logger.debug(
-        f"[{request_id}] Raw tool/function response: {json.dumps(response, indent=2)}")
+        f"[{request_id}] Raw tool/function response: {json.dumps(response, indent=2) if isinstance(response, dict) else str(response)}")
 
-    tool_message = {
-        "role": "tool",
-        "content": response.get("content", ""),
-        "name": response.get("name", ""),
-        "tool_call_id": response.get("tool_call_id")
-    }
-    return ChatStreamEvent(event="message", data=json.dumps(tool_message)), False
+    try:
+        # Convert dict to ToolResponse if needed
+        if isinstance(response, dict):
+            tool_message = {
+                "role": "tool",
+                "content": response.get("content", ""),
+                "name": response.get("name", ""),
+                "tool_call_id": response.get("tool_call_id")
+            }
+        else:
+            # Handle ToolResponse object
+            validate_tool_response(response)
+            tool_message = {
+                "role": "tool",
+                "content": response.result if response.success else response.error,
+                "name": response.tool_name,
+                "tool_call_id": response.metadata.get("tool_call_id") if response.metadata else None
+            }
+
+        return ChatStreamEvent(event="message", data=json.dumps(tool_message))
+
+    except ValidationError as e:
+        logger.error(f"[{request_id}] Invalid tool response: {e}")
+        error_response = create_error_response(
+            error=e,
+            function_type="tool",
+            function_name=getattr(response, "tool_name", "unknown"),
+            tool_call_id=getattr(response, "metadata", {}).get("tool_call_id")
+        )
+        return ChatStreamEvent(
+            event="error",
+            data=json.dumps({"error": error_response.error})
+        )
 
 
 async def handle_tool_calls(
@@ -211,20 +199,19 @@ async def handle_tool_calls(
     try:
         tool_responses = await function_service.handle_tool_calls(response["tool_calls"])
         for tool_response in tool_responses:
-            logger.info(
-                f"[{request_id}] Processing tool response: {json.dumps(tool_response, indent=2)}")
-            tool_message = {
-                "role": "tool",
-                "content": tool_response["content"],
-                "name": tool_response["name"]
-            }
-            events.append(ChatStreamEvent(
-                event="message", data=json.dumps(tool_message)))
+            event = await handle_tool_response(request_id, tool_response)
+            events.append(event)
+
     except Exception as e:
         logger.error(f"[{request_id}] Error executing tool calls: {e}")
+        error_response = create_error_response(
+            error=e,
+            function_type="tool",
+            function_name="unknown"
+        )
         events.append(ChatStreamEvent(
             event="error",
-            data=json.dumps({"error": f"Error executing tool calls: {str(e)}"})
+            data=json.dumps({"error": error_response.error})
         ))
 
     return events
@@ -235,14 +222,24 @@ async def handle_assistant_message(
     response: Dict[str, Any],
     filters: List[Filter]
 ) -> ChatStreamEvent:
-    """Handle assistant message."""
+    """Handle assistant message with outlet filtering."""
     assistant_message = {
         "role": "assistant",
         "content": response.get("content", "")
     }
-    filtered_message = await apply_filters(filters, assistant_message, request_id, "outlet")
-    print(filtered_message['content'], end="", flush=True)
-    return ChatStreamEvent(event="message", data=json.dumps(filtered_message))
+
+    if not filters:
+        print(assistant_message['content'], end="", flush=True)
+        return ChatStreamEvent(event="message", data=json.dumps(assistant_message))
+
+    return await apply_filters(
+        filters=filters,
+        data=assistant_message,
+        request_id=request_id,
+        direction="outlet",
+        as_event=True,
+        filter_name="outlet_message_filters"
+    )
 
 
 async def handle_string_chunk(
@@ -250,14 +247,24 @@ async def handle_string_chunk(
     response: str,
     filters: List[Filter]
 ) -> ChatStreamEvent:
-    """Handle string chunk from model."""
+    """Handle string chunk with outlet filtering."""
     chunk_message = {
         "role": "assistant",
         "content": str(response)
     }
-    filtered_message = await apply_filters(filters, chunk_message, request_id, "outlet")
-    print(filtered_message['content'], end="", flush=True)
-    return ChatStreamEvent(event="message", data=json.dumps(filtered_message))
+
+    if not filters:
+        print(chunk_message['content'], end="", flush=True)
+        return ChatStreamEvent(event="message", data=json.dumps(chunk_message))
+
+    return await apply_filters(
+        filters=filters,
+        data=chunk_message,
+        request_id=request_id,
+        direction="outlet",
+        as_event=True,
+        filter_name="outlet_chunk_filters"
+    )
 
 
 async def verify_model_availability(
@@ -314,16 +321,32 @@ async def stream_chat_response(
         function_schemas, filters, pipeline = await setup_chat_components(
             request_id, chat_request, function_service)
 
-        # Apply inlet filters
-        data = await apply_filters(
-            filters=filters,
-            data={"messages": chat_request.messages},
-            request_id=request_id,
-            direction="inlet"
-        )
-        chat_request.messages = data["messages"]
+        # Verify model availability
+        model = chat_request.model or config.DEFAULT_MODEL
+        if error_event := await verify_model_availability(request_id, model, model_service):
+            yield error_event
+            return
 
-        # Process conversation with LangChain using new context management
+        # Apply inlet filters to the entire messages array if filters exist
+        if filters:
+            data, filter_success = await apply_filters(
+                filters=filters,
+                data={"messages": chat_request.messages},
+                request_id=request_id,
+                direction="inlet",
+                filter_name="inlet_message_filters"
+            )
+
+            if not filter_success:
+                yield ChatStreamEvent(
+                    event="error",
+                    data=json.dumps({"error": "Failed to apply inlet filters"})
+                )
+                return
+
+            chat_request.messages = data["messages"]
+
+        # Process conversation with LangChain
         if chat_request.enable_memory and langchain_service:
             try:
                 chat_request.messages = await langchain_service.process_conversation(
@@ -335,12 +358,12 @@ async def stream_chat_response(
                     top_k=chat_request.top_k_memories
                 )
                 logger.info(
-                    f"[{request_id}] Added {chat_request.memory_type} memory context to conversation")
+                    f"[{request_id}] Added {chat_request.memory_type} memory context")
             except Exception as e:
                 logger.warning(
                     f"[{request_id}] Failed to add memory context: {e}")
 
-        # Apply pipeline
+        # Apply pipeline if present
         processed_messages = chat_request.messages
         if pipeline:
             logger.debug(f"[{request_id}] Applying pipeline: {pipeline.name}")
@@ -393,25 +416,12 @@ async def stream_chat_response(
                     )
 
             except Exception as e:
-                logger.error(
-                    f"[{request_id}] Error in pipeline execution: {e}")
+                logger.error(f"[{request_id}] Pipeline error: {e}")
                 yield ChatStreamEvent(
-                    event="pipeline_error",
-                    data=json.dumps({
-                        "error": str(e),
-                        "status": "failed"
-                    })
+                    event="error",
+                    data=json.dumps({"error": f"Pipeline error: {str(e)}"})
                 )
-
-        # Verify model
-        model = chat_request.model or config.DEFAULT_MODEL
-        error_event = await verify_model_availability(request_id, model, model_service)
-        if error_event:
-            yield error_event
-            return
-
-        # Stream chat completion
-        first_response = True
+                return
 
         # Log the context window before streaming response
         if chat_request.messages:
@@ -423,13 +433,15 @@ async def stream_chat_response(
                 print(f"{role}: {content}", flush=True)
             print("\nResponse:", flush=True)
 
-        async for response in agent.chat(
+        # Stream the response
+        first_response = True
+        async for chunk in agent.chat(
             messages=processed_messages,
             model=model,
             temperature=chat_request.temperature or config.MODEL_TEMPERATURE,
             max_tokens=chat_request.max_tokens or config.MAX_TOKENS,
             stream=True,
-            tools=function_schemas,
+            tools=function_schemas if chat_request.enable_tools else None,
             enable_tools=chat_request.enable_tools,
             enable_memory=chat_request.enable_memory,
             memory_filter=chat_request.memory_filter,
@@ -447,34 +459,27 @@ async def stream_chat_response(
                     continue
                 break
 
-            if response:
-                if isinstance(response, dict):
-                    if response.get("role") in ["tool", "function"]:
-                        event, tool_call_in_progress = await handle_tool_response(
-                            request_id, response, tool_call_in_progress)
+            if isinstance(chunk, dict):
+                if "tool_calls" in chunk:
+                    # Handle tool calls
+                    for event in await handle_tool_calls(request_id, chunk, function_service):
                         yield event
-
-                    elif response.get("role") == "assistant":
-                        if "tool_calls" in response:
-                            tool_call_in_progress = True
-                            events = await handle_tool_calls(
-                                request_id, response, function_service)
-                            for event in events:
-                                yield event
-                            continue
-
-                        event = await handle_assistant_message(
-                            request_id, response, filters)
-                        yield event
-
+                    tool_call_in_progress = True
                 else:
-                    event = await handle_string_chunk(request_id, response, filters)
-                    yield event
+                    # Handle assistant message
+                    yield await handle_assistant_message(request_id, chunk, filters)
+                    tool_call_in_progress = False
+            else:
+                # Handle string chunk
+                yield await handle_string_chunk(request_id, chunk, filters)
 
     except Exception as e:
         logger.error(
             f"[{request_id}] Error in chat stream: {e}", exc_info=True)
-        yield ChatStreamEvent(event="error", data=json.dumps({"error": str(e)}))
+        yield ChatStreamEvent(
+            event="error",
+            data=json.dumps({"error": str(e)})
+        )
 
 
 @router.post("/chat/stream", response_model=None)
@@ -484,8 +489,7 @@ async def chat_stream(
     agent: Agent = Depends(get_agent),
     model_service: ModelService = Depends(get_model_service),
     function_service: FunctionService = Depends(get_function_service),
-    langchain_service: LangChainService = Depends(get_langchain_service),
-    chroma_service: ChromaService = Depends(get_chroma_service)
+    langchain_service: LangChainService = Depends(get_langchain_service)
 ) -> EventSourceResponse:
     """Stream chat completions."""
     return EventSourceResponse(
@@ -495,8 +499,7 @@ async def chat_stream(
             agent,
             model_service,
             function_service,
-            langchain_service,
-            chroma_service
+            langchain_service
         )
     )
 

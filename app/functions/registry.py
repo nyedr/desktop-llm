@@ -13,7 +13,8 @@ from app.functions.base import (
     Tool,
     Pipeline,
     FunctionType,
-    ModuleImportError
+    ModuleImportError,
+    ValidationError,
 )
 
 logger = logging.getLogger(__name__)
@@ -60,6 +61,62 @@ class FunctionRegistry:
             logger.info("Created new FunctionRegistry instance")
         return cls._instance
 
+    def _validate_function_class(self, function_class: Type[BaseFunction]) -> None:
+        """Validate a function class meets all requirements."""
+        try:
+            # Check if class has required fields
+            if not (hasattr(function_class, 'model_fields') or hasattr(function_class, '__fields__')):
+                raise ValidationError(
+                    f"Function class {function_class.__name__} must be a Pydantic model")
+
+            # Validate required fields
+            required_fields = ['name', 'type', 'description', 'parameters']
+            for field in required_fields:
+                if not pydantic_field_exists(function_class, field):
+                    raise ValidationError(
+                        f"Function class {function_class.__name__} missing required field: {field}")
+
+            # Validate function type
+            func_type = get_field_default(function_class, 'type')
+            if not isinstance(func_type, FunctionType):
+                raise ValidationError(
+                    f"Invalid function type for {function_class.__name__}: {func_type}")
+
+            # Validate class inheritance
+            if func_type == FunctionType.TOOL and not issubclass(function_class, Tool):
+                raise ValidationError(
+                    f"Tool function {function_class.__name__} must inherit from Tool")
+            elif func_type == FunctionType.FILTER and not issubclass(function_class, Filter):
+                raise ValidationError(
+                    f"Filter function {function_class.__name__} must inherit from Filter")
+            elif func_type == FunctionType.PIPELINE and not issubclass(function_class, Pipeline):
+                raise ValidationError(
+                    f"Pipeline function {function_class.__name__} must inherit from Pipeline")
+
+        except Exception as e:
+            if isinstance(e, ValidationError):
+                raise
+            raise ValidationError(f"Function validation failed: {str(e)}")
+
+    def register(self, function_class: Type[BaseFunction]) -> None:
+        """Register a function class."""
+        try:
+            # Validate the function class
+            self._validate_function_class(function_class)
+
+            name = get_field_default(function_class, 'name')
+            func_type = get_field_default(function_class, 'type')
+
+            # Register the function
+            self._functions[name] = function_class
+            logger.debug(f"Registered function: {name} (type: {func_type})")
+            self._log_function_summary()
+
+        except Exception as e:
+            logger.error(
+                f"Failed to register {function_class.__name__}: {str(e)}")
+            raise
+
     def _log_function_summary(self):
         """Log a summary of all registered functions."""
         if not self._functions:
@@ -80,37 +137,6 @@ class FunctionRegistry:
                 summary += f"\n  - {func}"
 
         logger.info(summary)
-
-    def register(self, function_class: Type[BaseFunction]) -> None:
-        """Register a function class."""
-        try:
-            # Check if class has required fields
-            if not (hasattr(function_class, 'model_fields') or hasattr(function_class, '__fields__')):
-                raise ValueError(
-                    f"Function class {function_class.__name__} must be a Pydantic model")
-
-            if not pydantic_field_exists(function_class, 'name'):
-                raise ValueError(
-                    f"Function class {function_class.__name__} must have a name field")
-
-            name = get_field_default(function_class, 'name')
-            if not name:
-                raise ValueError(
-                    f"Function class {function_class.__name__} must have a default name")
-
-            if not pydantic_field_exists(function_class, 'type'):
-                raise ValueError(
-                    f"Function class {function_class.__name__} must have a type field")
-
-            func_type = get_field_default(function_class, 'type')
-            self._functions[name] = function_class
-            logger.debug(f"Registered function: {name} (type: {func_type})")
-            self._log_function_summary()
-
-        except Exception as e:
-            logger.error(
-                f"Failed to register {function_class.__name__}: {str(e)}")
-            raise
 
     def get_function(self, name: str) -> Optional[Type[BaseFunction]]:
         """Get a function class by name."""
@@ -164,7 +190,6 @@ class FunctionRegistry:
             return
 
         parent_dir = str(directory.parent.parent.parent)
-        sys_path_copy = sys.path.copy()
 
         if parent_dir not in sys.path:
             sys.path.insert(0, parent_dir)

@@ -522,6 +522,8 @@ class ChromaService:
 
             # Format and process results
             formatted_results = []
+            seen_contents = set()  # Track unique contents
+
             if results["ids"] and results["ids"][0]:
                 # Group chunks by response_id if reassembling
                 chunk_groups = {}
@@ -543,11 +545,15 @@ class ChromaService:
                                 "relevance_score": similarity
                             })
                         else:
-                            formatted_results.append({
-                                "document": document,
-                                "metadata": metadata,
-                                "relevance_score": similarity
-                            })
+                            # Only add if content is unique
+                            content_key = document.strip().lower()
+                            if content_key not in seen_contents:
+                                seen_contents.add(content_key)
+                                formatted_results.append({
+                                    "document": document,
+                                    "metadata": metadata,
+                                    "relevance_score": similarity
+                                })
 
                 # Reassemble chunks if needed
                 if reassemble_chunks and chunk_groups:
@@ -561,24 +567,33 @@ class ChromaService:
                             combined_text = " ".join(
                                 chunk["document"] for chunk in chunks)
 
-                            # Use metadata from first chunk but remove chunk-specific fields
-                            combined_metadata = chunks[0]["metadata"].copy()
-                            combined_metadata.pop("is_chunk", None)
-                            combined_metadata.pop("chunk_index", None)
-                            combined_metadata.pop("total_chunks", None)
+                            # Only add if combined content is unique
+                            content_key = combined_text.strip().lower()
+                            if content_key not in seen_contents:
+                                seen_contents.add(content_key)
 
-                            # Use highest relevance score from chunks
-                            max_score = max(chunk["relevance_score"]
-                                            for chunk in chunks)
+                                # Use metadata from first chunk but remove chunk-specific fields
+                                combined_metadata = chunks[0]["metadata"].copy(
+                                )
+                                combined_metadata.pop("is_chunk", None)
+                                combined_metadata.pop("chunk_index", None)
+                                combined_metadata.pop("total_chunks", None)
 
-                            formatted_results.append({
-                                "document": combined_text,
-                                "metadata": combined_metadata,
-                                "relevance_score": max_score
-                            })
+                                # Use highest relevance score from chunks
+                                max_score = max(chunk["relevance_score"]
+                                                for chunk in chunks)
+
+                                formatted_results.append({
+                                    "document": combined_text,
+                                    "metadata": combined_metadata,
+                                    "relevance_score": max_score
+                                })
                         else:
-                            # Single chunk, add as is
-                            formatted_results.append(chunks[0])
+                            # Single chunk, add as is if unique
+                            content_key = chunks[0]["document"].strip().lower()
+                            if content_key not in seen_contents:
+                                seen_contents.add(content_key)
+                                formatted_results.append(chunks[0])
 
             # Sort by relevance score and limit to top_k
             formatted_results.sort(

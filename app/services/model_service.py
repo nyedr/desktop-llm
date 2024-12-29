@@ -9,9 +9,11 @@ import httpx
 
 from ollama import AsyncClient
 from app.core.config import config
+from app.functions.base import ToolResponse
 from app.models.chat import StrictChatMessage
 from app.models.model import Model
 from app.models.completion import CompletionResponse
+from app.services.function_service import FunctionService
 
 logger = logging.getLogger(__name__)
 
@@ -149,28 +151,43 @@ class ModelService:
             logger.error(f"[{request_id}] Error during generation: {e}")
             raise
 
-    async def handle_tool_call(self, tool_call, function_service):
-        """Handle a tool call, execute the function, and return the result."""
+    async def handle_tool_call(
+        self,
+        tool_call: Dict[str, Any],
+        function_service: FunctionService
+    ) -> str:
+        """Handle a tool/function call.
+
+        Args:
+            tool_call: The tool call data from the assistant
+            function_service: Service for executing functions
+
+        Returns:
+            JSON string of function result
+        """
         function_name = tool_call['function']['name']
-        # Arguments are already a dict
         function_args = tool_call['function']['arguments']
 
-        if function_service:
-            try:
-                logger.info(
-                    f"Calling function: {function_name} with arguments: {function_args}")
-                function_response = await function_service.execute_function(function_name, function_args)
-                logger.info(
-                    f"Function {function_name} returned: {function_response}")
-                return json.dumps(function_response) if not isinstance(function_response, str) else function_response
-            except Exception as e:
-                logger.error(
-                    f"Error executing function {function_name}: {e}", exc_info=True)
-                return json.dumps({"error": str(e)})
-        else:
-            logger.error(
-                f"Function service not available to handle tool call {function_name}.")
-            return json.dumps({"error": "Function service not available."})
+        logger.info(
+            f"Calling function: {function_name} with arguments: {function_args}")
+        try:
+            function_response = await function_service.execute_function(function_name, function_args)
+
+            # Convert ToolResponse to dict for JSON serialization
+            if isinstance(function_response, ToolResponse):
+                response_dict = {
+                    "content": function_response.result if function_response.success else function_response.error,
+                    "name": function_response.tool_name,
+                    "tool_call_id": function_response.metadata.get("tool_call_id") if function_response.metadata else None
+                }
+                return json.dumps(response_dict)
+
+            # Handle string or dict responses
+            return json.dumps(function_response) if not isinstance(function_response, str) else function_response
+
+        except Exception as e:
+            logger.error(f"Error executing function {function_name}: {e}")
+            return json.dumps({"error": str(e)})
 
     async def chat(
         self,
@@ -273,7 +290,6 @@ class ModelService:
                                     }
                                 )
 
-                                current_content = ""
                                 async for continuation in continuation_stream:
                                     if 'message' in continuation:
                                         cont_message = continuation['message']

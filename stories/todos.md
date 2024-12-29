@@ -9,6 +9,8 @@
 - [x] Create tools that control the chroma vector database
 - [x] Ensure filters and pipelines are implemented correctly
 - [x] Update application types to be more strict and consistent
+- [x] Update the types of the function files
+- [ ] Revamp all tests
 
 ### Streaming and Tool Execution
 

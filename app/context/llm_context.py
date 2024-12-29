@@ -711,11 +711,12 @@ class LLMContextManager:
                 logger.debug("No content available to query for memories")
                 return
 
-            # Build metadata filter for conversation ID
+            # Build metadata filter to include all messages and memories
             metadata_filter = {
                 "$or": [
-                    {"conversation_id": self.conversation_id},
-                    {"type": "memory"}
+                    {"type": "message"},
+                    {"type": "memory"},
+                    {"type": "text"}
                 ]
             }
 
@@ -818,16 +819,34 @@ class LLMContextManager:
                 for memory in self.retrieved_memories:
                     # Safely get metadata with defaults
                     metadata = memory.get("metadata", {}) or {}
-                    source = metadata.get("source", "unknown")
+
+                    # Determine the source based on metadata
+                    source = "unknown"
+                    if metadata.get("type") == "message":
+                        source = metadata.get("role", "unknown")
+                    elif metadata.get("type") == "memory":
+                        source = "memory"
+                    elif metadata.get("type") == "text":
+                        source = metadata.get("source", "text")
+
+                    # Get timestamp and format it nicely
                     timestamp = metadata.get("timestamp", "unknown")
+                    if isinstance(timestamp, str) and timestamp != "unknown":
+                        try:
+                            dt = datetime.fromisoformat(timestamp)
+                            timestamp = dt.strftime("%Y-%m-%d %H:%M:%S")
+                        except ValueError:
+                            pass
+
                     score = memory.get("relevance_score", 0.0)
+                    content = memory.get("content", memory.get("document", ""))
 
                     # Format memory with metadata
                     memory_content.append(
                         f"[Memory from {source}]\n"
                         f"Timestamp: {timestamp}\n"
                         f"Relevance: {score:.2f}\n"
-                        f"Content: {memory.get('content', '')}"
+                        f"Content: {content}"
                     )
 
                 # Combine memories into a single system message

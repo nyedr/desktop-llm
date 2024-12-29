@@ -1,37 +1,9 @@
 """Chat request/response models."""
 
-# TODO: Refactoring Plan for Strict Message Types
-# 1. Migration Strategy:
-#    - Phase 1: Add new strict message types (AssistantMessage, UserMessage, etc.)
-#    - Phase 2: Update services to use StrictChatMessage internally
-#    - Phase 3: Add conversion methods in ChatMessage (.to_strict() and .from_strict())
-#    - Phase 4: Update function implementations to handle strict types
-#    - Phase 5: Update tests to use strict types
-#    - Phase 6: Add deprecation warnings to ChatMessage
-#    - Phase 7: Remove ChatMessage once all components use strict types
-#
-# 2. Key Components to Update:
-#    - Model Service: Update response handling
-#    - Function Service: Update function call processing
-#    - Agent Service: Update message flow
-#    - Memory Service: Update storage/retrieval
-#    - API Routes: Update request/response handling
-#
-# 3. Testing Requirements:
-#    - Add tests for new strict types
-#    - Add conversion tests
-#    - Update existing tests
-#    - Add integration tests
-#
-# 4. Documentation Updates:
-#    - Update API documentation
-#    - Add migration guide
-#    - Update function development guide
 
 from typing import Dict, List, Optional, Union, Literal, Any
 from pydantic import BaseModel, Field, field_validator, ConfigDict, model_validator
 from enum import Enum
-import warnings
 
 
 class ChatRole(str, Enum):
@@ -139,6 +111,8 @@ class ChatRequest(BaseModel):
         True, description="Whether to enable tool usage")
     enable_memory: bool = Field(
         True, description="Whether to enable memory usage")
+    memory_type: Optional[str] = Field(
+        "ephemeral", description="Type of memory to use (ephemeral or persistent)")
     memory_filter: Optional[Dict[str, Any]] = Field(
         None, description="Filter for memory usage")
     top_k_memories: Optional[int] = Field(
@@ -147,6 +121,10 @@ class ChatRequest(BaseModel):
         None, description="List of filters to apply")
     pipeline: Optional[str] = Field(
         None, description="Pipeline to process the request")
+    conversation_id: Optional[str] = Field(
+        None, description="ID of the conversation for memory context")
+    enable_summarization: Optional[bool] = Field(
+        False, description="Whether to enable conversation summarization")
 
     @field_validator("messages")
     def validate_messages(cls, v):

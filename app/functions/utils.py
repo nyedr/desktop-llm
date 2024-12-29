@@ -1,15 +1,15 @@
 """Utility functions for the function system."""
 
 import logging
-from typing import Dict, Any, List, Optional, Union, AsyncGenerator
+from typing import Dict, Any, List, Optional, Type
 from app.core.config import config
 from app.models.chat import AssistantMessage, StrictChatMessage, SystemMessage, ToolMessage, UserMessage
-from app.services.model_service import ModelService
+from app.functions.base import (
+    ToolResponse, FilterResponse, PipelineResponse,
+    FunctionResult, ValidationError
+)
 
 logger = logging.getLogger(__name__)
-
-# Initialize services
-model_service = ModelService()
 
 
 def get_last_user_message(messages: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
@@ -57,19 +57,6 @@ def get_system_message(messages: List[Dict[str, Any]]) -> Optional[Dict[str, Any
     return None
 
 
-async def get_all_models() -> List[str]:
-    """Get a list of all available models.
-
-    Returns:
-        List of model names
-    """
-    try:
-        return await model_service.get_models()
-    except Exception as e:
-        logger.error(f"Error getting models: {e}")
-        return []
-
-
 def ensure_strict_message(msg: Any) -> StrictChatMessage:
     """Convert input to StrictChatMessage, filtering invalid fields.
 
@@ -110,46 +97,165 @@ def ensure_strict_message(msg: Any) -> StrictChatMessage:
         raise ValueError(f"Invalid message role: {role}")
 
 
-async def generate_chat_completion(
-    messages: List[StrictChatMessage],
-    model: Optional[str] = None,
-    temperature: Optional[float] = None,
-    max_tokens: Optional[int] = None,
-    stream: bool = False,
-    tools: Optional[List[Dict[str, Any]]] = None,
-    enable_tools: bool = False,
-    function_service=None
-) -> AsyncGenerator[Union[str, Dict[str, Any]], None]:
-    """Generate a chat completion using the model service.
+def validate_function_response(response: FunctionResult) -> bool:
+    """Validate a function response.
 
     Args:
-        messages: List of messages in the conversation
-        model: Model to use (defaults to config.DEFAULT_MODEL)
-        temperature: Temperature for generation (defaults to config.MODEL_TEMPERATURE)
-        max_tokens: Maximum tokens to generate (defaults to config.MAX_TOKENS)
-        stream: Whether to stream the response
-        tools: List of available tools
-        enable_tools: Whether to enable tool usage
-        function_service: Service for executing functions
+        response: The function response to validate
 
     Returns:
-        AsyncGenerator yielding response chunks
+        bool: True if valid, False otherwise
+
+    Raises:
+        ValidationError: If response is invalid
     """
-    try:
-        async for response in model_service.chat(
-            messages=messages,
-            model=model or config.DEFAULT_MODEL,
-            temperature=temperature or config.MODEL_TEMPERATURE,
-            max_tokens=max_tokens or config.MAX_TOKENS,
-            stream=stream,
-            tools=tools,
-            enable_tools=enable_tools,
-            function_service=function_service
-        ):
-            yield response
-    except Exception as e:
-        logger.error(f"Error generating chat completion: {e}")
-        yield {"error": str(e)}
+    if not response.success and not response.error:
+        raise ValidationError("Failed responses must include an error message")
+
+    return True
+
+
+def validate_tool_response(response: ToolResponse) -> bool:
+    """Validate a tool response.
+
+    Args:
+        response: The tool response to validate
+
+    Returns:
+        bool: True if valid, False otherwise
+
+    Raises:
+        ValidationError: If response is invalid
+    """
+    validate_function_response(response)
+
+    if response.success and response.result is None:
+        raise ValidationError(
+            "Successful tool responses must include a result")
+
+    if response.execution_time < 0:
+        raise ValidationError("Execution time cannot be negative")
+
+    return True
+
+
+def validate_filter_response(response: FilterResponse) -> bool:
+    """Validate a filter response.
+
+    Args:
+        response: The filter response to validate
+
+    Returns:
+        bool: True if valid, False otherwise
+
+    Raises:
+        ValidationError: If response is invalid
+    """
+    validate_function_response(response)
+
+    if response.success and not isinstance(response.modified_data, dict):
+        raise ValidationError("Modified data must be a dictionary")
+
+    return True
+
+
+def validate_pipeline_response(response: PipelineResponse) -> bool:
+    """Validate a pipeline response.
+
+    Args:
+        response: The pipeline response to validate
+
+    Returns:
+        bool: True if valid, False otherwise
+
+    Raises:
+        ValidationError: If response is invalid
+    """
+    validate_function_response(response)
+
+    if response.steps_completed > response.total_steps:
+        raise ValidationError("Completed steps cannot exceed total steps")
+
+    if response.steps_completed < 0 or response.total_steps < 0:
+        raise ValidationError("Step counts cannot be negative")
+
+    return True
+
+
+def ensure_response_type(response: Any, expected_type: Type[FunctionResult]) -> FunctionResult:
+    """Ensure a response matches the expected type.
+
+    Args:
+        response: The response to validate
+        expected_type: The expected response type
+
+    Returns:
+        FunctionResult: The validated response
+
+    Raises:
+        ValidationError: If response is invalid
+    """
+    if not isinstance(response, expected_type):
+        raise ValidationError(
+            f"Expected {expected_type.__name__} but got {type(response).__name__}")
+
+    if isinstance(response, ToolResponse):
+        validate_tool_response(response)
+    elif isinstance(response, FilterResponse):
+        validate_filter_response(response)
+    elif isinstance(response, PipelineResponse):
+        validate_pipeline_response(response)
+
+    return response
+
+
+def create_error_response(
+    error: Exception,
+    function_type: str,
+    function_name: str,
+    **kwargs
+) -> FunctionResult:
+    """Create an error response of the appropriate type.
+
+    Args:
+        error: The error that occurred
+        function_type: The type of function ("tool", "filter", or "pipeline")
+        function_name: The name of the function
+        **kwargs: Additional response-specific fields
+
+    Returns:
+        FunctionResult: An appropriate error response
+    """
+    base_args = {
+        "success": False,
+        "error": str(error)
+    }
+
+    if function_type == "tool":
+        return ToolResponse(
+            **base_args,
+            tool_name=function_name,
+            result=None,
+            **kwargs
+        )
+    elif function_type == "filter":
+        return FilterResponse(
+            **base_args,
+            filter_name=function_name,
+            modified_data={},
+            changes_made=False,
+            **kwargs
+        )
+    else:  # pipeline
+        return PipelineResponse(
+            **base_args,
+            pipeline_name=function_name,
+            results=[],
+            steps_completed=0,
+            total_steps=0,
+            **kwargs
+        )
+
 
 # Constants from config
 APP_CONSTANTS = {
@@ -168,8 +274,12 @@ __all__ = [
     'get_last_user_message',
     'get_last_assistant_message',
     'get_system_message',
-    'get_all_models',
-    'generate_chat_completion',
-    'APP_CONSTANTS',
-    'USER_SETTINGS'
+    'ensure_strict_message',
+    'validate_function_response',
+    'validate_tool_response',
+    'validate_filter_response',
+    'validate_pipeline_response',
+    'ensure_response_type',
+    'create_error_response',
+    'APP_CONSTANTS'
 ]

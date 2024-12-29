@@ -2,16 +2,23 @@
 
 import logging
 import json
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 from jsonschema import validate, ValidationError as JsonSchemaValidationError
 
 from app.functions.base import (
     FunctionError,
     ValidationError,
-    TimeoutError,
     ExecutionError,
     FunctionNotFoundError,
-    InputValidationError
+    InputValidationError,
+    Tool,
+    Filter,
+    Pipeline,
+    FunctionResponse,
+    ToolResponse,
+    FilterResponse,
+    PipelineResponse,
+    FunctionResult
 )
 from app.functions.registry import function_registry
 
@@ -27,7 +34,7 @@ class FunctionExecutor:
         logger.info(
             f"FunctionExecutor initialized with {len(functions)} functions")
 
-    async def execute(self, name: str, params: Dict[str, Any]) -> Any:
+    async def execute(self, name: str, params: Dict[str, Any]) -> FunctionResult:
         """Execute a function by name with the given parameters.
 
         Args:
@@ -35,7 +42,7 @@ class FunctionExecutor:
             params: Parameters to pass to the function
 
         Returns:
-            Function execution result
+            Function execution result of type ToolResponse, FilterResponse, or PipelineResponse
 
         Raises:
             FunctionError: If any error occurs during execution
@@ -66,18 +73,33 @@ class FunctionExecutor:
                         invalid_params=list(e.path)
                     )
 
-            # Execute the function
+            # Execute the function based on its type
             logger.debug(f"Executing function {name}")
             try:
-                if hasattr(func, 'execute'):
-                    # Tool function
+                if isinstance(func, Tool):
                     result = await func.execute(params)
-                elif hasattr(func, 'pipe'):
-                    # Pipeline function
-                    result = await func.pipe(params)
+                    if not isinstance(result, ToolResponse):
+                        raise ExecutionError(
+                            f"Tool {name} returned invalid response type: {type(result)}",
+                            function_name=name
+                        )
+                elif isinstance(func, Filter):
+                    result = await func.execute(params)
+                    if not isinstance(result, FilterResponse):
+                        raise ExecutionError(
+                            f"Filter {name} returned invalid response type: {type(result)}",
+                            function_name=name
+                        )
+                elif isinstance(func, Pipeline):
+                    result = await func.execute(params)
+                    if not isinstance(result, PipelineResponse):
+                        raise ExecutionError(
+                            f"Pipeline {name} returned invalid response type: {type(result)}",
+                            function_name=name
+                        )
                 else:
                     raise ExecutionError(
-                        f"Function {name} has no executable method",
+                        f"Unknown function type for {name}: {type(func)}",
                         function_name=name
                     )
 
@@ -149,12 +171,30 @@ class FunctionExecutor:
                     # Execute the function
                     result = await self.execute(function_name, arguments)
 
-                    # Format the result
+                    # Format the result based on response type
                     formatted_result = {
                         "tool_call_id": tool_call.get("id"),
                         "name": function_name,
-                        "result": result
                     }
+
+                    if isinstance(result, (ToolResponse, FilterResponse, PipelineResponse)):
+                        if result.success:
+                            if isinstance(result, ToolResponse):
+                                formatted_result["result"] = result.result
+                            elif isinstance(result, FilterResponse):
+                                formatted_result["result"] = result.modified_data
+                            else:  # PipelineResponse
+                                formatted_result["result"] = result.results
+                        else:
+                            formatted_result["error"] = {
+                                "type": "ExecutionError",
+                                "message": result.error or "Unknown error"
+                            }
+                    else:
+                        formatted_result["error"] = {
+                            "type": "InvalidResponseType",
+                            "message": f"Function returned invalid response type: {type(result)}"
+                        }
 
                     results.append(formatted_result)
                     logger.debug(f"Tool call {idx + 1} completed successfully")
