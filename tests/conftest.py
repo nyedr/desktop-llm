@@ -3,13 +3,10 @@
 import pytest
 import asyncio
 import os
-from unittest.mock import patch
 from app.main import app
 from app.services.function_service import FunctionService
 from app.services.model_service import ModelService
 from app.services.agent import Agent
-import sys
-import platform
 
 
 @pytest.fixture
@@ -79,11 +76,7 @@ async def setup_test_environment():
 @pytest.fixture(scope="session")
 def event_loop():
     """Create an instance of the default event loop for the test session."""
-    if sys.platform == 'win32':
-        # Use ProactorEventLoop on Windows for subprocess support
-        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
-    else:
-        asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
     loop = asyncio.get_event_loop_policy().new_event_loop()
     asyncio.set_event_loop(loop)

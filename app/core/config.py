@@ -10,6 +10,10 @@ class AppConfig(BaseSettings):
     DEFAULT_MODEL: str = Field(default="granite3.1-8b-24k:latest")
     MODEL_TEMPERATURE: float = Field(default=0.7)
     MAX_TOKENS: int = Field(default=4096)
+    # Maximum tokens per chunk for text processing
+    MAX_CHUNK_TOKENS: int = Field(default=1024)
+    # Size of chunks for memory operations
+    CHUNK_SIZE: int = Field(default=512)
     MODEL_REQUEST_TIMEOUT: int = Field(default=30)
     DEFAULT_TEMPERATURE: float = Field(default=0.7)
     RATE_LIMIT: str = Field(default="60/minute")

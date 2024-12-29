@@ -58,3 +58,5 @@ dependencies:
       - slowapi>=0.1.9
       - jsonschema
       - psutil
+
+      - markdownify>=0.11.6

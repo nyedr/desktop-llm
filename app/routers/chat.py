@@ -1,9 +1,10 @@
-"""Chat router."""
+"""Chat router for handling chat-related endpoints and streaming responses."""
 import json
 import logging
 from typing import List, Optional, AsyncGenerator, Any, Dict, Union
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Request, Depends, HTTPException
 from sse_starlette.sse import EventSourceResponse
+from app.context.llm_context import MemoryType
 from app.core.config import config
 from app.dependencies.providers import (
     get_agent,
@@ -23,13 +24,21 @@ from app.models.chat import (
 from app.functions.base import FunctionType, Filter
 import asyncio
 from pydantic import BaseModel
+from app.models.memory import MemoryType
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-def convert_to_dict(obj):
-    """Recursively convert Message objects to dictionaries."""
+def convert_to_dict(obj: Any) -> Union[Dict[str, Any], List[Any], Any]:
+    """Recursively convert Message objects to dictionaries.
+
+    Args:
+        obj: Object to convert (Message, dict, list, or other)
+
+    Returns:
+        Converted object in dictionary form
+    """
     if hasattr(obj, "model_dump"):
         return obj.model_dump()
     elif isinstance(obj, dict):
@@ -45,7 +54,20 @@ async def apply_filters(
     request_id: str,
     direction: str = "outlet"
 ) -> Dict[str, Any]:
-    """Apply filters to data in a consistent way."""
+    """Apply filters to data in a consistent way.
+
+    Args:
+        filters: List of filters to apply
+        data: Data to filter
+        request_id: ID of the current request for logging
+        direction: Direction of filtering ("inlet" or "outlet")
+
+    Returns:
+        Filtered data
+
+    Raises:
+        Exception: If filter application fails
+    """
     if not filters:
         return data
 
@@ -138,7 +160,16 @@ async def handle_tool_response(
     response: Dict[str, Any],
     tool_call_in_progress: bool
 ) -> tuple[ChatStreamEvent, bool]:
-    """Handle tool/function response."""
+    """Handle tool/function response.
+
+    Args:
+        request_id: ID of the current request
+        response: Tool response data
+        tool_call_in_progress: Whether a tool call is in progress
+
+    Returns:
+        Tuple of (event to send, updated tool_call_in_progress flag)
+    """
     logger.info(f"[{request_id}] Processing tool/function response")
     logger.debug(
         f"[{request_id}] Raw tool/function response: {json.dumps(response, indent=2)}")
@@ -157,7 +188,16 @@ async def handle_tool_calls(
     response: Dict[str, Any],
     function_service: FunctionService
 ) -> List[ChatStreamEvent]:
-    """Handle tool calls from assistant."""
+    """Handle tool calls from assistant.
+
+    Args:
+        request_id: ID of the current request
+        response: Assistant response containing tool calls
+        function_service: Service for handling function calls
+
+    Returns:
+        List of events to send
+    """
     logger.info(
         f"[{request_id}] Tool calls detected: {json.dumps(response['tool_calls'], indent=2)}")
     events = []
@@ -196,16 +236,12 @@ async def handle_assistant_message(
     filters: List[Filter]
 ) -> ChatStreamEvent:
     """Handle assistant message."""
-    # Create a proper AssistantMessage
     assistant_message = {
         "role": "assistant",
         "content": response.get("content", "")
     }
-
-    # Apply filters to the message
     filtered_message = await apply_filters(filters, assistant_message, request_id, "outlet")
-    logger.info(
-        f"[{request_id}] Assistant message: {json.dumps(filtered_message, indent=2)}")
+    print(filtered_message['content'], end="", flush=True)
     return ChatStreamEvent(event="message", data=json.dumps(filtered_message))
 
 
@@ -215,17 +251,12 @@ async def handle_string_chunk(
     filters: List[Filter]
 ) -> ChatStreamEvent:
     """Handle string chunk from model."""
-    # Create a proper AssistantMessage for the chunk
     chunk_message = {
         "role": "assistant",
         "content": str(response)
     }
-
-    # Apply filters to the message
     filtered_message = await apply_filters(filters, chunk_message, request_id, "outlet")
-
-    logger.info(
-        f"[{request_id}] Sending filtered chunk: {json.dumps(filtered_message, indent=2)}")
+    print(filtered_message['content'], end="", flush=True)
     return ChatStreamEvent(event="message", data=json.dumps(filtered_message))
 
 
@@ -234,7 +265,16 @@ async def verify_model_availability(
     model: str,
     model_service: ModelService
 ) -> Optional[ChatStreamEvent]:
-    """Verify model availability and return error event if not available."""
+    """Verify model availability.
+
+    Args:
+        request_id: ID of the current request
+        model: Model name to verify
+        model_service: Service for model operations
+
+    Returns:
+        Error event if model not available, None if available
+    """
     try:
         models = await model_service.get_all_models(request_id)
     except Exception as model_error:
@@ -258,11 +298,10 @@ async def verify_model_availability(
 async def stream_chat_response(
     request: Request,
     chat_request: ChatRequest,
-    agent: Agent,
-    model_service: ModelService,
-    function_service: FunctionService,
+    agent: Agent = Depends(get_agent),
+    model_service: ModelService = Depends(get_model_service),
+    function_service: FunctionService = Depends(get_function_service),
     langchain_service: LangChainService = Depends(get_langchain_service),
-    chroma_service: ChromaService = Depends(get_chroma_service),
     is_test: bool = False
 ) -> AsyncGenerator[ChatStreamEvent, None]:
     """Generate streaming chat response."""
@@ -284,16 +323,19 @@ async def stream_chat_response(
         )
         chat_request.messages = data["messages"]
 
-        # Process conversation with LangChain
+        # Process conversation with LangChain using new context management
         if chat_request.enable_memory and langchain_service:
             try:
                 chat_request.messages = await langchain_service.process_conversation(
-                    chat_request.messages,
+                    messages=chat_request.messages,
+                    memory_type=chat_request.memory_type,
+                    conversation_id=chat_request.conversation_id,
+                    enable_summarization=chat_request.enable_summarization,
                     metadata_filter=chat_request.memory_filter,
                     top_k=chat_request.top_k_memories
                 )
                 logger.info(
-                    f"[{request_id}] Added memory context to conversation")
+                    f"[{request_id}] Added {chat_request.memory_type} memory context to conversation")
             except Exception as e:
                 logger.warning(
                     f"[{request_id}] Failed to add memory context: {e}")
@@ -370,6 +412,17 @@ async def stream_chat_response(
 
         # Stream chat completion
         first_response = True
+
+        # Log the context window before streaming response
+        if chat_request.messages:
+            print(f"\nContext window for request {request_id}:", flush=True)
+            for msg in chat_request.messages:
+                role = msg.get("role") if isinstance(msg, dict) else msg.role
+                content = msg.get("content") if isinstance(
+                    msg, dict) else msg.content
+                print(f"{role}: {content}", flush=True)
+            print("\nResponse:", flush=True)
+
         async for response in agent.chat(
             messages=processed_messages,
             model=model,
@@ -458,3 +511,30 @@ class ChatRequest(BaseModel):
     enable_tools: bool = True
     filters: Optional[List[str]] = None
     pipeline: Optional[str] = None
+    memory_type: Optional[str] = MemoryType.EPHEMERAL
+    conversation_id: Optional[str] = None
+    enable_summarization: Optional[bool] = False
+    memory_filter: Optional[Dict[str, Any]] = None
+    top_k_memories: Optional[int] = 5
+
+
+@router.post("/chat/memory/add")
+async def add_memory(
+    request: Request,
+    memory_text: str,
+    memory_type: MemoryType = MemoryType.EPHEMERAL,
+    metadata: Optional[Dict[str, Any]] = None,
+    chroma_service: ChromaService = Depends(get_chroma_service)
+):
+    """Add a memory to the specified collection."""
+    try:
+        await chroma_service.add_memory(
+            text=memory_text,
+            collection=memory_type,
+            metadata=metadata
+        )
+        return {"status": "success", "message": "Memory added successfully."}
+    except Exception as e:
+        logger.error(f"Error adding memory: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500, detail=f"Failed to add memory: {e}")

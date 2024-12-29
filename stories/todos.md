@@ -7,8 +7,8 @@
 - [x] Make the application services non-blocking to improve partition tolerance
 - [x] Test the chroma vector database
 - [x] Create tools that control the chroma vector database
-- [ ] Ensure filters and pipelines are implemented correctly
-- [ ] Update application types to be more strict and consistent
+- [x] Ensure filters and pipelines are implemented correctly
+- [x] Update application types to be more strict and consistent
 
 ### Streaming and Tool Execution
 

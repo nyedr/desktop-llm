@@ -1,367 +1,350 @@
-Below is an **implementation guide** for a **more optimal** context manager that supports **long-term memory** in a **FastAPI** or **desktop LLM** project. This design addresses your desire to avoid summarizing every conversation turn, perform a thorough and targeted **relevancy check**, minimize storage duplication, and provide a more **structured prompt** to the model.
+Below is an **updated implementation guide** tailored to your new plan:
+
+1. You will have a single “old conversations” table in your vector store (Chroma or otherwise) that stores _all user and assistant messages_ for ephemeral conversation logs.
+2. You will have a **separate “model memory”** collection for longer-term or personal user data, which the model can also update if needed (like ChatGPT’s memory system).
+3. Large messages (i.e., single user or assistant messages) are **chunked** to improve retrieval accuracy and to avoid storing huge embeddings for entire paragraphs. Each chunk is associated with `(conversation_id, response_id)` so you can piece them back together if needed.
+4. **Summaries** are generated **only** when context gets too big, or optionally on idle. They may be stored in the ephemeral conversations table or not, depending on your preference.
+5. **Multiple conversation IDs** let you keep old conversation logs accessible if they’re relevant. The user can jump back or reference them.
+
+Below are **code improvement suggestions**, an **updated guide**, and a **sample database schema**.
 
 ---
 
-# High-Level Goals
+## A. Proposed Database Schema Examples
 
-1. **Efficient Memory Storage**: Store conversation context in Chroma without repeatedly adding nearly identical summaries.
-2. **Targeted Retrieval**: Dynamically retrieve only the **most relevant chunks** of old context, limiting overhead while preserving continuity.
-3. **Optional Summaries**: Summaries should happen **periodically** (e.g., every N messages) or on demand, rather than every single request.
-4. **Structured Prompt**: Provide the LLM with labeled memories in a more **schema-driven** manner so it clearly understands each piece of context.
-5. **Prevent Duplication**: Implement stricter checks (metadata-based) to avoid storing multiple near-duplicate entries.
-6. **Better Prompt Engineering**: Instead of a single “system” memory dump, consider a more structured approach to let the model parse memory effectively.
-
----
-
-# Proposed Architecture
-
-```
-+-----------------+   (1) conversation messages  +----------------------+
-|    FRONTEND     | --------------------------->  |        FastAPI       |
-+-----------------+                                +----------------------+
-                                                    |
-                                                    | (2) enters
-                                                    v  LLMContextManager
-                                         +---------------------------------+
-                                         |  1) Periodic Summaries (optional)|
-                                         |  2) Memory Storage              |
-                                         |  3) Memory Retrieval            |
-                                         |  4) Prompt Engineering          |
-                                         |  5) Output final context        |
-                                         +---------------------------------+
-                                                    |
-                                                    | (3) final structured
-                                                    v    prompt messages
-                                             +-----------------+
-                                             |  model_service  |
-                                             |  (stream LLM)   |
-                                             +-----------------+
-                                                    |
-                                                    v
-                                            +------------------+
-                                            |  SSE to Client   |
-                                            +------------------+
-```
-
----
-
-## Step 1: Restructure Memory Storage
-
-### 1.1 Use Clear Metadata for Conversation Identification
-
-- **ConversationID**: Include a conversation ID (unique per session or per user) in every memory you store. This ensures retrieval only focuses on relevant conversation items.
-- **Chunking**: Store messages in smaller chunks if they’re large. For instance, chunk each user/assistant turn or any large text.
-- **No Summaries by Default**: Instead of summarizing on every request, store each user/assistant turn in Chroma as a separate **Document** with metadata like `{"conversation_id": ..., "role": ..., "timestamp": ...}`.
-
-**Implementation Tip**
+### A.1 Ephemeral Conversation Logs (Single Table)
 
 ```python
-# When storing a user message:
-await chroma_service.add_memory(
-    text=user_message,
-    metadata={
-        "conversation_id": unique_convo_id,
-        "role": "user",
-        "timestamp": datetime.now().isoformat()
-    }
-)
-```
-
-Store the assistant response similarly.
-
-### 1.2 Periodic Summaries
-
-Instead of summarizing each request, **summarize only after N messages** or if the conversation context is too large. For example:
-
-1. After every 5 user messages (configurable), generate a summary that merges these 5 into a shorter chunk.
-2. Replace or “retire” old chunks: You can remove them or mark them as “archived” if your conversation is extremely large.
-
-**Implementation Tip**  
-In `_teardown()`, **check** if `(message_count % 5) == 0`. If yes, summarize the last 5 messages into a single summary chunk, then store that chunk with metadata. Optionally, remove or mark the original 5 messages so they’re no longer retrieved.
-
----
-
-## Step 2: More Targeted Retrieval
-
-### 2.1 Vector Similarity + Metadata Filters
-
-- Filter by `conversation_id` to only pull data from the current conversation.
-- Retrieve top `k` documents with the highest similarity to the **current user query** (or last user message).
-- Optionally filter out “archived” chunks or older summaries if they’re not relevant.
-
-**Implementation Tip**
-
-```python
-memories = await self.chroma_service.retrieve_with_metadata(
-    query=query_text,
-    metadata_filter={"conversation_id": current_convo_id},
-    top_k=self.top_k
-)
-```
-
-You can also pass a **score_threshold** to ignore low-scoring results.
-
-### 2.2 Summaries vs. Raw Chunks
-
-If you store periodic summaries, your retrieval might see both summary chunks and raw message chunks for the same time period. You can:
-
-- Always include the most recent summary chunk.
-- Then retrieve raw messages from the last 10 minutes or last N messages to maintain immediate context.
-- Avoid duplication by skipping raw messages that the summary already covers if the summary is highly relevant.
-
----
-
-## Step 3: Prompt Engineering
-
-### 3.1 Structured “Memory Blocks”
-
-Rather than a single system message containing all memories, adopt a multi-part approach. For example:
-
-1. **System**: Base instructions: “You are a helpful assistant… etc.”
-2. **System**: `[Memory #1: Some relevant chunk]`
-3. **System**: `[Memory #2: Another chunk]`
-4. **User**: Actual user query.
-
-This avoids having the LLM see everything as one giant text block. It can parse them as separate messages with distinct content.
-
-#### Example of `_engineer_prompt()` Pseudocode
-
-```python
-def _engineer_prompt(self):
-    # Basic system instruction
-    final_messages = [{
-        "role": "system",
-        "content": (
-            "You are a helpful assistant. Use the following memory chunks, if relevant, "
-            "when answering the user. Do not repeat them verbatim unless necessary."
-        )
-    }]
-
-    # Insert each memory as a separate system message
-    for i, memory in enumerate(self.retrieved_memories):
-        final_messages.append({
-            "role": "system",
-            "content": f"[Memory Chunk {i+1}]\n{memory['content']}",
-            "metadata": {"relevance_score": memory["relevance_score"]}
-        })
-
-    # Then append the processed conversation
-    final_messages.extend(self.processed_inputs)
-
-    self.final_context_messages = final_messages
-```
-
-**Why This Helps**: The LLM can handle each chunk distinctly and it’s less likely to get “confused” by a single massive system message.
-
-### 3.2 Additional Metadata in the Prompt
-
-Optionally, you can label each memory chunk with timestamps, user roles, or summary indicators:
-
-```
-[Memory Chunk 1]
-From user at 2024-12-20 13:05:45
-Relevance: 0.88
-Text: "Last time we..."
-
-[Memory Chunk 2]
-(Summary) covers messages from 2024-12-15 to 2024-12-18...
-```
-
----
-
-## Step 4: Summarization Strategy
-
-### 4.1 Summarize Infrequently (Every N or on Demand)
-
-**Approach**:
-
-1. Keep raw messages in the DB for the last N turns.
-2. Summaries happen only after N user turns or when the conversation is idle.
-3. Store the summary chunk in Chroma with metadata, possibly marking older messages as “archived” or “summarized.”
-
-### 4.2 Summaries for Speed
-
-If the conversation is massive, retrieving 50+ messages from Chroma for every user request can slow down your system. Summaries reduce retrieval to fewer, bigger chunks. You can also store multiple levels of summaries (e.g., daily summary, weekly summary, etc.) if your conversation is extremely long.
-
-**Implementation Tip**
-
-```python
-if (total_user_messages % SUMMARY_INTERVAL) == 0:
-    # Summarize the last SUMMARY_INTERVAL messages
-    short_summary = await self.langchain_service.summarize_text(conversation_text)
-    # Store summary in Chroma
-    await self.chroma_service.add_memory(short_summary, metadata=...)
-    # Optional: mark the original messages as archived
-```
-
----
-
-## Step 5: Preventing Duplication
-
-### 5.1 Store Conversation-ID in Metadata
-
-Every chunk: `{"conversation_id": <ID>, "turn_index": <int>, ...}`. This ensures you only see data from the correct conversation.
-
-### 5.2 Fuzzy Duplicate Check
-
-- Before storing a new summary or chunk, do a quick similarity check with existing items in the conversation.
-- If the new chunk is ~90% similar (or some threshold) to an existing one, skip storing or merge them.
-
-**Implementation Tip**  
-Use `retrieve_memories(query=potential_new_chunk, score_threshold=0.9)` to see if a near-duplicate exists.
-
----
-
-## Step 6: Implementation Sketch
-
-Below is a skeleton code snippet focusing on the **key differences** from your current manager:
-
-```python
-class OptimalLLMContextManager:
-    def __init__(
-        self,
-        chroma_service: ChromaService,
-        langchain_service: 'LangChainService',
-        conversation_history: List[Dict[str, Any]],
-        conversation_id: str,
-        max_context_tokens: int = 2048,
-        top_k: int = 5,
-        summary_interval: int = 5
-    ):
-        self.chroma_service = chroma_service
-        self.langchain_service = langchain_service
-        self.conversation_history = conversation_history
-        self.conversation_id = conversation_id
-        self.max_context_tokens = max_context_tokens
-        self.top_k = top_k
-        self.summary_interval = summary_interval
-
-        self.processed_inputs = []
-        self.retrieved_memories = []
-        self.final_context_messages = []
-
-        # If you want a tokenizer
-        # self.tokenizer = AutoTokenizer.from_pretrained("gpt2")
-
-    async def __aenter__(self):
-        # 1) Process the user input
-        self.processed_inputs = self._process_input(self.conversation_history)
-
-        # 2) Retrieve top-k relevant memories for the last user query
-        self.retrieved_memories = await self._retrieve_topk_memories()
-
-        # 3) Engineer prompt to better structure the memory
-        self._engineer_prompt()
-
-        # 4) Manage context size
-        self._manage_context_size()
-
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        # Optional: only summarize if enough messages since last summary
-        if self._should_summarize():
-            await self._summarize_and_store()
-        # Clean up if needed
-
-    def get_context_messages(self):
-        return self.final_context_messages
-
-    def _process_input(self, messages):
-        # Similar to your existing logic for images, files, etc.
-        # Return a list of standardized message dicts
-        return messages
-
-    async def _retrieve_topk_memories(self):
-        # Only use the last user message as the query
-        user_query = ""
-        for msg in reversed(self.processed_inputs):
-            if msg["role"] == "user" and msg.get("content"):
-                user_query = msg["content"]
-                break
-        if not user_query:
-            return []
-
-        # Retrieve from Chroma with conversation_id filter
-        results = await self.chroma_service.retrieve_with_metadata(
-            user_query,
-            {"conversation_id": self.conversation_id},
-            top_k=self.top_k
-        )
-        # Sort by relevance_score desc
-        memories = sorted(results, key=lambda x: x["relevance_score"], reverse=True)
-        return memories
-
-    def _engineer_prompt(self):
-        system_message = {
-            "role": "system",
-            "content": (
-                "You are a helpful assistant with a memory. Below are some relevant memory chunks.\n"
-                "Use them if they help you answer the user's query, but do not repeat them verbatim.\n"
-            )
-        }
-        final_messages = [system_message]
-
-        for i, mem in enumerate(self.retrieved_memories):
-            chunk_text = mem["content"]
-            final_messages.append({
-                "role": "system",
-                "content": f"[Memory {i+1}]\n{chunk_text}"
-            })
-
-        final_messages.extend(self.processed_inputs)
-        self.final_context_messages = final_messages
-
-    def _manage_context_size(self):
-        # Token counting logic if desired
-        # Example placeholder
-        pass
-
-    def _should_summarize(self) -> bool:
-        # Suppose we only summarize if the user had X messages since last summary
-        # This code depends on how you track summary intervals
-        return False  # placeholder
-
-    async def _summarize_and_store(self):
-        # Summarize only the newly arrived messages or the chunk since last summary
-        pass
+# Table: ephemeral_conversations (or conversation_logs)
+# Purpose: Store user/assistant messages, chunked for large content.
+
+{
+  "id": <string, unique, e.g. UUID>,
+  "conversation_id": <string>,          # Ties logs to a conversation
+  "response_id": <string>,             # Groups chunks of a single message/response
+  "chunk_index": <int>,                # If a single response is split into multiple chunks
+  "content": <string>,                 # The chunked text itself
+  "metadata": <dict>,                  # { "role": "user/assistant", "timestamp", etc. }
+  "embedding": <vector>,               # Vector embedding if stored
+  "created_at": <datetime>
+}
 ```
 
 **Implementation Tips**
 
-1. **Use `conversation_id`**: If you have multi-user sessions or separate chat sessions, this is critical.
-2. **Periodic Summaries**: Possibly keep a `summary_count` or track how many messages have been added to the DB since the last summary. Summarize only if it exceeds a threshold.
-3. **Prevent Over-Frequent Summaries**: Summaries can be slow and cause extra model calls, so keep them minimal.
+- If the logs can be very large, chunk them so each row has a smaller text. Each chunk still references the same `(conversation_id, response_id)`.
+- You can reconstruct the entire message by querying all chunks with the same `(conversation_id, response_id)`, ordered by `chunk_index`.
+
+### A.2 Model Memory Collection
+
+```python
+# Table: model_memory
+# Purpose: Store curated, longer-term knowledge or preferences.
+
+{
+  "id": <string, e.g. UUID>,
+  "content": <string>,                 # Possibly chunked or not, up to you
+  "metadata": <dict>,                  # { "category": "preferences", "importance", etc. }
+  "embedding": <vector>,
+  "created_at": <datetime>
+}
+```
+
+**Implementation Tips**
+
+- If “model memory” can get very large, chunk it similarly, or store it in bigger documents if you expect it to remain small.
+- The user can manipulate or remove items from this table to refine the model’s personalized memory.
 
 ---
 
-## Step 7: QA and Edge Cases
+## B. Updated Implementation Guide
 
-1. **Empty Conversations**: If the user never typed anything, skip memory retrieval.
-2. **Large Summaries**: If your summary is long, chunk it or re-summarize it. Consider hierarchical summaries.
-3. **Concurrent Requests**: Make sure your `chroma_service` can handle concurrent calls or use a concurrency lock if needed.
-4. **Max Tokens**: If you want to be strict, integrate an actual token counting library (like `transformers`). Remove older memory chunks or less relevant ones if you exceed `max_context_tokens`.
+### B.1 Storing Conversation Logs in a Single Table
+
+1. **Chunk Large Responses**
+   - Whenever a user or assistant message is too large (e.g., more than 500 tokens), split it into smaller pieces.
+   - Assign them the same `response_id`.
+   - Insert them into `ephemeral_conversations`.
+2. **Metadata**
+   - Include `metadata={"role": "assistant", "timestamp": "...", "some_other_info": "..."}`.
+   - Possibly store `archived: bool` to mark older data.
+
+**Implementation Tip**  
+In your `ChromaService.add_memory`, you can do:
+
+```python
+def chunk_text(text: str, chunk_size=500) -> List[str]:
+    # Pseudocode: break text into smaller pieces
+    words = text.split()
+    chunks = []
+    for i in range(0, len(words), chunk_size):
+        chunk = " ".join(words[i:i+chunk_size])
+        chunks.append(chunk)
+    return chunks
+```
+
+Then store each chunk with `(conversation_id, response_id, chunk_index)` in the metadata.
+
+### B.2 Summarization Only On Overflow or Idle
+
+- **Overflow**: If your context manager sees the total token usage is beyond `max_context_tokens`, it can do an on-demand summarization of older conversation logs, replacing multiple logs with a summary chunk.
+- **Idle**: If the user has been inactive or if you have a background job, you can also choose to compress older logs to avoid indefinite growth.
+
+**Implementation Tip**
+
+- In `_manage_context_size` (or `_teardown()`), once you detect your conversation’s logs are too large to remain in context, call a summarization method.
+- Store the summary in `ephemeral_conversations` as well if you want future references to that condensed version. Mark it with `metadata={"type": "summary"}`.
+
+### B.3 On-Demand Memory vs. Automatic
+
+- **Model Memory** is stored in `model_memory`. The model can add new entries with a function call, or you can allow the user to manually store important data.
+- **Conversation Logs** automatically store every user/assistant turn.
+- If the user wants to finalize something into “model memory,” they can call a function like `save_to_model_memory` to push it from ephemeral logs to the curated table.
 
 ---
 
-## Answers to Your Questions
+## C. Code Improvement Suggestions
 
-1. **How Should Conversation Context Be Stored as Memory?**
+Below are some specific improvement suggestions in your codebase, referencing the files you provided.
 
-   - **Store each message** in Chroma as a separate Document, labeled by `conversation_id`, `role`, and a timestamp. Periodically store “summary” documents with clear metadata like `{"type": "summary"}`.
+1. **Use More Fine-Grained Collections**
 
-2. **How Should Relevant Data Be Accessed?**
+   - Right now, `ChromaService` references a single collection for “long-term memory.”
+   - Create a second `ChromaService` instance or extend the class to handle two collections:
+     - `ephemeral_logs_collection_name`
+     - `model_memory_collection_name`
 
-   - Always filter by `conversation_id`, then do a vector similarity search on the last user query (or possibly the entire last user turn). Retrieve top-K. You can also combine “recent messages” with “summaries” to get a broader or hierarchical context.
+2. **Add a `response_id` & `chunk_index` to Metadata**
 
-3. **How to Update `_engineer_prompt`**
-   - Provide smaller, labeled chunks, each as a separate system message. Possibly group them by role or timestamp to give the model better structure.
-   - Start with a short system directive: “Here are memory snippets. Use them if relevant.” Then list them, followed by user messages.
+   - In `_add_single_memory` and `_add_batch_memories`, incorporate `metadata["response_id"]` and `metadata["chunk_index"]` if provided.
+   - This helps you tie chunks together.
+
+3. **Chunking on Input**
+
+   - Before calling `add_memory`, chunk the text if it’s large. Then do `add_batch_memories`.
+   - Example in `_process_text_message` or in the code that adds conversation logs:
+
+   ```python
+   chunks = chunk_text(msg["content"], chunk_size=500)
+   for idx, chunk in enumerate(chunks):
+       metadata = {
+           "conversation_id": current_convo_id,
+           "response_id": msg_id,
+           "chunk_index": idx,
+           "role": msg["role"],
+           # ...
+       }
+       await ephemeral_chroma_service.add_memory(chunk, metadata=metadata)
+   ```
+
+4. **`LLMContextManager`: Summarization Moved to Overflow**
+
+   - You currently do summarization in `_teardown()`. To adopt the new approach, you might want to do it in `_manage_context_size` or upon noticing you exceed the token limit.
+   - Or keep `_teardown()` for a final summary if the conversation is truly ending.
+
+5. **Refine `_manage_context_size`**
+
+   - Instead of discarding older messages, call a helper function `_summarize_oldest_logs()`, then store that summary chunk.
+   - Example:
+
+   ```python
+   if total_tokens > self.max_context_tokens:
+       # Summarize oldest conversation logs
+       summary = self._summarize_logs(old_logs)
+       # Replace them with summary chunk or mark them archived
+       # Insert summary chunk in ephemeral table with type="summary"
+   ```
+
+6. **Database vs. In-Memory**
+
+   - If you want to keep partial ephemeral logs in memory for fast iteration, that’s fine. Just ensure you also store them in the DB if you want them persisted.
+
+7. **Add a Model “Memory Retrieval” Function**
+   - If the user wants to ask “What do you know about me?” you can create a function “retrieve_user_info” that calls the `model_memory_service.retrieve_memories(...)`.
+   - The model then decides when to call it (like ChatGPT does with function calling).
 
 ---
 
-# Conclusion
+## D. Tradeoffs and Rationale
 
-By **storing** individual user/assistant messages (plus occasional summaries) and **retrieving** them with a thorough similarity search—while **reducing** redundant summarization—you’ll maintain an **efficient** long-term memory system. Combining those memory chunks in a structured prompt ensures the LLM can more clearly interpret each piece of context.
+1. **Single Table for Ephemeral**:
+   - Minimizes complexity vs. splitting ephemeral logs into multiple smaller specialized tables.
+   - `(conversation_id, response_id, chunk_index)` is enough to reconstruct or do chunk-level retrieval.
+2. **Separate Model Memory**:
+   - Minimizes noise from ephemeral logs. The curated data can remain stable and quickly retrieved without wading through massive conversation logs.
+3. **Optional Summaries**:
+   - Summaries can degrade fidelity if you do them too often. Only do them at overflow or on idle.
+4. **Maintaining Relevance**:
+   - You can adopt a scoring system that slightly boosts logs from the same conversation, or let the raw vector similarity handle it.
 
-This approach will help you achieve a **consistent “long-term memory” feel**, reduce **duplicate entries**, and **avoid** overloading the model with repeated data, all while staying within the **limited context window** of the model.
+Overall, these changes should keep your system clean, **optimal**, and easy to expand. They **do not** contradict your end goal, which is to maintain the **most relevant content** in the model’s context while letting older content remain accessible when truly relevant.
+
+---
+
+## E. Sample (Pseudo) Updated Code Excerpt
+
+Here’s a short example illustrating chunking with `response_id`:
+
+```python
+def chunk_text(text: str, chunk_size: int = 300) -> List[str]:
+    words = text.split()
+    chunks = []
+    for i in range(0, len(words), chunk_size):
+        chunks.append(" ".join(words[i : i + chunk_size]))
+    return chunks
+
+async def store_user_message(chroma_service, conversation_id: str, user_message: str):
+    # If user_message is large, chunk it
+    chunks = chunk_text(user_message)
+    response_id = str(uuid.uuid4())  # or use time-based ID
+    for idx, c in enumerate(chunks):
+        await chroma_service.add_memory(
+            text=c,
+            metadata={
+                "conversation_id": conversation_id,
+                "response_id": response_id,
+                "chunk_index": idx,
+                "role": "user",
+                "timestamp": datetime.now().isoformat()
+            }
+        )
+```
+
+Then you can retrieve with:
+
+```python
+# Reassemble the chunks for a single response if needed
+async def get_response_text(chroma_service, conversation_id: str, response_id: str) -> str:
+    results = await chroma_service.retrieve_with_metadata(
+        query="",  # might pass a blank or a short dummy
+        metadata_filter={
+            "conversation_id": conversation_id,
+            "response_id": response_id
+        },
+        top_k=50  # or large enough to get all chunks
+    )
+    # Sort by chunk_index
+    sorted_chunks = sorted(results, key=lambda x: x["metadata"].get("chunk_index", 0))
+    full_text = " ".join([res["document"] for res in sorted_chunks])
+    return full_text
+```
+
+---
+
+## Final Summary
+
+- Storing everything in **one ephemeral table** for old conversation logs (chunked) plus a separate **model_memory** is a great approach.
+- **Summaries** can be optionally stored or ephemeral. If you want them for future reference, store them as well. If they’re only to reduce immediate prompt size, you can skip storing them.
+- The main code changes revolve around **chunking** large messages, adopting `(conversation_id, response_id, chunk_index)` for ephemeral logs, and **moving** summarization to an overflow/idle approach.
+- Retrieving memories from ephemeral conversations should be optional, but default to true.
+
+With these refinements, you’ll have a **robust**, **scalable**, and **clean** system that ensures the **most relevant** data remains accessible to the LLM—fulfilling your goal of maximizing user experience and context usage!
+
+# Context Management Migration Plan
+
+## Overview
+
+This document outlines the detailed plan for implementing the new context management system. The implementation involves changes to the Chroma database schema, context management logic, and related services.
+
+## Implementation Phases
+
+### Phase 1: Environment Setup
+
+1. **Create New Collections**
+   - Create Chroma collections: `ephemeral_logs` and `model_memory`
+   - Update configuration files with new collection names
+
+### Phase 2: Service Updates
+
+1. **ChromaService Modifications**
+
+   - File: `app/services/chroma_service.py`
+   - Add support for multiple collections
+   - Implement chunking functionality
+   - Add methods for handling `response_id` and `chunk_index`
+
+2. **LLMContextManager Updates**
+   - File: `app/context/llm_context.py`
+   - Implement new context management logic
+   - Add summarization on overflow/idle
+   - Update context size management
+
+### Phase 3: API and Function Updates
+
+1. **Chat Router Changes**
+
+   - File: `app/routers/chat.py`
+   - Modify message handling to use new context system
+   - Add support for multiple conversation IDs
+
+2. **Memory Management Functions**
+   - File: `app/functions/types/tools/memory_tool.py`
+   - Implement `save_to_model_memory` function
+   - Add `retrieve_user_info` function
+
+### Phase 4: Testing and Validation
+
+1. **Unit Tests**
+
+   - Update existing tests in `tests/services/test_chroma_service.py`
+   - Add new tests in `tests/context/test_llm_context.py`
+
+2. **Integration Testing**
+
+   - Test end-to-end functionality
+   - Verify backward compatibility
+
+3. **Performance Testing**
+   - Test chunking and summarization performance
+   - Verify memory usage with large conversations
+
+### Phase 5: Deployment
+
+1. **Deployment Plan**
+
+   - File: `scripts/deploy_context_revamp.sh`
+   - Verify service availability during update
+
+2. **Monitoring**
+   - Set up monitoring for new context system
+   - Track performance metrics
+
+## Implementation Timeline
+
+| Week | Tasks                             |
+| ---- | --------------------------------- |
+| 1    | Phase 1: Environment Setup        |
+| 2    | Phase 2: Service Updates          |
+| 3    | Phase 3: API and Function Updates |
+| 4    | Phase 4: Testing and Validation   |
+| 5    | Phase 5: Deployment               |
+
+## Risk Management
+
+### Potential Risks
+
+1. Performance degradation
+2. Backward compatibility issues
+
+### Mitigation Strategies
+
+1. Perform implementation in staging environment first
+2. Maintain old API endpoints during transition
+
+## Rollback Plan
+
+1. Revert to previous Chroma collection structure
+2. Roll back code changes using Git
+
+## Documentation Updates
+
+1. Update API documentation in `app/routers/chat.py`
+2. Add developer guide for new context system
+
+## Post-Implementation Tasks
+
+1. Monitor system performance
+2. Gather user feedback
+3. Optimize based on usage patterns
+
+This implementation plan provides a structured approach to implementing the context management revamp while minimizing disruption to existing functionality.

@@ -1,11 +1,13 @@
 """LLM Context Manager for handling model context and memory retrieval."""
 import logging
-from typing import Dict, Any, List, Optional, TYPE_CHECKING, Union
+from typing import Dict, Any, List, Optional, TYPE_CHECKING, Union, Tuple
+import uuid
 from transformers import AutoTokenizer
 from datetime import datetime
 
 from app.services.chroma_service import ChromaService
 from app.core.config import config
+from app.models.memory import MemoryType
 
 # Forward references for type checking
 if TYPE_CHECKING:
@@ -34,7 +36,10 @@ class LLMContextManager:
         max_context_tokens: int = config.MAX_TOKENS,
         metadata_filter: Optional[Dict[str, Any]] = None,
         top_k: int = 5,
-        model_name: str = config.DEFAULT_MODEL
+        model_name: str = config.DEFAULT_MODEL,
+        memory_type: MemoryType = MemoryType.EPHEMERAL,
+        conversation_id: Optional[str] = None,
+        enable_summarization: bool = False,
     ):
         """Initialize the LLM context manager.
 
@@ -46,6 +51,9 @@ class LLMContextManager:
             metadata_filter: Optional filter for memory retrieval
             top_k: Number of memories to retrieve
             model_name: Name of the model for tokenizer selection
+            memory_type: Type of memory to use (ephemeral or model)
+            conversation_id: Optional conversation ID for this context
+            enable_summarization: Whether to enable automatic summarization
         """
         self.chroma_service = chroma_service
         self.langchain_service = langchain_service
@@ -54,11 +62,18 @@ class LLMContextManager:
         self.top_k = top_k
         self.max_context_tokens = max_context_tokens
         self.model_name = model_name
+        self.memory_type = memory_type
+
+        # Handle conversation ID
+        self.conversation_id = conversation_id or str(uuid.uuid4())
+
+        self.enable_summarization = enable_summarization
 
         # Storage for processed data
         self.final_context_messages: List[Dict[str, Any]] = []
         self.processed_inputs: List[Dict[str, Any]] = []
         self.retrieved_memories: List[Dict[str, Any]] = []
+        self.message_chunks: Dict[str, List[Dict[str, Any]]] = {}
 
         # Initialize tokenizer for context management
         try:
@@ -68,6 +83,184 @@ class LLMContextManager:
         except Exception as e:
             logger.error(f"Failed to load tokenizer: {e}", exc_info=True)
             self.tokenizer = None
+
+    async def add_to_memory(
+        self,
+        text: str,
+        memory_type: MemoryType = MemoryType.EPHEMERAL,
+        metadata: Optional[Dict[str, Any]] = None,
+        chunk_size: Optional[int] = None,
+        conversation_ids: Optional[List[str]] = None
+    ) -> Optional[List[str]]:
+        """Add text to memory with appropriate chunking and metadata.
+
+        Args:
+            text: Text to store in memory
+            memory_type: Type of memory (ephemeral or model)
+            metadata: Optional metadata for the memory
+            chunk_size: Optional maximum chunk size in tokens
+            conversation_ids: Optional list of conversation IDs
+
+        Returns:
+            List of memory IDs if successful, None if failed or duplicate
+        """
+        try:
+            if not text:
+                return None
+
+            # Generate a single response_id for all chunks
+            response_id = str(uuid.uuid4())
+
+            # Prepare base metadata
+            base_metadata = {
+                **(metadata or {}),
+                # Use single conversation_id for consistency
+                "conversation_id": self.conversation_id,
+                "response_id": response_id,  # Use same response_id for all chunks
+                "timestamp": datetime.now().isoformat()
+            }
+
+            # Add memory type specific metadata
+            if memory_type == MemoryType.MODEL_MEMORY:
+                base_metadata.update({
+                    "type": "model_memory",
+                    "persistent": True,
+                    "last_accessed": datetime.now().isoformat()
+                })
+            else:
+                base_metadata.update({
+                    "type": "message",
+                    "persistent": False
+                })
+
+            # Let ChromaService handle chunking with consistent response_id
+            return await self.chroma_service.add_memory(
+                text=text,
+                collection=memory_type,
+                metadata=base_metadata,
+                max_chunk_tokens=chunk_size if chunk_size else config.MAX_CHUNK_TOKENS,
+                conversation_id=self.conversation_id
+            )
+
+        except Exception as e:
+            logger.error(f"Failed to add memory: {e}", exc_info=True)
+            return None
+
+    async def update_model_memory(self, memory_id: str, new_content: str) -> bool:
+        """Update an existing model memory with new content.
+
+        Args:
+            memory_id: The ID of the memory to update
+            new_content: The new content to store
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Verify this is a model memory
+            existing_memory = await self.chroma_service.get_memory(memory_id, "model_memory")
+            if not existing_memory or existing_memory.get("metadata", {}).get("memory_type") != "model":
+                logger.warning(
+                    f"Attempted to update non-model memory: {memory_id}")
+                return False
+
+            # Update the memory with new content and updated timestamp
+            return await self.chroma_service.update_memory(
+                memory_id,
+                new_content,
+                "model_memory",
+                {
+                    **existing_memory.get("metadata", {}),
+                    "last_accessed": datetime.now().isoformat()
+                }
+            )
+        except Exception as e:
+            logger.error(f"Failed to update model memory: {e}", exc_info=True)
+            return False
+
+    async def delete_model_memory(self, memory_id: str) -> bool:
+        """Delete a model memory.
+
+        Args:
+            memory_id: The ID of the memory to delete
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Verify this is a model memory
+            existing_memory = await self.chroma_service.get_memory(memory_id, "model_memory")
+            if not existing_memory or existing_memory.get("metadata", {}).get("memory_type") != "model":
+                logger.warning(
+                    f"Attempted to delete non-model memory: {memory_id}")
+                return False
+
+            return await self.chroma_service.delete_memory(memory_id, "model_memory")
+        except Exception as e:
+            logger.error(f"Failed to delete model memory: {e}", exc_info=True)
+            return False
+
+    async def get_model_memories(self, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Retrieve all model memories for a user.
+
+        Args:
+            user_id: Optional user ID to filter memories
+
+        Returns:
+            List of model memories with metadata
+        """
+        try:
+            metadata_filter = {"memory_type": "model"}
+            if user_id:
+                metadata_filter["user_id"] = user_id
+
+            memories = await self.chroma_service.retrieve_memories(
+                query="*",
+                collection="model_memory",
+                metadata_filter=metadata_filter
+            )
+
+            # Reassemble any chunked memories
+            chunk_groups = {}
+            for memory in memories:
+                metadata = memory.get("metadata", {})
+                if metadata.get("is_chunk"):
+                    original_id = metadata.get("original_message_id")
+                    if original_id not in chunk_groups:
+                        chunk_groups[original_id] = []
+                    chunk_groups[original_id].append(memory)
+
+            # Process chunked memories
+            processed_memories = []
+            for original_id, chunks in chunk_groups.items():
+                if len(chunks) > 1:
+                    # Sort chunks by their index
+                    chunks.sort(key=lambda x: x.get(
+                        "metadata", {}).get("chunk_index", 0))
+                    # Reassemble the message
+                    reassembled = {
+                        "content": " ".join(chunk["document"] for chunk in chunks),
+                        "metadata": chunks[0]["metadata"].copy(),
+                        "id": original_id
+                    }
+                    # Remove chunk-specific metadata
+                    reassembled["metadata"].pop("is_chunk", None)
+                    reassembled["metadata"].pop("chunk_index", None)
+                    reassembled["metadata"].pop("total_chunks", None)
+                    processed_memories.append(reassembled)
+                else:
+                    # Single chunk or non-chunked memory
+                    processed_memories.append({
+                        "content": chunks[0]["document"],
+                        "metadata": chunks[0]["metadata"],
+                        "id": chunks[0]["id"]
+                    })
+
+            return processed_memories
+        except Exception as e:
+            logger.error(
+                f"Failed to retrieve model memories: {e}", exc_info=True)
+            return []
 
     async def __aenter__(self):
         """Prepare context data by processing inputs, retrieving memories, and engineering prompt."""
@@ -169,41 +362,16 @@ class LLMContextManager:
                 if (self._get_message_value(msg, "role") == "function" or
                     (self._get_message_value(msg, "role") == "system" and
                      self._get_message_value(msg, "name") == "function")):
-
-                    # Look for the preceding assistant message that made the call
-                    if i > 0 and self._get_message_value(self.conversation_history[i-1], "role") == "assistant":
-                        # Append function result to the assistant's message
-                        function_name = self._get_message_value(
-                            msg, "name", "function")
-                        function_content = self._get_message_value(
-                            msg, "content", "")
-
-                        # Format the function result as part of the assistant's response
-                        processed[-1]["content"] += f"\n\nI called the {function_name} function, which returned:\n{function_content}"
-                        processed[-1]["metadata"]["has_function_call"] = True
-                        continue
-                    else:
-                        # If no preceding assistant message, create a new one
-                        processed.append({
-                            "role": "assistant",
-                            "content": f"I received this information from the {self._get_message_value(msg, 'name', 'function')} function:\n{self._get_message_value(msg, 'content', '')}",
-                            "metadata": {
-                                "type": "function_result",
-                                "has_function_call": True
-                            }
-                        })
-                        continue
+                    processed.extend(await self._process_function_result(msg, i))
+                    continue
 
                 # Handle different message types
                 if self._get_message_value(msg, "images"):
-                    # Process images if present
                     processed.append(await self._process_image_message(msg))
                 elif self._get_message_value(msg, "file_path"):
-                    # Process file references if present
                     processed.append(await self._process_file_message(msg))
                 else:
-                    # Regular text message
-                    processed.append(self._process_text_message(msg))
+                    processed.append(await self._process_text_message(msg))
 
             self.processed_inputs = processed
             logger.debug(f"Processed {len(processed)} input messages")
@@ -212,38 +380,321 @@ class LLMContextManager:
             logger.error(f"Error processing user inputs: {e}", exc_info=True)
             self.processed_inputs = self.conversation_history
 
+    async def _process_function_result(self, msg: Union[Dict[str, Any], 'StrictChatMessage'], index: int) -> List[Dict[str, Any]]:
+        """Process a function result message.
+
+        Args:
+            msg: The function result message
+            index: Current message index in conversation history
+
+        Returns:
+            List of processed messages
+        """
+        try:
+            function_name = self._get_message_value(msg, "name", "function")
+            function_content = self._get_message_value(msg, "content", "")
+
+            # Find the last assistant message that might have called this function
+            last_assistant_msg = None
+            last_assistant_idx = -1
+
+            # Look back through history for the last assistant message
+            for i in range(index - 1, -1, -1):
+                prev_msg = self.conversation_history[i]
+                if self._get_message_value(prev_msg, "role") == "assistant":
+                    last_assistant_msg = prev_msg
+                    last_assistant_idx = i
+                    break
+
+            # If we found a recent assistant message
+            if last_assistant_msg and last_assistant_idx >= 0:
+                # Check if there are any messages between assistant and function result
+                intermediate_messages = self.conversation_history[last_assistant_idx + 1:index]
+
+                # If there are no intermediate user messages, append to assistant
+                if not any(self._get_message_value(m, "role") == "user" for m in intermediate_messages):
+                    # Get the original assistant content
+                    assistant_content = self._get_message_value(
+                        last_assistant_msg, "content", "")
+
+                    # Create updated assistant message
+                    return [{
+                        "role": "assistant",
+                        "content": f"{assistant_content}\n\nFunction Result ({function_name}):\n{function_content}",
+                        "metadata": {
+                            "has_function_call": True,
+                            "function_name": function_name,
+                            "original_message_index": last_assistant_idx,
+                            "conversation_id": self.conversation_id
+                        }
+                    }]
+
+            # If we couldn't append to an assistant message, create a new one
+            return [{
+                "role": "assistant",
+                "content": f"Function Result ({function_name}):\n{function_content}",
+                "metadata": {
+                    "type": "function_result",
+                    "has_function_call": True,
+                    "function_name": function_name,
+                    "conversation_id": self.conversation_id
+                }
+            }]
+
+        except Exception as e:
+            logger.error(
+                f"Error processing function result: {e}", exc_info=True)
+            # Return a safe fallback
+            return [{
+                "role": "system",
+                "content": f"Error processing function result: {str(e)}",
+                "metadata": {"type": "error", "error": str(e)}
+            }]
+
     async def _process_image_message(self, msg: Union[Dict[str, Any], 'StrictChatMessage']) -> Dict[str, Any]:
-        """Process a message containing images with potential OCR or description."""
+        """Process a message containing images with potential OCR or description.
+
+        Args:
+            msg: Message containing image data
+
+        Returns:
+            Processed message dictionary
+        """
         content = str(self._get_message_value(msg, "content", ""))
-        if self._get_message_value(msg, "images"):
+        role = str(self._get_message_value(msg, "role"))
+        name = self._get_message_value(msg, "name")
+        images = self._get_message_value(msg, "images", [])
+
+        # Process image content
+        if images:
             # TODO: Implement image processing (OCR, description)
-            content += "\n[Image attached]"
+            image_descriptions = ["\n[Image attached]" for _ in images]
+            content += " ".join(image_descriptions)
+
+        # Always store in ephemeral collection
+        await self.chroma_service.add_memory(
+            text=content,
+            collection=MemoryType.EPHEMERAL,
+            metadata={
+                "role": role,
+                "name": name,
+                "type": "image_message",
+                "has_image": True,
+                "image_count": len(images),
+                "conversation_id": self.conversation_id,
+                "timestamp": datetime.now().isoformat()
+            }
+        )
+
         return {
-            "role": str(self._get_message_value(msg, "role")),
+            "role": role,
             "content": content,
-            "metadata": {"has_image": True}
+            "name": name,
+            "metadata": {
+                "type": "image_message",
+                "has_image": True,
+                "image_count": len(images),
+                "conversation_id": self.conversation_id
+            }
         }
 
     async def _process_file_message(self, msg: Union[Dict[str, Any], 'StrictChatMessage']) -> Dict[str, Any]:
-        """Process a message containing file references with content extraction."""
+        """Process a message containing file references with content extraction.
+
+        Args:
+            msg: Message containing file reference
+
+        Returns:
+            Processed message dictionary
+        """
         content = str(self._get_message_value(msg, "content", ""))
-        if self._get_message_value(msg, "file_path"):
+        role = str(self._get_message_value(msg, "role"))
+        name = self._get_message_value(msg, "name")
+        file_path = self._get_message_value(msg, "file_path")
+
+        if file_path:
             # TODO: Implement file content extraction
-            content += f"\n[File: {self._get_message_value(msg, 'file_path')}]"
+            content += f"\n[File: {file_path}]"
+
+        # Store in ephemeral collection
+        await self.chroma_service.add_memory(
+            text=content,
+            collection=MemoryType.EPHEMERAL,
+            metadata={
+                "role": role,
+                "name": name,
+                "type": "file_message",
+                "has_file": True,
+                "file_path": file_path,
+                "conversation_id": self.conversation_id,
+                "timestamp": datetime.now().isoformat()
+            }
+        )
+
         return {
-            "role": str(self._get_message_value(msg, "role")),
+            "role": role,
             "content": content,
-            "metadata": {"has_file": True}
+            "name": name,
+            "metadata": {
+                "type": "file_message",
+                "has_file": True,
+                "file_path": file_path,
+                "conversation_id": self.conversation_id
+            }
         }
 
-    def _process_text_message(self, msg: Union[Dict[str, Any], 'StrictChatMessage']) -> Dict[str, Any]:
-        """Process a regular text message with normalization."""
+    async def _process_text_message(self, msg: Union[Dict[str, Any], 'StrictChatMessage']) -> Dict[str, Any]:
+        """Process a regular text message with normalization.
+
+        Args:
+            msg: Message to process (dict or StrictChatMessage)
+
+        Returns:
+            Processed message dictionary
+
+        Note:
+            All messages are stored in ephemeral collection as they represent
+            the actual conversation flow. Model memory is only modified through
+            explicit user or model actions.
+        """
+        content = str(self._get_message_value(msg, "content", "")).strip()
+        role = str(self._get_message_value(msg, "role"))
+        name = self._get_message_value(msg, "name")
+
+        # Store in ephemeral collection for conversation history
+        await self.chroma_service.add_memory(
+            text=content,
+            collection=MemoryType.EPHEMERAL,  # Use enum value
+            metadata={
+                "role": role,
+                "name": name,
+                "type": "text",
+                "conversation_id": self.conversation_id,
+                "timestamp": datetime.now().isoformat()
+            },
+            max_chunk_tokens=config.MAX_CHUNK_TOKENS  # Explicitly pass chunk size
+        )
+
         return {
-            "role": str(self._get_message_value(msg, "role")),
-            "content": str(self._get_message_value(msg, "content", "")).strip(),
-            "name": self._get_message_value(msg, "name"),
-            "metadata": {"type": "text"}
+            "role": role,
+            "content": content,
+            "name": name,
+            "metadata": {
+                "type": "text",
+                "conversation_id": self.conversation_id
+            }
         }
+
+    async def retrieve_memories(self, query: str, top_k: int = 5, metadata_filter: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """Retrieve relevant memories from both ephemeral and model memory collections.
+
+        Args:
+            query: The query to search for relevant memories
+            top_k: Number of memories to retrieve
+            metadata_filter: Optional metadata filter for the search
+
+        Returns:
+            List of retrieved memories with metadata
+        """
+        try:
+            # Retrieve from both collections
+            ephemeral_memories = await self.chroma_service.retrieve_memories(
+                query=query,
+                collection=MemoryType.EPHEMERAL,
+                top_k=top_k,
+                metadata_filter=metadata_filter
+            )
+            model_memories = await self.chroma_service.retrieve_memories(
+                query=query,
+                collection=MemoryType.MODEL_MEMORY,
+                top_k=top_k,
+                metadata_filter=metadata_filter
+            )
+
+            # Combine and process results
+            all_memories = (ephemeral_memories or []) + (model_memories or [])
+
+            # Group chunks by their original_message_id
+            chunk_groups = {}
+            for memory in all_memories:
+                metadata = memory.get("metadata", {})
+                if metadata.get("is_chunk"):
+                    original_id = metadata.get("original_message_id")
+                    if original_id not in chunk_groups:
+                        chunk_groups[original_id] = []
+                    chunk_groups[original_id].append(memory)
+
+            # Process each group using _reassemble_chunks
+            processed_memories = []
+            for chunks in chunk_groups.values():
+                if len(chunks) > 1:
+                    reassembled = await self._reassemble_chunks(chunks)
+                    if reassembled:
+                        processed_memories.append(reassembled)
+                else:
+                    # Single chunk or non-chunked memory
+                    processed_memories.append({
+                        "content": chunks[0]["document"],
+                        "metadata": chunks[0]["metadata"],
+                        "relevance_score": chunks[0].get("relevance_score", 0),
+                        "collection": chunks[0].get("collection", MemoryType.EPHEMERAL)
+                    })
+
+            # Add non-chunked memories
+            for memory in all_memories:
+                if not memory.get("metadata", {}).get("is_chunk"):
+                    processed_memories.append(memory)
+
+            # Sort by relevance score and prioritize model memory
+            processed_memories.sort(
+                key=lambda x: (
+                    x["relevance_score"],
+                    1 if x.get("collection") == MemoryType.MODEL_MEMORY else 0
+                ),
+                reverse=True
+            )
+
+            return processed_memories[:top_k]
+
+        except Exception as e:
+            logger.error(f"Error retrieving memories: {e}", exc_info=True)
+            return []
+
+    async def _reassemble_chunks(self, chunks: List[Dict[str, Any]], sort_key: str = "relevance_score") -> Optional[Dict[str, Any]]:
+        """Reassemble chunks into a complete message.
+
+        Args:
+            chunks: List of chunks to reassemble
+            sort_key: Key to use for sorting when selecting best chunk (for relevance)
+
+        Returns:
+            Reassembled message with metadata, or None if no chunks
+        """
+        if not chunks:
+            return None
+
+        # Sort chunks by their index
+        chunks.sort(key=lambda x: x.get("metadata", {}).get("chunk_index", 0))
+
+        # Get the highest score if using relevance scoring
+        max_score = max((chunk.get(sort_key, 0)
+                        for chunk in chunks), default=0)
+
+        # Combine chunks
+        reassembled = {
+            "content": " ".join(chunk.get("document", chunk.get("content", "")) for chunk in chunks),
+            "metadata": chunks[0].get("metadata", {}).copy(),
+            "relevance_score": max_score,
+            "collection": chunks[0].get("collection", MemoryType.EPHEMERAL)
+        }
+
+        # Remove chunk-specific metadata
+        reassembled["metadata"].pop("is_chunk", None)
+        reassembled["metadata"].pop("chunk_index", None)
+        reassembled["metadata"].pop("total_chunks", None)
+        reassembled["metadata"].pop("original_message_id", None)
+
+        return reassembled
 
     async def _retrieve_relevant_memories(self):
         """Retrieve relevant memories from Chroma with semantic search."""
@@ -253,7 +704,6 @@ class LLMContextManager:
             query = " ".join([
                 str(self._get_message_value(msg, "content", ""))
                 for msg in self.processed_inputs
-                # Only use user messages for query
                 if self._get_message_value(msg, "role") == "user"
             ])
 
@@ -261,34 +711,73 @@ class LLMContextManager:
                 logger.debug("No content available to query for memories")
                 return
 
-            # Retrieve memories with metadata if filter is provided
-            if self.metadata_filter:
-                memories = await self.chroma_service.retrieve_with_metadata(
-                    query, self.metadata_filter, self.top_k
-                )
-            else:
-                memories = await self.chroma_service.retrieve_memories(
-                    query, self.top_k
-                )
+            # Build metadata filter for conversation ID
+            metadata_filter = {
+                "$or": [
+                    {"conversation_id": self.conversation_id},
+                    {"type": "memory"}
+                ]
+            }
 
-            # Process retrieved memories with metadata
-            self.retrieved_memories = [
-                {
-                    "content": memory["document"],
-                    "metadata": memory["metadata"],
-                    "relevance_score": memory.get("relevance", 0.0)
-                }
-                for memory in (memories or [])
-            ]
+            # Retrieve from both collections
+            ephemeral_memories = await self.chroma_service.retrieve_memories(
+                query=query,
+                collection=MemoryType.EPHEMERAL,
+                top_k=self.top_k,
+                metadata_filter=metadata_filter
+            )
+            model_memories = await self.chroma_service.retrieve_memories(
+                query=query,
+                collection=MemoryType.MODEL_MEMORY,
+                top_k=self.top_k,
+                metadata_filter=metadata_filter
+            )
 
-            # Sort by relevance score
+            # Combine and process retrieved memories
+            all_memories = (ephemeral_memories or []) + (model_memories or [])
+
+            # Group chunks by their response_id
+            chunk_groups = {}
+            for memory in all_memories:
+                metadata = memory.get("metadata", {})
+                response_id = metadata.get("response_id")
+                if response_id:
+                    if response_id not in chunk_groups:
+                        chunk_groups[response_id] = []
+                    chunk_groups[response_id].append(memory)
+
+            # Reassemble chunks into complete messages
+            self.retrieved_memories = []
+            for response_id, chunks in chunk_groups.items():
+                if len(chunks) > 1:
+                    reassembled = await self._reassemble_chunks(chunks)
+                    if reassembled:
+                        self.retrieved_memories.append(reassembled)
+                else:
+                    # Single chunk or non-chunked memory
+                    self.retrieved_memories.append({
+                        "content": chunks[0]["document"],
+                        "metadata": chunks[0]["metadata"],
+                        "relevance_score": chunks[0].get("relevance_score", 0),
+                        "collection": chunks[0].get("collection", MemoryType.EPHEMERAL)
+                    })
+
+            # Sort by relevance score and prioritize model memory
             self.retrieved_memories.sort(
-                key=lambda x: x["relevance_score"],
+                key=lambda x: (
+                    x["relevance_score"],
+                    1 if x.get("collection") == MemoryType.MODEL_MEMORY else 0
+                ),
                 reverse=True
             )
 
+            # Limit to top_k results
+            self.retrieved_memories = self.retrieved_memories[:self.top_k]
+
             logger.debug(
-                f"Retrieved {len(self.retrieved_memories)} relevant memories"
+                f"Retrieved {len(self.retrieved_memories)} relevant memories "
+                f"({len(ephemeral_memories or [])} ephemeral, "
+                f"{len(model_memories or [])} model)"
             )
 
         except Exception as e:
@@ -364,19 +853,84 @@ class LLMContextManager:
             # Fallback to processed inputs on error
             self.final_context_messages = self.processed_inputs
 
-    async def _manage_context_size(self):
-        """Ensure context stays within token limits with smart truncation."""
-        try:
-            # Calculate current token count
-            total_tokens = sum(
-                self.count_message_tokens(msg)
-                for msg in self.final_context_messages
-            )
+    async def _summarize_overflowing_messages(
+        self,
+        messages: List[Dict[str, Any]],
+        excess_tokens: int
+    ) -> Tuple[Optional[Dict[str, Any]], List[Dict[str, Any]]]:
+        """Summarize messages that exceed the token limit.
 
-            if total_tokens > self.max_context_tokens:
+        Args:
+            messages: List of messages to potentially summarize
+            excess_tokens: Number of tokens to reduce by
+
+        Returns:
+            Tuple of (summary message if created, remaining messages)
+        """
+        if not messages or not self.enable_summarization:
+            return None, messages
+
+        # Take the oldest messages that exceed our limit
+        messages_to_summarize = []
+        current_tokens = 0
+
+        for msg in messages:
+            msg_tokens = self.count_message_tokens(msg)
+            if current_tokens + msg_tokens <= excess_tokens:
+                messages_to_summarize.append(msg)
+                current_tokens += msg_tokens
+            else:
+                break
+
+        if not messages_to_summarize:
+            return None, messages
+
+        # Generate summary
+        summary = await self._summarize_conversation(messages_to_summarize)
+        if not summary:
+            return None, messages
+
+        # Store summary in ephemeral collection
+        await self.chroma_service.add_memory(
+            text=summary,
+            collection=MemoryType.EPHEMERAL,  # Force ephemeral storage for summaries
+            metadata={
+                "type": "conversation_summary",
+                "conversation_id": self.conversation_id,
+                "summarized_messages": len(messages_to_summarize),
+                "timestamp": datetime.now().isoformat()
+            }
+        )
+
+        # Create summary message
+        summary_msg = {
+            "role": "system",
+            "content": f"Previous conversation summary: {summary}",
+            "metadata": {
+                "type": "summary",
+                "conversation_id": self.conversation_id
+            }
+        }
+
+        # Return summary and remaining messages
+        return summary_msg, messages[len(messages_to_summarize):]
+
+    async def _manage_context_size(self):
+        """Ensure context stays within token limits with smart truncation and summarization."""
+        try:
+            while True:
+                # Calculate current token count
+                total_tokens = sum(
+                    self.count_message_tokens(msg)
+                    for msg in self.final_context_messages
+                )
+
+                if total_tokens <= self.max_context_tokens:
+                    break
+
                 logger.info(
                     f"Context size ({total_tokens} tokens) exceeds limit "
-                    f"({self.max_context_tokens} tokens). Truncating..."
+                    f"({self.max_context_tokens} tokens). Managing size..."
                 )
 
                 # Separate system and conversation messages
@@ -395,7 +949,20 @@ class LLMContextManager:
                     for msg in system_messages
                 )
 
-                # Calculate remaining tokens for conversation
+                # Try to summarize conversation messages
+                excess_tokens = total_tokens - self.max_context_tokens
+                summary_msg, remaining_messages = await self._summarize_overflowing_messages(
+                    conversation, excess_tokens
+                )
+
+                if summary_msg:
+                    # Update conversation with summary and remaining messages
+                    conversation = [summary_msg] + remaining_messages
+                    self.final_context_messages = system_messages + conversation
+                    continue
+
+                # If we can't summarize or summarization didn't help enough,
+                # calculate remaining tokens and truncate
                 remaining_tokens = self.max_context_tokens - system_tokens
 
                 # Keep most recent conversation messages that fit
@@ -412,143 +979,46 @@ class LLMContextManager:
 
                 self.final_context_messages = system_messages + truncated_conversation
                 logger.debug(
-                    f"Truncated context to {len(self.final_context_messages)} messages"
+                    f"Managed context to {len(self.final_context_messages)} messages"
                 )
 
         except Exception as e:
             logger.error(f"Error managing context size: {e}", exc_info=True)
 
-    async def _summarize_conversation(self) -> Optional[str]:
-        """Summarize the current conversation for storage.
+    async def _teardown(self):
+        """Clean up resources."""
+        logger.debug("Starting _teardown method")
+        # No specific cleanup needed, as summarization is now handled in _manage_context_size
+        pass
+
+    async def _summarize_conversation(self, messages: List[Dict[str, Any]]) -> Optional[str]:
+        """Summarize a set of conversation messages.
+
+        Args:
+            messages: List of messages to summarize
 
         Returns:
             Optional summary of the conversation
         """
         try:
-            if not self.final_context_messages:
+            if not messages:
                 return None
 
-            # Use LangChain for summarization
+            # Format messages for summarization
+            conversation_text = "\n".join([
+                f"{msg.get('role', 'unknown')}: {msg.get('content', '')}"
+                for msg in messages
+            ])
+
+            # Use LangChain for summarization with specific instructions
             summary = await self.langchain_service.query_memory(
-                "Summarize this conversation",
-                context=self.final_context_messages
+                "Create a concise summary of this conversation exchange. "
+                "Focus on key points, decisions made, and important information. "
+                "Maintain context for future interactions.",
+                context={"conversation": conversation_text}
             )
             return summary.get("result")
 
         except Exception as e:
             logger.error(f"Error summarizing conversation: {e}", exc_info=True)
             return None
-
-    async def _teardown(self):
-        """Clean up resources and store conversation summary."""
-        logger.debug("Starting _teardown method")
-        try:
-            # Only store summaries for conversations with user messages
-            has_user_messages = any(
-                self._get_message_value(msg, "role") == "user"
-                for msg in self.final_context_messages
-            )
-
-            if not has_user_messages:
-                logger.debug(
-                    "No user messages found, skipping summary storage")
-                return
-
-            # Only summarize if we have actual content to store
-            has_assistant_response = any(
-                self._get_message_value(msg, "role") == "assistant" and
-                self._get_message_value(msg, "content", "").strip() and
-                not self._get_message_value(msg, "metadata", {}).get(
-                    "type") == "function_result"
-                for msg in self.final_context_messages
-            )
-
-            if not has_assistant_response:
-                logger.debug(
-                    "No complete assistant response found, skipping summary storage")
-                return
-
-            # Get the last complete exchange
-            last_exchange = []
-            for msg in reversed(self.final_context_messages):
-                role = self._get_message_value(msg, "role")
-                if role in ["user", "assistant"]:
-                    last_exchange.insert(0, msg)
-                if len(last_exchange) >= 2:  # We have a complete exchange
-                    break
-
-            if len(last_exchange) < 2:
-                logger.debug(
-                    "No complete exchange found, skipping summary storage")
-                return
-
-            # Summarize only the last complete exchange
-            summary = await self._summarize_conversation()
-
-            if summary:
-                # Enhanced duplicate detection with semantic similarity
-                existing_memories = await self.chroma_service.retrieve_memories(
-                    summary,
-                    top_k=5,
-                    score_threshold=0.95  # Require 95% similarity
-                )
-
-                # Check for duplicates using multiple criteria
-                if existing_memories:
-                    for memory in existing_memories:
-                        existing_content = memory.get(
-                            "document", "").strip().lower()
-                        new_content = summary.strip().lower()
-
-                        # Check for exact match
-                        if existing_content == new_content:
-                            logger.debug(
-                                "Found exact duplicate memory, skipping storage")
-                            return
-
-                        # Check for semantic similarity
-                        if memory.get("relevance_score", 0) >= 0.95:
-                            logger.debug(
-                                "Found highly similar memory (95%+), skipping storage")
-                            return
-
-                        # Check for significant overlap in key phrases
-                        existing_phrases = set(existing_content.split())
-                        new_phrases = set(new_content.split())
-                        overlap = len(existing_phrases &
-                                      new_phrases) / len(new_phrases)
-                        if overlap > 0.9:
-                            logger.debug(
-                                "Found memory with 90%+ phrase overlap, skipping storage")
-                            return
-
-                # Store summary in Chroma with proper metadata
-                await self.chroma_service.add_memory(
-                    summary,
-                    metadata={
-                        "type": "conversation_summary",
-                        "model": self.model_name,
-                        "timestamp": datetime.now().isoformat(),
-                        # Only count the actual exchange
-                        "message_count": len(last_exchange),
-                        "has_system_context": any(
-                            self._get_message_value(msg, "role") == "system"
-                            for msg in self.final_context_messages
-                        ),
-                        "has_function_calls": any(
-                            self._get_message_value(msg, "name") == "function"
-                            for msg in self.final_context_messages
-                        ),
-                        "user_query": next(
-                            (self._get_message_value(msg, "content")
-                             for msg in last_exchange
-                             if self._get_message_value(msg, "role") == "user"),
-                            ""
-                        )
-                    }
-                )
-                logger.debug(
-                    f"Stored summary of exchange with {len(last_exchange)} messages")
-
-        except Exception as e:
-            logger.error(f"Error in teardown: {e}", exc_info=True)
