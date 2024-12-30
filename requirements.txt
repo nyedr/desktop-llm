@@ -53,3 +53,12 @@ psutil
 
 # Web Scraping
 markdownify>=0.11.6
+
+# NLP and Entity Recognition
+spacy>=3.7.2
+lightrag-hku>=1.0.8
+aioboto3>=13.3.0
+
+# File Processing
+PyPDF2
+python-docx

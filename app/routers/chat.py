@@ -11,8 +11,10 @@ from app.dependencies.providers import (
     get_model_service,
     get_function_service,
     get_langchain_service,
-    get_chroma_service
+    get_lightrag_manager
 )
+from app.memory.lightrag.manager import EnhancedLightRAGManager
+from app.ner_utils import advanced_ner_and_relationship_inference
 from app.functions.filters import apply_filters
 from app.functions.utils import (
     validate_tool_response,
@@ -22,7 +24,6 @@ from app.services.agent import Agent
 from app.services.model_service import ModelService
 from app.services.function_service import FunctionService
 from app.services.langchain_service import LangChainService
-from app.services.chroma_service import ChromaService
 from app.models.chat import (
     ChatRequest, ChatStreamEvent, StrictChatMessage
 )
@@ -527,17 +528,35 @@ async def add_memory(
     memory_text: str,
     memory_type: MemoryType = MemoryType.EPHEMERAL,
     metadata: Optional[Dict[str, Any]] = None,
-    chroma_service: ChromaService = Depends(get_chroma_service)
+    manager: EnhancedLightRAGManager = Depends(get_lightrag_manager)
 ):
-    """Add a memory to the specified collection."""
+    """Add a memory to the specified collection using EnhancedLightRAGManager."""
     try:
-        await chroma_service.add_memory(
+        await manager.ingestor.ingest_text(
             text=memory_text,
-            collection=memory_type,
-            metadata=metadata
+            metadata=metadata,
+            parent_id=None  # Adjust as needed for hierarchy
         )
         return {"status": "success", "message": "Memory added successfully."}
     except Exception as e:
         logger.error(f"Error adding memory: {e}", exc_info=True)
         raise HTTPException(
             status_code=500, detail=f"Failed to add memory: {e}")
+
+
+@router.post("/chat/parse")
+async def parse_chat_message(
+    message: str,
+    user_id: str,
+    manager: EnhancedLightRAGManager = Depends(get_lightrag_manager)
+):
+    """Parse chat message for entities and relationships using EnhancedLightRAGManager."""
+    try:
+        # Perform NER and relationship inference
+        advanced_ner_and_relationship_inference(message, user_id, manager)
+
+        return {"status": "success", "message": "Message parsed successfully"}
+    except Exception as e:
+        logger.error(f"Error parsing chat message: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500, detail=f"Failed to parse chat message: {e}")

@@ -5,7 +5,7 @@ import uuid
 from transformers import AutoTokenizer
 from datetime import datetime
 
-from app.services.chroma_service import ChromaService
+from app.memory.lightrag.manager import EnhancedLightRAGManager
 from app.core.config import config
 from app.models.memory import MemoryType
 
@@ -30,7 +30,7 @@ class LLMContextManager:
 
     def __init__(
         self,
-        chroma_service: ChromaService,
+        manager: EnhancedLightRAGManager,
         langchain_service: 'LangChainService',
         conversation_history: List[Dict[str, Any]],
         max_context_tokens: int = config.MAX_TOKENS,
@@ -44,7 +44,7 @@ class LLMContextManager:
         """Initialize the LLM context manager.
 
         Args:
-            chroma_service: Service for interacting with ChromaDB
+            manager: Service for managing LightRAG memory operations
             langchain_service: Service for LangChain operations
             conversation_history: List of conversation messages
             max_context_tokens: Maximum tokens allowed in context
@@ -55,7 +55,7 @@ class LLMContextManager:
             conversation_id: Optional conversation ID for this context
             enable_summarization: Whether to enable automatic summarization
         """
-        self.chroma_service = chroma_service
+        self.manager = manager
         self.langchain_service = langchain_service
         self.conversation_history = conversation_history
         self.metadata_filter = metadata_filter
@@ -133,8 +133,8 @@ class LLMContextManager:
                     "persistent": False
                 })
 
-            # Let ChromaService handle chunking with consistent response_id
-            return await self.chroma_service.add_memory(
+            # Let LightRAG manager handle chunking with consistent response_id
+            return await self.manager.add_memory(
                 text=text,
                 collection=memory_type,
                 metadata=base_metadata,
@@ -158,14 +158,14 @@ class LLMContextManager:
         """
         try:
             # Verify this is a model memory
-            existing_memory = await self.chroma_service.get_memory(memory_id, "model_memory")
+            existing_memory = await self.manager.get_memory(memory_id, "model_memory")
             if not existing_memory or existing_memory.get("metadata", {}).get("memory_type") != "model":
                 logger.warning(
                     f"Attempted to update non-model memory: {memory_id}")
                 return False
 
             # Update the memory with new content and updated timestamp
-            return await self.chroma_service.update_memory(
+            return await self.manager.update_memory(
                 memory_id,
                 new_content,
                 "model_memory",
@@ -189,13 +189,13 @@ class LLMContextManager:
         """
         try:
             # Verify this is a model memory
-            existing_memory = await self.chroma_service.get_memory(memory_id, "model_memory")
+            existing_memory = await self.manager.get_memory(memory_id, "model_memory")
             if not existing_memory or existing_memory.get("metadata", {}).get("memory_type") != "model":
                 logger.warning(
                     f"Attempted to delete non-model memory: {memory_id}")
                 return False
 
-            return await self.chroma_service.delete_memory(memory_id, "model_memory")
+            return await self.manager.delete_memory(memory_id, "model_memory")
         except Exception as e:
             logger.error(f"Failed to delete model memory: {e}", exc_info=True)
             return False
@@ -214,7 +214,7 @@ class LLMContextManager:
             if user_id:
                 metadata_filter["user_id"] = user_id
 
-            memories = await self.chroma_service.retrieve_memories(
+            memories = await self.manager.retrieve_memories(
                 query="*",
                 collection="model_memory",
                 metadata_filter=metadata_filter
@@ -472,19 +472,19 @@ class LLMContextManager:
             content += " ".join(image_descriptions)
 
         # Always store in ephemeral collection
-        await self.chroma_service.add_memory(
-            text=content,
-            collection=MemoryType.EPHEMERAL,
-            metadata={
-                "role": role,
-                "name": name,
-                "type": "image_message",
-                "has_image": True,
-                "image_count": len(images),
-                "conversation_id": self.conversation_id,
-                "timestamp": datetime.now().isoformat()
-            }
-        )
+            await self.manager.add_memory(
+                text=content,
+                collection=MemoryType.EPHEMERAL,
+                metadata={
+                    "role": role,
+                    "name": name,
+                    "type": "image_message",
+                    "has_image": True,
+                    "image_count": len(images),
+                    "conversation_id": self.conversation_id,
+                    "timestamp": datetime.now().isoformat()
+                }
+            )
 
         return {
             "role": role,
@@ -517,7 +517,7 @@ class LLMContextManager:
             content += f"\n[File: {file_path}]"
 
         # Store in ephemeral collection
-        await self.chroma_service.add_memory(
+        await self.manager.add_memory(
             text=content,
             collection=MemoryType.EPHEMERAL,
             metadata={
@@ -562,7 +562,7 @@ class LLMContextManager:
         name = self._get_message_value(msg, "name")
 
         # Store in ephemeral collection for conversation history
-        await self.chroma_service.add_memory(
+        await self.manager.add_memory(
             text=content,
             collection=MemoryType.EPHEMERAL,  # Use enum value
             metadata={
@@ -598,13 +598,13 @@ class LLMContextManager:
         """
         try:
             # Retrieve from both collections
-            ephemeral_memories = await self.chroma_service.retrieve_memories(
+            ephemeral_memories = await self.manager.retrieve_memories(
                 query=query,
                 collection=MemoryType.EPHEMERAL,
                 top_k=top_k,
                 metadata_filter=metadata_filter
             )
-            model_memories = await self.chroma_service.retrieve_memories(
+            model_memories = await self.manager.retrieve_memories(
                 query=query,
                 collection=MemoryType.MODEL_MEMORY,
                 top_k=top_k,
@@ -721,13 +721,13 @@ class LLMContextManager:
             }
 
             # Retrieve from both collections
-            ephemeral_memories = await self.chroma_service.retrieve_memories(
+            ephemeral_memories = await self.manager.retrieve_memories(
                 query=query,
                 collection=MemoryType.EPHEMERAL,
                 top_k=self.top_k,
                 metadata_filter=metadata_filter
             )
-            model_memories = await self.chroma_service.retrieve_memories(
+            model_memories = await self.manager.retrieve_memories(
                 query=query,
                 collection=MemoryType.MODEL_MEMORY,
                 top_k=self.top_k,
@@ -910,7 +910,7 @@ class LLMContextManager:
             return None, messages
 
         # Store summary in ephemeral collection
-        await self.chroma_service.add_memory(
+        await self.manager.add_memory(
             text=summary,
             collection=MemoryType.EPHEMERAL,  # Force ephemeral storage for summaries
             metadata={

@@ -59,4 +59,15 @@ dependencies:
       - jsonschema
       - psutil
 
+      # Web Scraping
       - markdownify>=0.11.6
+
+      # NLP and Entity Recognition
+      - spacy>=3.7.2
+      - lightrag-hku
+      - nano-vectordb
+      - aioboto3
+
+      # File Processing
+      - PyPDF2
+      - python-docx

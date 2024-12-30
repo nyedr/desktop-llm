@@ -21,24 +21,63 @@ class Message(BaseModel):
 
 
 class Agent:
-    """Agent for managing model interactions and function execution."""
+    """Agent class for handling chat interactions."""
 
     def __init__(
         self,
-        model_service: ModelService,
-        function_service: FunctionService,
+        model_service: Optional[ModelService] = None,
+        function_service: Optional[FunctionService] = None,
         langchain_service: Optional[LangChainService] = None,
         model: str = config.DEFAULT_MODEL,
         temperature: float = config.MODEL_TEMPERATURE,
         max_tokens: int = config.MAX_TOKENS
     ):
+        """Initialize the agent.
+
+        Args:
+            model_service: Model service for LLM operations
+            function_service: Function service for executing functions
+            langchain_service: Optional LangChain service for memory operations
+            model: Model to use for chat
+            temperature: Temperature for model sampling
+            max_tokens: Maximum tokens for model output
+        """
+        if model_service is None or function_service is None:
+            raise ValueError(
+                "model_service and function_service must be provided")
+
         self.model_service = model_service
         self.function_service = function_service
         self.langchain_service = langchain_service
         self.model = model
         self.temperature = temperature
         self.max_tokens = max_tokens
-        self._model_cache = {}
+        self._initialized = False
+
+    async def initialize(self):
+        """Initialize the agent."""
+        if self._initialized:
+            return
+        try:
+            logger.info("Initializing Agent...")
+            if self.langchain_service:
+                logger.info(
+                    "LangChain service found, ensuring initialization...")
+                if not getattr(self.langchain_service, '_initialized', False):
+                    logger.warning(
+                        "LangChain service not initialized, skipping memory features")
+                    self.langchain_service = None
+                else:
+                    logger.info("LangChain service initialized successfully")
+            else:
+                logger.info(
+                    "No LangChain service provided, memory features will be disabled")
+            self._initialized = True
+            logger.info("Agent initialized successfully")
+        except Exception as e:
+            logger.error(
+                f"Failed to initialize Agent: {str(e)}", exc_info=True)
+            raise
 
     async def generate(
         self,
@@ -81,6 +120,10 @@ class Agent:
     ) -> AsyncGenerator[str, None]:
         """Generate chat completions with optional memory context."""
         try:
+            # Ensure agent is initialized
+            if not self._initialized:
+                await self.initialize()
+
             if enable_tools and tools:
                 logger.debug(
                     f"Tools enabled for chat. Available tools: {[t['function']['name'] for t in tools]}")

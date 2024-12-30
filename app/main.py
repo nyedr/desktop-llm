@@ -79,7 +79,13 @@ async def initialize_service(service_name: str, get_service_fn, state: ServiceSt
         state.service = service
 
         if hasattr(service, 'initialize'):
-            await service.initialize()
+            if isinstance(service, Providers.get_lightrag_manager().__class__):
+                # Initialize LightRAG manager
+                await service.initialize()
+                if not getattr(service, '_initialized', False):
+                    raise RuntimeError("LightRAG manager failed to initialize")
+            else:
+                await service.initialize()
 
         state.set_status(ServiceStatus.READY)
         logger.info(f"{service_name} initialized")
@@ -149,7 +155,7 @@ async def cleanup_services(service_states: Dict[str, ServiceState], is_shutting_
 service_states = {
     "model": ServiceState(),
     "function": ServiceState(),
-    "chroma": ServiceState(),
+    "lightrag": ServiceState(),
     "mcp": ServiceState(),
     "langchain": ServiceState(),
     "agent": ServiceState()
@@ -163,21 +169,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     try:
         # Initialize base services first
-        chroma_success = await initialize_service("Chroma", Providers.get_chroma_service, service_states['chroma'])
+        lightrag_success = await initialize_service("LightRAG", Providers.get_lightrag_manager, service_states['lightrag'])
         mcp_success = await initialize_service("MCP", Providers.get_mcp_service, service_states['mcp'])
+
+        # Initialize model and function services
+        await initialize_service("Model", Providers.get_model_service, service_states['model'])
+        await initialize_service("Function", Providers.get_function_service, service_states['function'])
 
         # Initialize LangChain with dependencies
         langchain_state = service_states['langchain']
-        if chroma_success and mcp_success:
+        if lightrag_success and mcp_success:
             try:
                 langchain_state.set_status(ServiceStatus.INITIALIZING)
-                langchain_service = Providers.get_langchain_service()
+                langchain_service = await Providers.get_langchain_service()
                 langchain_state.service = langchain_service
-
-                await langchain_service.initialize(
-                    service_states['chroma'].service,
-                    service_states['mcp'].service
-                )
                 langchain_state.set_status(ServiceStatus.READY)
                 logger.info("LangChain Service initialized")
             except Exception as e:
@@ -188,9 +193,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             logger.error(
                 "LangChain Service initialization skipped - dependencies not ready")
 
-        # Initialize remaining services
-        await initialize_service("Model", Providers.get_model_service, service_states['model'])
-        await initialize_service("Function", Providers.get_function_service, service_states['function'])
+        # Initialize agent last since it depends on other services
         await initialize_service("Agent", Providers.get_agent, service_states['agent'])
 
         # Log final service states

@@ -11,7 +11,7 @@ from langchain.schema import Document
 from langchain.chains.summarize import load_summarize_chain
 
 from app.core.config import config
-from app.services.chroma_service import ChromaService
+from app.memory.lightrag.manager import EnhancedLightRAGManager
 from app.services.mcp_service import MCPService
 from app.models.memory import MemoryType
 from app.context.llm_context import LLMContextManager
@@ -28,7 +28,8 @@ class LangChainService:
 
     def __init__(self):
         """Initialize the LangChain service."""
-        self.chroma_service = None
+        logger.info("Creating new LangChainService instance")
+        self.manager = None
         self.mcp_service = None
         self.retriever = None
         self.llm = None
@@ -36,7 +37,7 @@ class LangChainService:
         self.summarize_chain = None
         self._initialized = False
 
-    async def initialize(self, chroma_service: ChromaService, mcp_service: MCPService):
+    async def initialize(self, manager: EnhancedLightRAGManager, mcp_service: MCPService):
         """Initialize the service with required dependencies.
 
         This method sets up all necessary components for LangChain integration:
@@ -46,98 +47,105 @@ class LangChainService:
         4. Summarization chain for context management
 
         Args:
-            chroma_service: Service for vector storage operations
+            manager: EnhancedLightRAGManager for memory operations
             mcp_service: Service for model context protocol operations
 
         Raises:
             RuntimeError: If initialization fails or service is already initialized
         """
         try:
+            logger.info("Starting LangChainService initialization...")
             if self._initialized:
-                logger.warning("LangChain Service already initialized")
+                logger.info("LangChainService already initialized")
                 return
 
-            logger.info("Initializing LangChain Service...")
+            logger.info("Initializing core services...")
+            await self._initialize_services(manager, mcp_service)
 
-            # Store service dependencies
-            await self._initialize_services(chroma_service, mcp_service)
-
-            # Initialize core components
+            logger.info("Initializing embeddings...")
             await self._initialize_embeddings()
+
+            logger.info("Initializing LLM...")
             await self._initialize_llm()
+
+            logger.info("Initializing retriever...")
             await self._initialize_retriever()
+
+            logger.info("Initializing chains...")
             await self._initialize_chains()
 
             self._initialized = True
-            logger.info("LangChain Service initialized successfully")
-
+            logger.info(
+                "LangChainService initialization completed successfully")
         except Exception as e:
             logger.error(
-                f"Failed to initialize LangChain Service: {e}", exc_info=True)
-            raise RuntimeError(
-                f"LangChain Service initialization failed: {str(e)}")
+                f"Failed to initialize LangChainService: {str(e)}", exc_info=True)
+            raise
 
-    async def _initialize_services(self, chroma_service: ChromaService, mcp_service: MCPService):
+    async def _initialize_services(self, manager: EnhancedLightRAGManager, mcp_service: MCPService):
         """Initialize service dependencies.
 
         Args:
-            chroma_service: Service for vector storage operations
+            manager: EnhancedLightRAGManager for memory operations
             mcp_service: Service for model context protocol operations
         """
-        self.chroma_service = chroma_service
-        self.mcp_service = mcp_service
-        logger.debug("Service dependencies initialized")
-
-    async def _initialize_embeddings(self):
-        """Initialize the embeddings model for vector operations."""
         try:
-            self.embeddings = HuggingFaceEmbeddings(
-                model_name=config.CHROMA_EMBEDDING_MODEL
-            )
-            logger.debug(
-                f"Embeddings model initialized: {config.CHROMA_EMBEDDING_MODEL}")
+            logger.debug("Setting up manager and MCP service...")
+            self.manager = manager
+            self.mcp_service = mcp_service
+            logger.debug("Core services initialized successfully")
         except Exception as e:
             logger.error(
-                f"Failed to initialize embeddings: {e}", exc_info=True)
+                f"Failed to initialize core services: {str(e)}", exc_info=True)
+            raise
+
+    async def _initialize_embeddings(self):
+        """Initialize embeddings model."""
+        try:
+            logger.debug("Setting up HuggingFace embeddings...")
+            self.embeddings = HuggingFaceEmbeddings()
+            logger.debug("Embeddings initialized successfully")
+        except Exception as e:
+            logger.error(
+                f"Failed to initialize embeddings: {str(e)}", exc_info=True)
             raise
 
     async def _initialize_llm(self):
-        """Initialize the language model for text generation."""
+        """Initialize language model."""
         try:
+            logger.debug("Setting up Ollama LLM...")
             self.llm = Ollama(
                 base_url=config.OLLAMA_BASE_URLS[0],
                 model=config.DEFAULT_MODEL,
                 temperature=config.MODEL_TEMPERATURE
             )
-            logger.debug(f"LLM initialized: {config.DEFAULT_MODEL}")
+            logger.debug(f"LLM initialized with model: {config.DEFAULT_MODEL}")
         except Exception as e:
-            logger.error(f"Failed to initialize LLM: {e}", exc_info=True)
+            logger.error(f"Failed to initialize LLM: {str(e)}", exc_info=True)
             raise
 
     async def _initialize_retriever(self):
-        """Initialize the retriever for semantic search operations."""
+        """Initialize retriever for semantic search."""
         try:
+            logger.debug("Setting up Chroma retriever...")
             self.retriever = Chroma(
-                client=self.chroma_service.client,
-                collection_name=config.CHROMA_COLLECTION_NAME,
-                embedding_function=self.embeddings
-            ).as_retriever()
-            logger.debug("Retriever initialized")
+                embedding_function=self.embeddings).as_retriever()
+            logger.debug("Retriever initialized successfully")
         except Exception as e:
-            logger.error(f"Failed to initialize retriever: {e}", exc_info=True)
+            logger.error(
+                f"Failed to initialize retriever: {str(e)}", exc_info=True)
             raise
 
     async def _initialize_chains(self):
-        """Initialize LangChain processing chains."""
+        """Initialize LangChain chains."""
         try:
+            logger.debug("Setting up summarization chain...")
             self.summarize_chain = load_summarize_chain(
-                llm=self.llm,
-                chain_type="map_reduce",
-                verbose=True
-            )
-            logger.debug("Processing chains initialized")
+                self.llm, chain_type="stuff")
+            logger.debug("Chains initialized successfully")
         except Exception as e:
-            logger.error(f"Failed to initialize chains: {e}", exc_info=True)
+            logger.error(
+                f"Failed to initialize chains: {str(e)}", exc_info=True)
             raise
 
     async def cleanup(self):
@@ -147,7 +155,7 @@ class LangChainService:
                 return
 
             # Clean up any resources that need to be released
-            self.chroma_service = None
+            self.manager = None
             self.mcp_service = None
             self.retriever = None
             self.llm = None
@@ -191,7 +199,7 @@ class LangChainService:
             # Use the context manager to retrieve memories if no context provided
             if not context:
                 async with LLMContextManager(
-                    self.chroma_service,
+                    self.manager,
                     self,
                     [{"role": "user", "content": query}],
                     metadata_filter=kwargs.get("metadata_filter"),
@@ -280,7 +288,7 @@ class LangChainService:
                     name = self._get_message_value(message, "name")
 
                     # Always store messages in ephemeral collection
-                    await self.chroma_service.add_memory(
+                    await self.manager.add_memory(
                         text=content,
                         collection=MemoryType.EPHEMERAL,  # Force ephemeral for messages
                         metadata={
@@ -294,7 +302,7 @@ class LangChainService:
 
             # Process with context manager
             async with LLMContextManager(
-                self.chroma_service,
+                self.manager,
                 self,
                 messages,
                 memory_type=memory_type,  # This is for retrieving memories
@@ -338,7 +346,7 @@ class LangChainService:
         conversation_id: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None
     ) -> Optional[str]:
-        """Summarize and store a conversation in Chroma.
+        """Summarize and store a conversation in memory.
 
         Args:
             messages: List of conversation messages
@@ -373,9 +381,9 @@ class LangChainService:
             }
 
             # Store in ephemeral collection
-            summary_id = await self.chroma_service.add_memory(
+            summary_id = await self.manager.add_memory(
                 text=summary,
-                collection=MemoryType.EPHEMERAL,
+                collection=MemoryType.EPHEMERAL,  # Use enum instead of string
                 metadata=full_metadata
             )
             logger.info(f"Stored conversation summary with ID: {summary_id}")

@@ -1,4 +1,8 @@
-"""Service for managing vector-based memory storage using ChromaDB."""
+"""DEPRECATED: Service for managing vector-based memory storage using ChromaDB.
+
+This service has been replaced by EnhancedLightRAGManager in app/memory/lightrag/manager.py.
+New code should use EnhancedLightRAGManager instead.
+"""
 import chromadb
 from chromadb.config import Settings
 import logging
@@ -18,7 +22,11 @@ logger = logging.getLogger(__name__)
 
 
 class ChromaService:
-    """Service for managing vector-based memory storage using ChromaDB."""
+    """DEPRECATED: Service for managing vector-based memory storage using ChromaDB.
+
+    This service has been replaced by EnhancedLightRAGManager in app/memory/lightrag/manager.py.
+    New code should use EnhancedLightRAGManager instead.
+    """
 
     def __init__(self):
         """Initialize the Chroma service."""

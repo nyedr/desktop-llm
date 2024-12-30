@@ -200,32 +200,39 @@ class ModelService:
         enable_tools: bool = False,
         function_service=None
     ) -> AsyncGenerator[Union[str, Dict[str, Any]], None]:
-        """Chat with a model asynchronously with single continuous stream."""
+        """Generate a chat response."""
         request_id = self._get_request_id()
-        try:
-            if enable_tools:
-                if tools:
-                    logger.info(
-                        f"[{request_id}] Tools enabled with {len(tools)} available tools")
-                    logger.debug(
-                        f"[{request_id}] Available tools: {[t['function']['name'] for t in (tools or [])]}")
-                else:
-                    logger.warning(
-                        f"[{request_id}] Tools enabled but no tools provided")
-            else:
-                logger.info(f"[{request_id}] Tools disabled for this request")
+        logger.info(f"[{request_id}] Generating chat response")
 
-            # Convert messages to the expected format
+        try:
+            # Format messages for Ollama
             formatted_messages = []
             for msg in messages:
-                if isinstance(msg, StrictChatMessage):
-                    message_dict = msg.model_dump(exclude_none=True)
-                    # Convert role enum to string
-                    if 'role' in message_dict:
-                        message_dict['role'] = str(message_dict['role'])
-                    formatted_messages.append(message_dict)
-                else:
+                if isinstance(msg, dict):
                     formatted_messages.append(msg)
+                else:
+                    formatted_messages.append(msg.dict())
+
+            # Add system prompt for entity extraction if needed
+            if any("extract_entities" in str(msg.get("content", "")) for msg in formatted_messages):
+                system_prompt = {
+                    "role": "system",
+                    "content": """You are a helpful assistant that extracts entities from text. 
+                    When extracting entities, return a JSON object with the following structure:
+                    {
+                        "entities": [
+                            {
+                                "text": "entity text",
+                                "label": "entity type",
+                                "start": start_position,
+                                "end": end_position,
+                                "context": "surrounding text"
+                            }
+                        ]
+                    }
+                    Entity types can be: PERSON, ORG, GPE, LOC, DATE, CARDINAL, etc."""
+                }
+                formatted_messages.insert(0, system_prompt)
 
             if stream:
                 stream_response = await self.ollama_client.chat(
@@ -297,29 +304,64 @@ class ModelService:
                                             content = cont_message.get(
                                                 'content', '')
                                             if content:
-                                                # Split content into words and stream each
-                                                words = content.split()
-                                                for word in words:
-                                                    yield {
-                                                        'role': 'assistant',
-                                                        'content': word + " "
-                                                    }
-                                                    # Add a small delay between words
-                                                    await asyncio.sleep(0.05)
+                                                # Try to parse as JSON if it's an entity extraction response
+                                                if any("extract_entities" in str(msg.get("content", "")) for msg in formatted_messages):
+                                                    try:
+                                                        json_content = json.loads(
+                                                            content)
+                                                        yield {
+                                                            'role': 'assistant',
+                                                            'content': json.dumps(json_content, indent=2)
+                                                        }
+                                                    except json.JSONDecodeError:
+                                                        # If not valid JSON, stream as normal text
+                                                        words = content.split()
+                                                        for word in words:
+                                                            yield {
+                                                                'role': 'assistant',
+                                                                'content': word + " "
+                                                            }
+                                                            await asyncio.sleep(0.05)
+                                                else:
+                                                    # Normal text streaming
+                                                    words = content.split()
+                                                    for word in words:
+                                                        yield {
+                                                            'role': 'assistant',
+                                                            'content': word + " "
+                                                        }
+                                                        await asyncio.sleep(0.05)
 
                         # Handle content
                         elif 'content' in message:
                             content = message.get('content', '')
                             if content:
-                                # Split content into words and stream each
-                                words = content.split()
-                                for word in words:
-                                    yield {
-                                        'role': 'assistant',
-                                        'content': word + " "
-                                    }
-                                    # Add a small delay between words
-                                    await asyncio.sleep(0.05)
+                                # Try to parse as JSON if it's an entity extraction response
+                                if any("extract_entities" in str(msg.get("content", "")) for msg in formatted_messages):
+                                    try:
+                                        json_content = json.loads(content)
+                                        yield {
+                                            'role': 'assistant',
+                                            'content': json.dumps(json_content, indent=2)
+                                        }
+                                    except json.JSONDecodeError:
+                                        # If not valid JSON, stream as normal text
+                                        words = content.split()
+                                        for word in words:
+                                            yield {
+                                                'role': 'assistant',
+                                                'content': word + " "
+                                            }
+                                            await asyncio.sleep(0.05)
+                                else:
+                                    # Normal text streaming
+                                    words = content.split()
+                                    for word in words:
+                                        yield {
+                                            'role': 'assistant',
+                                            'content': word + " "
+                                        }
+                                        await asyncio.sleep(0.05)
             else:
                 # Non-streaming mode
                 response = await self.ollama_client.chat(
@@ -333,7 +375,23 @@ class ModelService:
                     }
                 )
                 if 'message' in response:
-                    yield response['message']
+                    message = response['message']
+                    if 'content' in message:
+                        content = message.get('content', '')
+                        # Try to parse as JSON if it's an entity extraction response
+                        if any("extract_entities" in str(msg.get("content", "")) for msg in formatted_messages):
+                            try:
+                                json_content = json.loads(content)
+                                yield {
+                                    'role': 'assistant',
+                                    'content': json.dumps(json_content, indent=2)
+                                }
+                            except json.JSONDecodeError:
+                                yield message
+                        else:
+                            yield message
+                    else:
+                        yield message
                 else:
                     logger.warning(f"Unexpected response format: {response}")
 
