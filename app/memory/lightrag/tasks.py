@@ -3,7 +3,7 @@
 import logging
 import asyncio
 from datetime import datetime, timedelta
-from typing import Optional, Dict
+from typing import Optional, Dict, Any
 from collections import deque
 from .manager_base import LightRAGManager
 from .datastore import MemoryDatastore
@@ -15,6 +15,7 @@ from .config import (
     MONITORING_INTERVAL,
     DEFAULT_RETENTION_DAYS
 )
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,12 @@ class MemoryTasks:
         self._tasks = []
         self._memory_queue = deque()
         self._processing = False
+
+    async def initialize(self):
+        """Initialize the task system."""
+        if not self._running:
+            await self.start()
+        logger.info("Memory tasks initialized")
 
     async def start(self):
         """Start background tasks."""
@@ -54,11 +61,68 @@ class MemoryTasks:
             task.cancel()
         self._tasks = []
 
-    async def queue_memory_processing(self, memory_text: str, metadata: Dict = None):
-        """Queue a memory for background processing."""
-        self._memory_queue.append((memory_text, metadata))
-        logger.debug(
-            f"Queued memory for processing. Queue size: {len(self._memory_queue)}")
+    async def queue_memory_processing(self, text: str, metadata: Dict[str, Any]) -> None:
+        """Queue memory for background processing."""
+        try:
+            # Check if this exact text was recently processed
+            memory_id = metadata.get('memory_id')
+            conversation_id = metadata.get('conversation_id')
+
+            if not memory_id or not conversation_id:
+                logger.warning(
+                    "Missing memory_id or conversation_id in metadata")
+                return
+
+            # Format memory text with metadata
+            memory_text = f"METADATA: {json.dumps(metadata)}\nCONTENT: {text}"
+
+            # Generate deterministic document ID
+            doc_id = f"doc-{conversation_id}-{memory_id}"
+
+            # Store in LightRAG using ainsert since we're in an async context
+            await self.manager.rag.ainsert(memory_text)
+            logger.info(f"Stored memory text with ID: {memory_id}")
+
+            # Extract and store entities/relationships
+            entities, relationships = await self.manager.extract_entities_and_relationships(text, metadata)
+
+            # Build custom knowledge graph
+            custom_kg = {
+                "entities": [],
+                "relationships": []
+            }
+
+            if entities:
+                # Format entities for custom KG
+                for entity in entities:
+                    custom_kg["entities"].append({
+                        "entity_name": entity["id"],
+                        "entity_type": entity["type"],
+                        "description": entity.get("metadata", {}).get("original_text", ""),
+                        "source_id": doc_id
+                    })
+
+            if relationships:
+                # Format relationships for custom KG
+                for rel in relationships:
+                    custom_kg["relationships"].append({
+                        "src_id": rel["source"],
+                        "tgt_id": rel["target"],
+                        "description": f"{rel['source']} {rel['type']} {rel['target']}",
+                        "keywords": f"{rel['type']} {rel['target']}",
+                        "source_id": doc_id
+                    })
+
+            # Update the knowledge graph if we have entities or relationships
+            if custom_kg["entities"] or custom_kg["relationships"]:
+                await self.manager.rag.ainsert_custom_kg(custom_kg)
+                logger.info(
+                    "Added entities and relationships to knowledge graph")
+
+        except Exception as e:
+            logger.error(
+                f"Error in background memory processing: {e}", exc_info=True)
+            raise
 
     async def _process_memory_queue(self):
         """Process queued memories in the background."""
@@ -103,7 +167,7 @@ class MemoryTasks:
 
                         # Update the knowledge graph
                         if custom_kg["entities"] or custom_kg["relationships"]:
-                            await self.manager.rag.ainsert_custom_kg(custom_kg)
+                            await self.manager.rag.insert_custom_kg(custom_kg)
                             logger.info(
                                 "Added entities and relationships to knowledge graph in background")
 

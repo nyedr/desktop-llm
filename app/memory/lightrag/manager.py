@@ -1,18 +1,19 @@
 """Enhanced memory manager combining LightRAG and relational database."""
 
+import hashlib
 import logging
 import uuid
 from datetime import datetime, timedelta
-from typing import List, Optional, Dict, Union
+from typing import List, Optional, Dict, Union, Any, Tuple
 from pathlib import Path
 from enum import Enum
 import json
+import re
 
 from lightrag import QueryParam
 from sentence_transformers import SentenceTransformer
 from .config import (
     LIGHTRAG_DATA_DIR,
-    ENTITY_SPAN_MAX_WORDS,
     ENTITY_TYPE_KEYWORDS,
     EMBEDDING_SIMILARITY_THRESHOLD,
     RELATIONSHIP_TYPE_MAP,
@@ -50,21 +51,19 @@ class EnhancedLightRAGManager(LightRAGManager):
     5) Access control and retention policies
     """
 
-    def __init__(self, working_dir: Union[str, Path] = LIGHTRAG_DATA_DIR):
+    def __init__(self, working_dir: Union[str, Path, Dict] = LIGHTRAG_DATA_DIR):
         """Initialize the enhanced memory manager."""
-        # Convert to Path and ensure it exists
-        working_dir = Path(working_dir)
-        working_dir.mkdir(parents=True, exist_ok=True)
+        # Convert to config dict if needed
+        config = working_dir if isinstance(working_dir, dict) else {
+            "working_dir": str(working_dir)}
 
-        logger.info(
-            f"Initializing enhanced LightRAGManager with working directory: {working_dir}")
-        super().__init__(str(working_dir))
+        # Initialize parent class
+        super().__init__(config)
 
-        # Initialize components
+        # Initialize enhanced components
         self.datastore = None
         self.ingestor = None
         self.tasks = None
-        self._initialized = False
         self._embedder = None
 
     async def initialize(self):
@@ -73,10 +72,10 @@ class EnhancedLightRAGManager(LightRAGManager):
             return
 
         try:
-            # First initialize our datastore
+            # Initialize datastore first
             self.datastore = MemoryDatastore()
 
-            # Initialize base class with our datastore
+            # Initialize parent class with our datastore
             await super().initialize(self.datastore)
 
             # Initialize remaining components
@@ -85,7 +84,6 @@ class EnhancedLightRAGManager(LightRAGManager):
 
             # Initialize embedder
             try:
-                from sentence_transformers import SentenceTransformer
                 self._embedder = SentenceTransformer(
                     'sentence-transformers/all-MiniLM-L6-v2')
                 logger.info(
@@ -96,10 +94,12 @@ class EnhancedLightRAGManager(LightRAGManager):
                     texts, embed_model="nomic-embed-text")
                 logger.info("Using Ollama embeddings for entity extraction")
 
-            # Start background tasks
-            await self.start()
+            # Initialize tasks
+            await self.tasks.initialize()
 
+            # Mark as initialized
             self._initialized = True
+
             logger.info("Enhanced LightRAGManager initialized successfully")
         except Exception as e:
             logger.error(
@@ -184,8 +184,67 @@ class EnhancedLightRAGManager(LightRAGManager):
             f"Granted {level.value} access to {user_id} for entity {entity_id}")
 
     # Enhanced memory operations
+    async def chunk_exists(self, chunk_hash: str) -> bool:
+        """Check if a chunk with the given hash already exists in memory.
+
+        Args:
+            chunk_hash: The hash of the chunk to check
+
+        Returns:
+            bool: True if chunk exists, False otherwise
+        """
+        existing = self.datastore.search_entities(chunk_hash, limit=1)
+        return bool(existing)
+
+    async def insert_entity(self, metadata: Dict) -> str:
+        """Insert entity metadata into the memory system without storing text content.
+
+        Args:
+            metadata: Dictionary containing entity metadata including:
+                - entity_id: Unique identifier for the entity
+                - hierarchy_level: The level in the memory hierarchy
+                - parent_id: Optional parent entity ID
+                - Other metadata fields as needed
+
+        Returns:
+            str: The entity ID
+        """
+        if not metadata.get('entity_id'):
+            metadata['entity_id'] = str(uuid.uuid4())
+
+        # Validate required fields
+        if not metadata.get('hierarchy_level'):
+            raise ValueError("hierarchy_level is required")
+
+        # Store entity in datastore
+        self.datastore.create_entity(
+            metadata['entity_id'],
+            metadata.get('title', 'Untitled Entity'),
+            metadata['hierarchy_level'],
+            metadata.get('description', '')
+        )
+
+        # Add metadata fields
+        for key, value in metadata.items():
+            if key not in ['entity_id', 'hierarchy_level', 'title', 'description']:
+                self.datastore.add_entity_metadata(
+                    metadata['entity_id'], key, value)
+
+        # Handle parent relationship if specified
+        if metadata.get('parent_id'):
+            self.create_relationship(
+                metadata['parent_id'],
+                metadata['entity_id'],
+                'contains',
+                confidence=1.0
+            )
+
+        logger.debug(
+            f"Inserted entity {metadata['entity_id']} with {len(metadata)} metadata items")
+        return metadata['entity_id']
+
     async def insert_text(self, text: str, metadata: Optional[Dict] = None, user_id: Optional[str] = None):
-        """Add unstructured text to memory with access control."""
+        """Add unstructured text to memory with access control and deduplication."""
         if not text.strip():
             return
 
@@ -193,11 +252,32 @@ class EnhancedLightRAGManager(LightRAGManager):
         if user_id and not self.check_access("global", user_id, MemoryAccessLevel.WRITE):
             raise PermissionError(f"User {user_id} does not have write access")
 
+        # Generate content hash for deduplication
+        content_hash = hashlib.md5(text.encode('utf-8')).hexdigest()
+
+        # Check for existing content
+        if await self.chunk_exists(content_hash):
+            logger.debug(
+                f"Skipping duplicate content with hash {content_hash}")
+            return content_hash
+
+        # Prepare metadata
+        full_metadata = metadata or {}
+        full_metadata.update({
+            "content_hash": content_hash,
+            "timestamp": datetime.now().isoformat()
+        })
+
+        # Insert into RAG system
         logger.debug(f"Inserting text (size={len(text)}) into memory")
         await self.rag.insert(text)
 
-        if metadata:
-            await self.ingestor.ingest_text(text, metadata)
+        # Ingest with metadata
+        if full_metadata:
+            await self.ingestor.ingest_text(text, full_metadata)
+
+        # Return the content hash as ID
+        return content_hash
 
     async def query_memory(self, query_str: str, user_id: str, mode: str = "mix", top_k: int = 5) -> Dict:
         """
@@ -205,6 +285,7 @@ class EnhancedLightRAGManager(LightRAGManager):
         - Access control
         - Hybrid search (vector + keyword)
         - Relational context
+        - Chunk-based document reconstruction
         """
         # Check read access
         if not self.check_access("global", user_id, MemoryAccessLevel.READ):
@@ -229,10 +310,29 @@ class EnhancedLightRAGManager(LightRAGManager):
                     confidence=1.0
                 )
 
-        # Step 4: Hybrid Search
-        rag_text = await self.rag.query(query_str, param=QueryParam(mode=mode, top_k=top_k))
-        keyword_results = self.datastore.search_entities(
-            query_str, limit=top_k)
+        # Step 4: Hybrid Search with chunk handling
+        initial_results = await self.rag.query(query_str, param=QueryParam(mode=mode, top_k=top_k * 3))
+
+        # Process results to handle chunks and reconstruct documents
+        processed_results = []
+        seen_docs = set()
+
+        if isinstance(initial_results, dict) and 'matches' in initial_results:
+            for match in initial_results['matches']:
+                metadata = match.get('metadata', {})
+
+                # Skip if this is a chunk and we've already processed its parent document
+                if metadata.get('is_chunk') == 'true':
+                    parent_doc = metadata.get('parent_doc')
+                    if parent_doc and parent_doc in seen_docs:
+                        continue
+                    seen_docs.add(parent_doc)
+
+                processed_results.append(match)
+
+                # Stop when we have enough unique results
+                if len(processed_results) >= top_k:
+                    break
 
         # Step 5: Fetch Relational Information
         relational_info = []
@@ -245,12 +345,11 @@ class EnhancedLightRAGManager(LightRAGManager):
                 "relations": rels
             })
 
-        # Step 6: Build System Prompt
+        # Step 6: Build System Prompt with chunk context
         system_prompt = self.build_system_prompt(relational_info)
 
         return {
-            "rag_text": rag_text,
-            "keyword_results": keyword_results,
+            "results": processed_results[:top_k],
             "relational_context": relational_info,
             "system_prompt": system_prompt
         }
@@ -313,80 +412,131 @@ class EnhancedLightRAGManager(LightRAGManager):
 
     # Helper methods
     async def extract_entities(self, text):
-        """Extract entities from text using embeddings-based similarity."""
+        """Extract entities from text using multiple techniques."""
         if not self._initialized:
             await self.initialize()
 
-        # Split text into potential entity spans
-        words = text.split()
-        spans = []
-
-        # Create spans of 1-3 words for potential entities
-        for i in range(len(words)):
-            for j in range(1, ENTITY_SPAN_MAX_WORDS + 1):
-                if i + j <= len(words):
-                    span = ' '.join(words[i:i+j])
-                    spans.append(span)
-
-        if not spans:
-            return []
-
-        # Get embeddings for spans
-        if isinstance(self._embedder, SentenceTransformer):
-            span_embeddings = self._embedder.encode(spans)
-        else:
-            span_embeddings = await self._embedder(spans)
-
-        # Get embeddings for type keywords
-        type_embeddings = {}
-        for etype, keywords in ENTITY_TYPE_KEYWORDS.items():
-            if isinstance(self._embedder, SentenceTransformer):
-                type_embeddings[etype] = self._embedder.encode(keywords)
-            else:
-                type_embeddings[etype] = await self._embedder(keywords)
-
+        # Initialize results
         entities = []
         seen_spans = set()
 
-        # Find entities by comparing embeddings
-        for i, span in enumerate(spans):
-            if span.lower() in seen_spans:
-                continue
+        # Technique 1: Embedding-based similarity (original approach)
+        try:
+            # Split text into potential entity spans
+            words = text.split()
+            spans = []
 
-            # Compare with type keywords
-            for etype, type_embs in type_embeddings.items():
-                similarity = span_embeddings[i] @ type_embs.T
-                if max(similarity) > EMBEDDING_SIMILARITY_THRESHOLD:
-                    seen_spans.add(span.lower())
+            # Create spans of 1-5 words for potential entities
+            for i in range(len(words)):
+                for j in range(1, 5 + 1):  # Increased max span size
+                    if i + j <= len(words):
+                        span = ' '.join(words[i:i+j])
+                        spans.append(span)
 
-                    # Find span context
-                    span_start = text.find(span)
-                    context_start = max(0, span_start - 50)
-                    context_end = min(len(text), span_start + len(span) + 50)
-                    context = text[context_start:context_end]
+            if spans:
+                # Get embeddings for spans
+                if isinstance(self._embedder, SentenceTransformer):
+                    span_embeddings = self._embedder.encode(spans)
+                else:
+                    span_embeddings = await self._embedder(spans)
 
-                    # Get relation type and confidence
-                    relation_type, relation_confidence = self.interpret_relation(
-                        etype, context)
+                # Get embeddings for type keywords
+                type_embeddings = {}
+                for etype, keywords in ENTITY_TYPE_KEYWORDS.items():
+                    if isinstance(self._embedder, SentenceTransformer):
+                        type_embeddings[etype] = self._embedder.encode(
+                            keywords)
+                    else:
+                        type_embeddings[etype] = await self._embedder(keywords)
 
-                    entity = {
-                        "text": span,
-                        "label": etype,
-                        "start": span_start,
-                        "end": span_start + len(span),
-                        "context": context,
-                        "metadata": {
-                            "source": "embedding_similarity",
-                            "confidence": float(max(similarity)),
-                            "relation_type": relation_type,
-                            "relation_confidence": relation_confidence
-                        }
-                    }
+                # Find entities by comparing embeddings
+                for i, span in enumerate(spans):
+                    if span.lower() in seen_spans:
+                        continue
 
-                    entities.append(entity)
-                    break
+                    # Compare with type keywords
+                    for etype, type_embs in type_embeddings.items():
+                        similarity = span_embeddings[i] @ type_embs.T
+                        if max(similarity) > EMBEDDING_SIMILARITY_THRESHOLD:
+                            seen_spans.add(span.lower())
+                            entity = self._create_entity(
+                                span, etype, text, similarity)
+                            entities.append(entity)
+                            break
+        except Exception as e:
+            logger.warning(f"Embedding-based entity extraction failed: {e}")
+
+        # Technique 2: Pattern-based extraction
+        try:
+            # Extract dates, numbers, and other patterns
+            date_pattern = r'\b(?:\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}[/-]\d{1,2}[/-]\d{1,2})\b'
+            number_pattern = r'\b\d+\b'
+            email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+
+            for pattern, label in [(date_pattern, 'DATE'),
+                                   (number_pattern, 'NUMBER'),
+                                   (email_pattern, 'EMAIL')]:
+                matches = re.finditer(pattern, text)
+                for match in matches:
+                    span = match.group()
+                    if span.lower() not in seen_spans:
+                        seen_spans.add(span.lower())
+                        entity = self._create_entity(span, label, text, 1.0)
+                        entities.append(entity)
+        except Exception as e:
+            logger.warning(f"Pattern-based entity extraction failed: {e}")
+
+        # Technique 3: Keyword-based extraction
+        try:
+            # Look for specific keywords/phrases
+            keywords = {
+                'birthday': 'EVENT',
+                'anniversary': 'EVENT',
+                'meeting': 'EVENT',
+                'deadline': 'DATE'
+            }
+
+            for keyword, label in keywords.items():
+                if keyword in text.lower():
+                    # Find all occurrences
+                    matches = re.finditer(
+                        r'\b' + re.escape(keyword) + r'\b', text, re.IGNORECASE)
+                    for match in matches:
+                        span = match.group()
+                        if span.lower() not in seen_spans:
+                            seen_spans.add(span.lower())
+                            entity = self._create_entity(
+                                span, label, text, 1.0)
+                            entities.append(entity)
+        except Exception as e:
+            logger.warning(f"Keyword-based entity extraction failed: {e}")
 
         return entities
+
+    def _create_entity(self, span, label, text, confidence):
+        """Helper method to create entity dictionary."""
+        span_start = text.find(span)
+        context_start = max(0, span_start - 50)
+        context_end = min(len(text), span_start + len(span) + 50)
+        context = text[context_start:context_end]
+
+        # Get relation type and confidence
+        relation_type, relation_confidence = self.interpret_relation(
+            label, context)
+
+        return {
+            "text": span,
+            "label": label,
+            "start": span_start,
+            "end": span_start + len(span),
+            "context": context,
+            "metadata": {
+                "source": "multi_technique",
+                "confidence": float(confidence),
+                "relation_type": relation_type,
+                "relation_confidence": relation_confidence
+            }
+        }
 
     def build_system_prompt(self, relational_info: List[Dict]) -> str:
         """Build a system prompt string from relational information."""
@@ -428,18 +578,8 @@ class EnhancedLightRAGManager(LightRAGManager):
         )
         return entity_id
 
-    def interpret_relation(self, entity_label: str, context: str):
+    def interpret_relation(self, entity_label: str, context: str) -> Tuple[Optional[str], float]:
         """Interpret the relationship type based on entity label and context."""
-        # Special handling for dates with context
-        if entity_label == "DATE":
-            context_lower = context.lower()
-            if "birthday" in context_lower:
-                return "birthday_date", ENTITY_CONFIDENCE["EXACT_MATCH"]
-            elif any(word in context_lower for word in ["born", "birth"]):
-                return "birth_date", ENTITY_CONFIDENCE["HIGH"]
-            else:
-                return "date_reference", ENTITY_CONFIDENCE["MEDIUM"]
-
         # Use configured relationship type map
         relation_type = RELATIONSHIP_TYPE_MAP.get(entity_label)
         if relation_type:
@@ -471,23 +611,31 @@ class EnhancedLightRAGManager(LightRAGManager):
     ) -> str:
         """Add a new memory with background entity extraction and relationship tracking."""
         try:
-            # Format memory text with metadata
+            # Generate content hash for deduplication
+            content_hash = hashlib.md5(text.encode('utf-8')).hexdigest()
+
+            # Check for existing memory with same content
+            existing = self.datastore.search_entities(content_hash, limit=1)
+            if existing:
+                logger.info(
+                    f"Found existing memory for content hash {content_hash}")
+                return existing[0]["id"]
+
+            # Generate memory ID
+            memory_id = str(uuid.uuid4())
+
+            # Format metadata
             full_metadata = metadata or {}
             full_metadata.update({
                 "timestamp": datetime.now().isoformat(),
-                "collection": collection.value
+                "collection": collection.value,
+                "memory_id": memory_id,
+                "content_hash": content_hash
             })
 
-            memory_text = f"METADATA: {json.dumps(full_metadata)}\nCONTENT: {text}"
-
-            # Store in LightRAG using ainsert for immediate text storage
-            memory_id = str(uuid.uuid4())
-            await self.rag.ainsert([memory_text])
-            logger.info(f"Added memory text with ID: {memory_id}")
-
-            # Queue the memory for background processing
+            # Queue for processing - this will handle both storage and entity extraction
             await self.tasks.queue_memory_processing(text, full_metadata)
-            logger.info("Queued memory for background processing")
+            logger.info(f"Queued memory {memory_id} for processing")
 
             return memory_id
 
@@ -510,7 +658,7 @@ class EnhancedLightRAGManager(LightRAGManager):
             # Create query parameters
             param = QueryParam()
             param.mode = "hybrid"  # Use hybrid search mode
-            param.k = top_k * 2  # Double the results to account for filtering
+            param.k = top_k * 3  # Get more results for deduplication
 
             # Add collection to metadata filter if specified
             if collection:
@@ -533,6 +681,8 @@ class EnhancedLightRAGManager(LightRAGManager):
 
             # Process matches to extract metadata and content
             processed_matches = []
+            seen_hashes = set()
+
             for match in matches:
                 content = match.get("content", "")
                 try:
@@ -548,9 +698,25 @@ class EnhancedLightRAGManager(LightRAGManager):
                             if isinstance(metadata, str):
                                 metadata = json.loads(metadata)
 
+                            # Calculate content hash for deduplication
+                            content_hash = hashlib.md5(
+                                actual_content.encode('utf-8')).hexdigest()
+                            if content_hash in seen_hashes:
+                                continue
+                            seen_hashes.add(content_hash)
+
                             # Extract entities from content for better relevance scoring
                             content_entities = await self.extract_entities(actual_content)
                             relevance_score = match.get("score", 0.0)
+
+                            # Calculate semantic similarity using embeddings
+                            if isinstance(self._embedder, SentenceTransformer):
+                                query_embedding = self._embedder.encode([query])[
+                                    0]
+                                content_embedding = self._embedder.encode([actual_content])[
+                                    0]
+                                semantic_similarity = query_embedding @ content_embedding.T
+                                relevance_score *= (1 + semantic_similarity)
 
                             # Boost score based on entity matches
                             for q_entity in query_entities:
@@ -563,7 +729,8 @@ class EnhancedLightRAGManager(LightRAGManager):
                                 "content": actual_content,
                                 "metadata": metadata,
                                 "score": relevance_score,
-                                "entities": content_entities
+                                "entities": content_entities,
+                                "hash": content_hash
                             })
                         except json.JSONDecodeError as je:
                             logger.warning(
@@ -585,89 +752,250 @@ class EnhancedLightRAGManager(LightRAGManager):
             logger.error(f"Error retrieving memories: {str(e)}", exc_info=True)
             return []
 
-    async def query(self, query: str, param: QueryParam) -> Dict:
-        """Query the memory system with enhanced filtering."""
+    async def retrieve_text(self, chunk_id: str) -> str:
+        """Retrieve text content for a specific chunk.
+
+        Args:
+            chunk_id: The ID of the chunk to retrieve
+
+        Returns:
+            str: The retrieved text content
+        """
         try:
             if not self._initialized:
                 await self.initialize()
+
+            # Query the RAG system for this specific chunk
+            result = await self.rag.aquery(f"id:{chunk_id}", QueryParam(mode="exact", top_k=1))
+
+            if isinstance(result, str):
+                return result
+
+            if isinstance(result, dict) and "matches" in result:
+                if result["matches"]:
+                    return result["matches"][0].get("content", "")
+
+            return ""
+        except Exception as e:
+            logger.error(
+                f"Failed to retrieve text for chunk {chunk_id}: {str(e)}")
+            return ""
+
+    async def query(self, query: str, param: QueryParam) -> Dict:
+        """Query the memory system with enhanced filtering, cache validation, and response caching."""
+        try:
+            if not self._initialized:
+                await self.initialize()
+
+            # Generate cache key
+            cache_key = hashlib.md5(
+                (query + str(param)).encode('utf-8')).hexdigest()
+
+            # Check cache first
+            cached = self.datastore.get_cache_entry(cache_key)
+            if cached:
+                logger.debug(f"Returning cached response for query: {query}")
+                return cached
 
             # Get metadata filter and collection
             metadata_filter = getattr(param, "filter", {}) or {}
             collection = metadata_filter.get("collection")
 
-            # Query the base system
-            result = await self.rag.aquery(query, param)
+            # Enhance query with semantic context
+            query_entities = await self.extract_entities(query)
+            enhanced_query = query
+            for entity in query_entities:
+                if entity.get("relation_type"):
+                    enhanced_query += f" {entity['relation_type']} {entity['text']}"
 
-            # Convert result to dict if it's a string
-            if isinstance(result, str):
-                # If result is empty or error, return empty matches
-                if not result.strip() or "ERROR:" in result:
-                    return {"matches": []}
+            # Query the base system with enhanced query
+            result = await self.rag.aquery(enhanced_query, param)
 
-                # Otherwise, create a single match from the result
-                return {
-                    "matches": [{
-                        "content": result,
-                        "metadata": metadata_filter,
-                        "score": 1.0
-                    }]
-                }
+            # Validate and clean the result
+            def validate_match(match: Dict) -> Optional[Dict]:
+                """Validate and clean a single match result."""
+                try:
+                    content = match.get("content", "")
+                    if not content or not isinstance(content, str):
+                        return None
 
-            # Process matches to ensure metadata is properly handled
-            if isinstance(result, dict) and "matches" in result:
-                matches = []
-                for match in result["matches"]:
-                    try:
-                        content = match.get("content", "")
-                        if not content:
-                            continue
-
-                        # Extract metadata if present
-                        parts = content.split("\nCONTENT: ", 1)
-                        if len(parts) == 2:
-                            metadata_str = parts[0].replace("METADATA: ", "")
+                    # Extract and validate metadata
+                    metadata = {}
+                    if "\nCONTENT: " in content:
+                        meta_part, content_part = content.split(
+                            "\nCONTENT: ", 1)
+                        if meta_part.startswith("METADATA: "):
                             try:
-                                match_metadata = json.loads(metadata_str)
-                                if isinstance(match_metadata, str):
-                                    match_metadata = json.loads(match_metadata)
-
-                                # Apply collection filter if specified
-                                if collection and match_metadata.get("collection") != collection:
-                                    continue
-
-                                # Apply other metadata filters
-                                if metadata_filter:
-                                    matches_filter = True
-                                    for k, v in metadata_filter.items():
-                                        if k != "collection" and match_metadata.get(k) != v:
-                                            matches_filter = False
-                                            break
-                                    if not matches_filter:
-                                        continue
-
-                                matches.append({
-                                    # Use only the content part
-                                    "content": parts[1],
-                                    "metadata": match_metadata,
-                                    "score": match.get("score", 1.0)
-                                })
+                                metadata = json.loads(
+                                    meta_part[len("METADATA: "):])
+                                if isinstance(metadata, str):
+                                    metadata = json.loads(metadata)
                             except json.JSONDecodeError:
                                 logger.warning(
-                                    f"Failed to parse metadata: {metadata_str}")
-                                # Include the match even if metadata parsing fails
-                                matches.append({
-                                    "content": content,
-                                    "metadata": {},
-                                    "score": match.get("score", 1.0)
-                                })
-                    except Exception as e:
-                        logger.warning(f"Failed to process match: {e}")
-                        continue
-                result["matches"] = matches
+                                    "Invalid metadata format, using empty metadata")
+                                metadata = {}
+                        content = content_part
 
-            return result
+                    # Validate content
+                    if not content.strip():
+                        return None
+
+                    # Apply collection filter
+                    if collection and metadata.get("collection") != collection:
+                        return None
+
+                    # Apply metadata filters
+                    if metadata_filter:
+                        for k, v in metadata_filter.items():
+                            if k != "collection" and metadata.get(k) != v:
+                                return None
+
+                    # Calculate semantic similarity with query
+                    if isinstance(self._embedder, SentenceTransformer):
+                        query_embedding = self._embedder.encode([query])[0]
+                        content_embedding = self._embedder.encode([content])[0]
+                        semantic_similarity = query_embedding @ content_embedding.T
+                    else:
+                        semantic_similarity = 1.0
+
+                    return {
+                        "content": content,
+                        "metadata": metadata,
+                        "score": float(match.get("score", 1.0)) * (1 + semantic_similarity)
+                    }
+                except Exception as e:
+                    logger.warning(f"Failed to validate match: {e}")
+                    return None
+
+            # Process results based on type
+            final_result = {"matches": []}
+
+            if isinstance(result, str):
+                if not result.strip() or "ERROR:" in result:
+                    final_result = {"matches": []}
+                else:
+                    final_result = {
+                        "matches": [{
+                            "content": result,
+                            "metadata": metadata_filter,
+                            "score": 1.0
+                        }]
+                    }
+
+            elif isinstance(result, dict) and "matches" in result:
+                # Validate and clean all matches
+                valid_matches = []
+                for match in result["matches"]:
+                    validated = validate_match(match)
+                    if validated:
+                        valid_matches.append(validated)
+
+                # Clean cache if too many invalid matches
+                if len(valid_matches) < len(result["matches"]) * 0.5:
+                    logger.info(
+                        "Cleaning cache due to high invalid match rate")
+                    await self.rag.clean_cache()
+
+                # Sort matches by combined score
+                valid_matches.sort(key=lambda x: x["score"], reverse=True)
+                final_result = {"matches": valid_matches}
+
+            # Cache the final result if it's valid
+            if final_result["matches"]:
+                self.datastore.set_cache_entry(
+                    cache_key,
+                    final_result,
+                    expiration=timedelta(hours=1)  # Cache for 1 hour
+                )
+
+            return final_result
 
         except Exception as e:
             logger.error(
                 f"Error querying memory system: {str(e)}", exc_info=True)
             return {"matches": []}
+
+    def format_entity(self, entity: str) -> str:
+        """Format entity ID to be valid for storage."""
+        # Remove quotes and spaces
+        entity = entity.strip('"').strip()
+        # Replace spaces and special chars with underscores
+        entity = re.sub(r'[^a-zA-Z0-9]', '_', entity)
+        # Ensure it starts with a letter
+        if not entity[0].isalpha():
+            entity = 'e_' + entity
+        return entity
+
+    def format_relationship(self, rel: Dict[str, Any]) -> Dict[str, Any]:
+        """Format relationship for storage."""
+        return {
+            "source": self.format_entity(rel["source"]),
+            "target": self.format_entity(rel["target"]),
+            "type": rel.get("type", "default"),
+            "weight": float(rel.get("weight", 1.0)),
+            "metadata": rel.get("metadata", {}),
+            "source_id": rel.get("source_id") or str(uuid.uuid4())
+        }
+
+    async def extract_entities_and_relationships(
+        self,
+        text: str,
+        metadata: Optional[Dict] = None
+    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+        """Extract entities and relationships from text using configured rules."""
+        try:
+            if not self._initialized:
+                await self.initialize()
+
+            # Extract entities using embeddings and keywords
+            entities = await self.extract_entities(text)
+
+            # Build relationships between entities
+            relationships = []
+            for i, entity1 in enumerate(entities):
+                for j, entity2 in enumerate(entities):
+                    if i == j:
+                        continue
+
+                    # Determine relationship type based on entity types and context
+                    rel_type = self.interpret_relation(
+                        entity1["label"],
+                        f"{entity1['text']} {entity2['text']}"
+                    )[0]
+
+                    if rel_type:
+                        relationships.append({
+                            "source": entity1["text"],
+                            "target": entity2["text"],
+                            "type": rel_type,
+                            "weight": 1.0,
+                            "metadata": {
+                                "source_entity": entity1,
+                                "target_entity": entity2,
+                                "context": text
+                            }
+                        })
+
+            # Format entities for storage
+            formatted_entities = []
+            for entity in entities:
+                formatted_entities.append({
+                    "id": self.format_entity(entity["text"]),
+                    "type": entity["label"],
+                    "metadata": {
+                        "original_text": entity["text"],
+                        "context": entity["context"],
+                        "confidence": entity["metadata"]["confidence"]
+                    }
+                })
+
+            # Format relationships for storage
+            formatted_relationships = [
+                self.format_relationship(rel) for rel in relationships
+            ]
+
+            return formatted_entities, formatted_relationships
+
+        except Exception as e:
+            logger.error(f"Error extracting entities and relationships: {e}")
+            return [], []

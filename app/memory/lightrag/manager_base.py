@@ -1,29 +1,15 @@
 """Base manager class for LightRAG memory system."""
 
-from typing import Dict, Optional, Union, List
+from typing import Dict, Optional, Union
 from pathlib import Path
-from lightrag import LightRAG, QueryParam
+from lightrag import QueryParam
+from app.services.rag_service import create_lightrag
 from .datastore import MemoryDatastore
 from .tasks_base import MemoryTaskManager
-from .config import EMBEDDING_MODEL
 import logging
-from sentence_transformers import SentenceTransformer
 from app.services.model_service import ModelService
-from lightrag.llm import ollama_model_complete
 
 logger = logging.getLogger(__name__)
-
-
-class EmbeddingFunction:
-    """Wrapper for embedding function with required attributes."""
-
-    def __init__(self, model: SentenceTransformer):
-        self.model = model
-        self.embedding_dim = model.get_sentence_embedding_dimension()
-
-    async def __call__(self, texts: List[str]) -> List[List[float]]:
-        """Get embeddings for a list of texts."""
-        return self.model.encode(texts).tolist()
 
 
 class LightRAGManager:
@@ -33,20 +19,17 @@ class LightRAGManager:
         # Convert string/Path to config dict if needed
         if isinstance(config, (str, Path)):
             self.working_dir = str(config)
+            self.config = {"working_dir": self.working_dir}
         elif isinstance(config, dict):
             self.working_dir = config.get("working_dir")
             if not self.working_dir:
                 raise ValueError("working_dir must be provided in config")
-
-        # Store the original config for other settings
-        self.config = config if isinstance(config, dict) else {
-            "working_dir": self.working_dir}
+            self.config = config
 
         self.rag = None
         self.datastore = None
         self.task_manager = None
         self._initialized = False
-        self._embedding_model = None
         self._model_service = ModelService()  # Initialize ModelService
 
     @property
@@ -80,26 +63,11 @@ class LightRAGManager:
                         f"Removing existing vector database file: {file}")
                     file.unlink()
 
-            # Initialize the embedding model
-            logger.debug(f"Initializing embedding model: {EMBEDDING_MODEL}")
-            self._embedding_model = SentenceTransformer(EMBEDDING_MODEL)
-
-            # Create wrapped embedding function with required attributes
-            embedding_func = EmbeddingFunction(self._embedding_model)
-            logger.debug(
-                f"Created embedding function with dimension: {embedding_func.embedding_dim}")
-
-            # Initialize LightRAG with working directory and embedding function
-            self.rag = LightRAG(
+            # Initialize LightRAG using create_lightrag from rag_service
+            self.rag = create_lightrag(
                 working_dir=str(working_dir),
-                embedding_func=embedding_func,
-                llm_model_name="granite3.1-dense:2b-instruct-q4_K_M",
-                llm_model_max_async=4,
-                llm_model_max_token_size=26000,
-                llm_model_kwargs={
-                    "host": "http://localhost:11434", "options": {"num_ctx": 26000}},
-                enable_llm_cache=True,
-                llm_model_func=ollama_model_complete,
+                # Pass through any additional config from self.config
+                **{k: v for k, v in self.config.items() if k != 'working_dir'}
             )
 
             self.datastore = datastore or MemoryDatastore()

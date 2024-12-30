@@ -1,5 +1,6 @@
 """Enhanced document and file ingestion for LightRAG memory system."""
 
+import hashlib
 import logging
 import mimetypes
 from pathlib import Path
@@ -25,10 +26,11 @@ class ContentChunker:
 
     @staticmethod
     def chunk_text(text: str) -> List[Tuple[str, Dict]]:
-        """Split text into meaningful chunks with metadata."""
+        """Split text into meaningful chunks with metadata and deduplication."""
         chunks = []
         start = 0
         text_length = len(text)
+        previous_chunk_hash = None
 
         while start < text_length:
             end = min(start + MAX_CHUNK_SIZE, text_length)
@@ -40,15 +42,49 @@ class ContentChunker:
 
             chunk = text[start:end].strip()
             if chunk:
+                # Generate content hash that includes overlap context
+                chunk_hash = ContentChunker._generate_chunk_hash(
+                    text, start, end)
+
+                # Skip if this chunk is too similar to previous chunk
+                if previous_chunk_hash and ContentChunker._chunk_similarity(chunk_hash, previous_chunk_hash) > 0.8:
+                    start = end - OVERLAP_SIZE if end - OVERLAP_SIZE > start else end
+                    continue
+
                 chunks.append((chunk, {
                     'start_pos': start,
                     'end_pos': end,
-                    'length': end - start
+                    'length': end - start,
+                    'chunk_hash': chunk_hash,
+                    'previous_chunk_hash': previous_chunk_hash
                 }))
+                previous_chunk_hash = chunk_hash
 
             start = end - OVERLAP_SIZE if end - OVERLAP_SIZE > start else end
 
         return chunks
+
+    @staticmethod
+    def _generate_chunk_hash(text: str, start: int, end: int) -> str:
+        """Generate a unique hash for a chunk that includes context."""
+        import hashlib
+        # Include surrounding text for better uniqueness
+        context_start = max(0, start - 100)
+        context_end = min(len(text), end + 100)
+        context = text[context_start:context_end]
+        return hashlib.sha256(context.encode('utf-8')).hexdigest()
+
+    @staticmethod
+    def _chunk_similarity(hash1: str, hash2: str) -> float:
+        """Calculate similarity between two chunk hashes."""
+        # Simple similarity based on hash prefix match
+        match_length = 0
+        for c1, c2 in zip(hash1, hash2):
+            if c1 == c2:
+                match_length += 1
+            else:
+                break
+        return match_length / len(hash1)
 
     @staticmethod
     def _find_break_point(text: str, start: int, end: int) -> int:
@@ -188,92 +224,99 @@ class MemoryIngestor:
 
     async def ingest_text(self, text: str, metadata: Optional[Dict] = None, parent_id: Optional[str] = None):
         """
-        Ingest plain text content into the memory system with hierarchical organization and metadata.
+        Ingest plain text content into the memory system as chunks with metadata.
 
         Args:
             text: The text content to ingest
             metadata: Optional metadata to associate with the content
             parent_id: Optional parent entity ID for hierarchical organization
+
+        Returns:
+            str: The document entity ID
         """
         if not text.strip():
-            return
+            return None
 
         logger.info(f"Ingesting text content (length: {len(text)})")
 
-        # Create document-level entity with hierarchy
-        doc_entity_id = self.datastore.create_entity(
-            str(uuid.uuid4()),
-            metadata.get('title', 'Untitled Document'),
-            'document',
-            metadata.get('description', '')
-        )
+        # Generate content hash for deduplication
+        content_hash = hashlib.md5(text.encode('utf-8')).hexdigest()
 
-        # Set document hierarchy
-        self.datastore.set_entity_hierarchy(
-            doc_entity_id,
-            'document',
-            parent_id
-        )
+        # Check for existing document with same content
+        existing = self.manager.datastore.search_entities(
+            content_hash, limit=1)
+        if existing:
+            logger.debug(
+                f"Skipping duplicate content with hash {content_hash}")
+            return existing[0]["id"]
 
-        # Add document metadata
+        # Create document-level entity with proper hierarchy
+        doc_entity_id = str(uuid.uuid4())
+        doc_title = metadata.get(
+            'title', 'Untitled Document') if metadata else 'Untitled Document'
+
+        # Create document entity metadata
+        doc_metadata = {
+            'is_document': 'true',
+            'title': doc_title,
+            'length': len(text),
+            'chunk_count': 0,  # Will be updated as chunks are added
+            'content_hash': content_hash,
+            'timestamp': datetime.now().isoformat()
+        }
         if metadata:
-            for key, value in metadata.items():
-                self.datastore.add_entity_metadata(
-                    doc_entity_id, key, str(value))
+            doc_metadata.update(metadata)
+
+        # Store document metadata without the full text
+        await self.manager.insert_entity({
+            **doc_metadata,
+            'hierarchy_level': 'document',
+            'parent_id': parent_id if parent_id else None,
+            'entity_id': doc_entity_id
+        })
 
         # Chunk the content
         chunks = ContentChunker.chunk_text(text)
+        doc_metadata['chunk_count'] = len(chunks)
 
-        # Create section entity for these chunks
-        section_entity_id = self.datastore.create_entity(
-            str(uuid.uuid4()),
-            'Text Section',
-            'section',
-            f"Section containing {len(chunks)} chunks"
-        )
-
-        # Set section hierarchy under document
-        self.datastore.set_entity_hierarchy(
-            section_entity_id,
-            'section',
-            doc_entity_id
-        )
-
-        # Ingest chunks with metadata and hierarchy
+        # Ingest chunks with proper parent reference
         for chunk, chunk_meta in chunks:
-            chunk_id = str(uuid.uuid4())
-            await self.manager.insert_text(chunk)
+            # Check for duplicate chunk using chunk_hash
+            if await self.manager.chunk_exists(chunk_meta['chunk_hash']):
+                logger.debug(
+                    f"Skipping duplicate chunk: {chunk_meta['chunk_hash']}")
+                continue
 
-            # Create chunk entity
-            chunk_entity_id = self.datastore.create_entity(
-                chunk_id,
-                f"Chunk {chunk_meta['start_pos']}-{chunk_meta['end_pos']}",
-                'chunk',
-                f"Text chunk from position {chunk_meta['start_pos']} to {chunk_meta['end_pos']}"
-            )
-
-            # Set chunk hierarchy under section
-            self.datastore.set_entity_hierarchy(
-                chunk_entity_id,
-                'chunk',
-                section_entity_id
-            )
-
-            # Store chunk metadata
-            self.datastore.add_entity_metadata(
-                chunk_entity_id, 'start_pos', str(chunk_meta['start_pos']))
-            self.datastore.add_entity_metadata(
-                chunk_entity_id, 'end_pos', str(chunk_meta['end_pos']))
+            # Create chunk metadata with parent reference
+            chunk_metadata = {
+                'start_pos': str(chunk_meta['start_pos']),
+                'end_pos': str(chunk_meta['end_pos']),
+                'is_chunk': 'true',
+                'doc_title': doc_title,
+                'parent_id': doc_entity_id,  # Reference parent document
+                'chunk_hash': chunk_meta['chunk_hash'],
+                'previous_chunk_hash': chunk_meta['previous_chunk_hash'],
+                'hierarchy_level': 'chunk'
+            }
 
             # Add document metadata to chunk
             if metadata:
-                for key, value in metadata.items():
-                    self.datastore.add_entity_metadata(
-                        chunk_entity_id, key, str(value))
+                chunk_metadata.update(metadata)
+
+            # Store chunk in LightRAG with combined metadata
+            await self.manager.insert_text(chunk, chunk_metadata)
+
+        # Update document entity with final chunk count and chunk references
+        await self.manager.update_entity(doc_entity_id, {
+            'chunk_count': len(chunks),
+            'chunk_references': [c[1]['chunk_hash'] for c in chunks]
+        })
+
+        return doc_entity_id
 
     async def ingest_file(self, file_path: Union[str, Path]) -> bool:
         """
-        Ingest content from a file into the memory system with enhanced processing.
+        Ingest content from a file into the memory system as chunks with metadata.
 
         Args:
             file_path: Path to the file to ingest
@@ -316,7 +359,7 @@ class MemoryIngestor:
         if not chunks:
             return False
 
-        # Ingest content with file metadata
+        # Create file metadata
         metadata = {
             'source': 'file',
             'filename': path.name,
@@ -325,29 +368,21 @@ class MemoryIngestor:
             'ingested_at': datetime.now().isoformat()
         }
 
-        # Create entity for this file
-        entity_id = self.datastore.create_entity(
-            str(uuid.uuid4()),
-            path.name,
-            'file',
-            f"File ingested from {path}"
-        )
-
-        # Ingest chunks
+        # Ingest chunks with metadata
         for chunk, chunk_meta in chunks:
-            chunk_id = str(uuid.uuid4())
-            await self.manager.insert_text(chunk)
+            # Create chunk metadata
+            chunk_metadata = {
+                'start_pos': str(chunk_meta['start_pos']),
+                'end_pos': str(chunk_meta['end_pos']),
+                'is_chunk': 'true',
+                'file_name': path.name
+            }
 
-            # Store chunk metadata
-            self.datastore.add_entity_metadata(entity_id, 'chunk_id', chunk_id)
-            self.datastore.add_entity_metadata(
-                entity_id, 'start_pos', str(chunk_meta['start_pos']))
-            self.datastore.add_entity_metadata(
-                entity_id, 'end_pos', str(chunk_meta['end_pos']))
+            # Add file metadata to chunk
+            chunk_metadata.update(metadata)
 
-            # Add file metadata to each chunk
-            for key, value in metadata.items():
-                self.datastore.add_entity_metadata(chunk_id, key, str(value))
+            # Store chunk in LightRAG with combined metadata
+            await self.manager.insert_text(chunk, chunk_metadata)
 
         return True
 

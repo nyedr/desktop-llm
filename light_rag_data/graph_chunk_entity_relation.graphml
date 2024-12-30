@@ -6,160 +6,480 @@
 <key id="d2" for="node" attr.name="source_id" attr.type="string"/>
 <key id="d1" for="node" attr.name="description" attr.type="string"/>
 <key id="d0" for="node" attr.name="entity_type" attr.type="string"/>
-<graph edgedefault="undirected"><node id="&quot;BIRTHDAY&quot;">
-  <data key="d0">"EVENT"</data>
-  <data key="d1">"A commemorative day marking personal milestones, in this case, the user's birthday."&lt;SEP&gt;"Birthdays are general events that mark the anniversary of one's birth."&lt;SEP&gt;"Birthday is an annual personal occasion marking one's entry into another year of life."</data>
-  <data key="d2">chunk-480b92221d2724de3199160b931268ac&lt;SEP&gt;chunk-89057ae80f3309b31106a80402fd542f&lt;SEP&gt;chunk-a9108c065f3537dfd4e5f3a67de0da7b</data>
+<graph edgedefault="undirected"><node id="&quot;E_17&quot;">
+  <data key="d0">NUMBER</data>
+  <data key="d1">17</data>
+  <data key="d2">UNKNOWN</data>
+</node>
+<node id="&quot;BIRTHDAY&quot;">
+  <data key="d0">EVENT</data>
+  <data key="d1">birthday</data>
+  <data key="d2">UNKNOWN</data>
+</node>
+<node id="&quot;TYPE&quot;:&quot;">
+  <data key="d0">"ORGANIZATION"</data>
+  <data key="d1">"Type refers to the classification or categorization of an organization."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;NAME&quot;:&quot;">
+  <data key="d0">"ORGANIZATION"</data>
+  <data key="d1">"Name is a combination of characters used to uniquely identify an organization."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
 </node>
 <node id="&quot;USER&quot;">
-  <data key="d0">"PERSON"</data>
-  <data key="d1">"The role of 'user' is not explicitly stated but can be inferred from the text."&lt;SEP&gt;"The speaker is identified as the user in this context."&lt;SEP&gt;"The user is the individual celebrating their birthday on November 17."&lt;SEP&gt;"The user seeking help from the AI assistant across diverse tasks."&lt;SEP&gt;"The user is interacting with the AI system."</data>
-  <data key="d2">chunk-1f95879d45b87ccb2252b1b96777730d&lt;SEP&gt;chunk-480b92221d2724de3199160b931268ac&lt;SEP&gt;chunk-ebdd9db65cd7e8557d1425da931543db&lt;SEP&gt;chunk-516e3a601b04c6beb0f1a1358e5d1672&lt;SEP&gt;chunk-a9108c065f3537dfd4e5f3a67de0da7b</data>
+  <data key="d0">"ORGANIZATION"</data>
+  <data key="d1">"The user has a birthday on November 17."&lt;SEP&gt;"User is a person interacting with the system."&lt;SEP&gt;"User is interacting with the system under the ERC's permissions."&lt;SEP&gt;"user" is a part of the organization, as they have a role, name, and conversation_id</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f&lt;SEP&gt;chunk-c297db8db476b285e576cf0dec34f174</data>
 </node>
-<node id="&quot;NOVEMBER 17&quot;">
-  <data key="d0">"DATE"</data>
-  <data key="d1">"November 17 is a specific date, marking the user's birth."&lt;SEP&gt;"November 17 is specified as a date, marking the user's special day."</data>
-  <data key="d2">chunk-480b92221d2724de3199160b931268ac&lt;SEP&gt;chunk-1f95879d45b87ccb2252b1b96777730d</data>
-</node>
-<node id="&quot;BIRTHDAY (NOVEMBER 17)&quot;">
-  <data key="d2">chunk-480b92221d2724de3199160b931268ac</data>
-  <data key="d1">"The speaker celebrates their birthday on November 17, indicating a personal connection to that date."&lt;SEP&gt;"The speaker marks their birthday as a significant event, emphasizing its importance."</data>
-  <data key="d0">"UNKNOWN"</data>
+<node id="&quot;ROLE&quot;:&quot;">
+  <data key="d0">"ORGANIZATION"</data>
+  <data key="d1">"Role is a designation or part of a system of roles within an organization."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
 </node>
 <node id="&quot;NOVEMBER&quot;">
-  <data key="d0">DATE</data>
-  <data key="d1">Entity extracted from text: November (DATE)</data>
-  <data key="d2">UNKNOWN</data>
-</node>
-<node id="&quot;NOVEMBER_17&quot;">
-  <data key="d0">DATE</data>
-  <data key="d1">Entity extracted from text: November 17 (DATE)</data>
-  <data key="d2">UNKNOWN</data>
-</node>
-<node id="&quot;NOVEMBER_17_IS&quot;">
-  <data key="d0">DATE</data>
-  <data key="d1">Entity extracted from text: November 17 is (DATE)</data>
-  <data key="d2">UNKNOWN</data>
-</node>
-<node id="&quot;USER-PROVIDED PERSONAL DETAILS&quot;">
-  <data key="d0">"CONCEPT"</data>
-  <data key="d1">"Details about users, including birthdays, preferences, likes, dislikes, which can be stored for future interactions and improving user experience."</data>
-  <data key="d2">chunk-ebdd9db65cd7e8557d1425da931543db</data>
-</node>
-<node id="&quot;YOU&quot;">
-  <data key="d0">"PERSON"</data>
-  <data key="d1">"The AI assistant, designed for various tasks, providing assistance in a professional manner."</data>
-  <data key="d2">chunk-ebdd9db65cd7e8557d1425da931543db</data>
-</node>
-<node id="&quot;AI ASSISTANT'S LONG-TERM MEMORY&quot;">
-  <data key="d0">"TOOL"</data>
-  <data key="d1">"A storage area for information that can enhance future interactions with users."</data>
-  <data key="d2">chunk-ebdd9db65cd7e8557d1425da931543db</data>
-</node>
-<node id="&quot;USER'S DEVICE&quot;">
-  <data key="d0">"GEO"</data>
-  <data key="d1">"The location of the user's device, which is crucial for providing context-specific assistance."</data>
-  <data key="d2">chunk-ebdd9db65cd7e8557d1425da931543db</data>
-</node>
-<node id="&quot;AI ASSISTANT&quot;">
-  <data key="d0">"ORGANIZATION"</data>
-  <data key="d1">"A highly capable and versatile entity assisting users with a wide range of tasks."&lt;SEP&gt;"The AI assistant is a tool designed for assisting users with various tasks."</data>
-  <data key="d2">chunk-ebdd9db65cd7e8557d1425da931543db&lt;SEP&gt;chunk-516e3a601b04c6beb0f1a1358e5d1672</data>
-</node>
-<node id="&quot;STATE&quot;">
-  <data key="d0">GPE</data>
-  <data key="d1">Entity extracted from text: state (GPE)</data>
-  <data key="d2">UNKNOWN</data>
-</node>
-<node id="&quot;STATE_WHEN_YOU&quot;">
-  <data key="d0">GPE</data>
-  <data key="d1">Entity extracted from text: state when you (GPE)</data>
-  <data key="d2">UNKNOWN</data>
-</node>
-<node id="&quot;2024&quot;">
   <data key="d0">"DATE"</data>
-  <data key="d1">"The year 2024 is implied as the current date."&lt;SEP&gt;"The year 2024 is mentioned in passing."</data>
-  <data key="d2">chunk-1f95879d45b87ccb2252b1b96777730d&lt;SEP&gt;chunk-89057ae80f3309b31106a80402fd542f</data>
+  <data key="d1">"November 17 is the birthday of the user."&lt;SEP&gt;"November is the month of the birthday."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
 </node>
-<node id="&quot;SYSTEM&quot;">
-  <data key="d0">"TECHNOLOGY"</data>
-  <data key="d1">"The system, in this case, refers to the platform where the conversation takes place and which includes the tools available to the AI assistant."</data>
-  <data key="d2">chunk-516e3a601b04c6beb0f1a1358e5d1672</data>
+<node id="&quot;METADATA: &quot;:&quot;">
+  <data key="d0">"ORGANIZATION"</data>
+  <data key="d1">"Metadata is a system for structured data storage and management."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;AABF3A5C1962FB056981AE7587BEC2E7&quot;">
+  <data key="d0">"CONTENT_HASH "</data>
+  <data key="d1">"This is a unique hash of the message content."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;2315645970528&quot;">
+  <data key="d0">"NUMERIC"</data>
+  <data key="d1">"This is a unique identifier for the user."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot; METADATA: &quot;">
+  <data key="d0">"ORGANIZATION"</data>
+  <data key="d1">"Metadata is a system for structured data storage and management."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;JEREMY:">
+  <data key="d0">"PERSON"</data>
+  <data key="d1">"Jeremy is a name with unknown relevance to the context."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;ARSEXCEL &quot;">
+  <data key="d0">"NUMERIC"&lt;</data>
+  <data key="d1">"ARS Excel is a spreadsheet software."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;ROLE&quot;">
+  <data key="d0">"ORGANIZATION"</data>
+  <data key="d1">"Role is a designation or part of a system of roles within an organization."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;WEDNESDAY &quot;">
+  <data key="d0">"DAY"</data>
+  <data key="d1">"Wednesday is a day of the week."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;NAME&quot;">
+  <data key="d0">"ORGANIZATION"</data>
+  <data key="d1">"Name is a combination of characters used to uniquely identify an organization."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;281 [&amp;](">
+  <data key="d0">"NUMERIC"</data>
+  <data key="d1">"This could potentially represent a numerical value, possibly a unique identifier."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;TYPE&quot;">
+  <data key="d0">"ORGANIZATION"</data>
+  <data key="d1">"Type refers to the classification or categorization of an organization."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;UTC &quot;">
+  <data key="d0">"TIME"</data>
+  <data key="d1">"UTC stands for Coordinated Universal Time, a time zone.</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;ERC&quot;">
+  <data key="d0">"ORGANIZATION"</data>
+  <data key="d1">"ERC stands for the name of the organization making this metadata."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;USER:">
+  <data key="d0">"PERSON"</data>
+  <data key="d1">"User is a person interacting with the system."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;EST &quot;">
+  <data key="d0">"TIME"</data>
+  <data key="d1">"EST stands for Eastern Standard Time, a time zone."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;JID&quot;">
+  <data key="d0">"NUMERIC"</data>
+  <data key="d1">"This is a unique identifier for internal identification."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;ER.&quot;">
+  <data key="d0">"TIME"</data>
+  <data key="d1">"This could possibly refer to Eastern Standard Time, a time zone."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;MINISPACER.&quot;">
+  <data key="d0">"NUMERIC"</data>
+  <data key="d1">"Minispacer is a metric for API misuse usage history."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;USER &quot;:&quot;">
+  <data key="d0">"PERSON"</data>
+  <data key="d1">"User is a person interacting with the system."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;TIMESTAMP&quot;">
+  <data key="d0">"TIME"</data>
+  <data key="d1">"Timestamp represents a moment in time for logging the API usage."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;CONVERSATION_ID&quot;">
+  <data key="d0">"TIME"</data>
+  <data key="d1">"Conversation ID represents a unique identifier for the interaction."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;17&quot;">
+  <data key="d0">"DATE"</data>
+  <data key="d1">"This is the day of the month for the birthday."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;METADATA: &quot;">
+  <data key="d0">"ORGANIZATION"</data>
+  <data key="d1">"Metadata is a system for structured data storage and management."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;USER &quot;">
+  <data key="d0">"PERSON"</data>
+  <data key="d1">"User is a person interacting with the system."&lt;SEP&gt;"User is interacting with the system."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;ROLE &quot;">
+  <data key="d0">"ORGANIZATION"</data>
+  <data key="d1">"Role is a designation or part of a system of  roles within an organization."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;NAME &quot;">
+  <data key="d0">"ORGANIZATION"</data>
+  <data key="d1">"Name is a combination of characters used to uniquely identify an organization."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;18:29:22.189016&quot;">
+  <data key="d0">"TIME"</data>
+  <data key="d1">"This is the timestamp of the message."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;TYPE &quot;">
+  <data key="d0">"ORGANIZATION"</data>
+  <data key="d1">"Type refers to the classification or categorization of an organization."</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</node>
+<node id="&quot;JESSICA&quot;">
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+  <data key="d1">"The user is Jessica.</data>
+  <data key="d0">"UNKNOWN"</data>
 </node>
 <node id="&quot;METADATA&quot;">
-  <data key="d0">"CATEGORY"</data>
-  <data key="d1">"Metadata typically refers to data that provides information about other data, so in this context, it could relate to storing or describing the user's birthday details."</data>
-  <data key="d2">chunk-1f95879d45b87ccb2252b1b96777730d</data>
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+  <data key="d1">"Role is part of the metadata system, but the exact nature is unclear.</data>
+  <data key="d0">"UNKNOWN"</data>
 </node>
-<node id="&quot;EPHEMERAL&quot;">
-  <data key="d0">"EVENT/CATEGORY"</data>
-  <data key="d1">"Ephemeral refers to something temporary or fleeting, which could imply a specific context or timeline related to the user's birthday statement."</data>
-  <data key="d2">chunk-1f95879d45b87ccb2252b1b96777730d</data>
+<node id="&quot; ERC &quot;">
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+  <data key="d1">"ERC oversees the user's interaction with the system.</data>
+  <data key="d0">"UNKNOWN"</data>
 </node>
-<edge source="&quot;BIRTHDAY&quot;" target="&quot;USER&quot;">
-  <data key="d3">2.0</data>
-  <data key="d4">"The user is associated with the birthday category, which includes celebrations of their personal birthdate."&lt;SEP&gt;"The user's birthday is marked as November 17."</data>
-  <data key="d5">"individual identity, life cycle"&lt;SEP&gt;"personal date, celebration"</data>
-  <data key="d6">chunk-a9108c065f3537dfd4e5f3a67de0da7b</data>
-</edge>
-<edge source="&quot;USER&quot;" target="&quot;BIRTHDAY (NOVEMBER 17)&quot;">
-  <data key="d3">18.0</data>
-  <data key="d4">"The speaker celebrates their birthday on November 17, indicating a personal connection to that date."&lt;SEP&gt;"The speaker marks their birthday as a significant event, emphasizing its importance."</data>
-  <data key="d5">"personal celebration"&lt;SEP&gt;"personal milestone"</data>
-  <data key="d6">chunk-480b92221d2724de3199160b931268ac</data>
-</edge>
-<edge source="&quot;USER&quot;" target="&quot;NOVEMBER&quot;">
+<node id="&quot;ERC &quot;">
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+  <data key="d1">"ERC uses minispacer for tracking API misuse usage.</data>
+  <data key="d0">"UNKNOWN"</data>
+</node>
+<node id="&quot;MINISPACER&quot;">
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+  <data key="d1">"ERC uses minispacer for tracking API misuse usage.</data>
+  <data key="d0">"UNKNOWN"</data>
+</node>
+<node id="&quot;JEREMY&quot;">
+  <data key="d2">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+  <data key="d1">"The user is Jeremy.</data>
+  <data key="d0">"UNKNOWN"</data>
+</node>
+<node id="&quot;46&quot;">
+  <data key="d0">"NUMERIC"</data>
+  <data key="d1">"46 minutes decided to be extracted by a specifick algorithm inside content)\</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;30 SECONDS&quot;">
+  <data key="d0">"NUMERIC"</data>
+  <data key="d1">"30 seconds is a duration."</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;04&quot;">
+  <data key="d0">"NUMERIC"</data>
+  <data key="d1">"04 is a minute</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;2023&quot;">
+  <data key="d0">"NUMERIC"</data>
+  <data key="d1">"2023 is a year mentioned in the content.</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;18:30:04.346717&quot;">
+  <data key="d0">"TIME"</data>
+  <data key="d1">"18:30:04.346717 is a specific time mentioned in the content.</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;SECONDS&quot;">
+  <data key="d0">"NUMERIC"</data>
+  <data key="d1">"30 seconds is a duration."</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;.346717&quot;">
+  <data key="d0">"NUMERIC"</data>
+  <data key="d1">"0.346717 is a part of a larger numeric value in the format HH:MM:SS.SSS</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;2022&quot;">
+  <data key="d0">"NUMERIC"</data>
+  <data key="d1">"2022 is a year mentioned in the content.</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;LOCATION&quot;">
+  <data key="d0">"ORGANIZATION"</data>
+  <data key="d1">"The location is implied to be a section or part of an organization.</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;்ர்த=&quot;">
+  <data key="d0">"TIME"</data>
+  <data key="d1">"18:30:04.346717 is a specific time mentioned in the content.</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;S&gt;">
+  <data key="d0">"TIME"</data>
+  <data key="d1">"s is a unit or part of a time unit.</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;2024&quot;">
+  <data key="d0">"NUMERIC"</data>
+  <data key="d1">"2024 is a year mentioned in the content.</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;2024-12-30&quot;">
+  <data key="d0">"DATE"</data>
+  <data key="d1">"2024-12-30 is a specific date mentioned in the content.</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;-NAVBAR&quot;">
+  <data key="d0">"LOCATION"</data>
+  <data key="d1">"navbar is likely a part of the organization, located to the left</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;DECEMBER&quot;">
+  <data key="d0">"MONTH"</data>
+  <data key="d1">"December is a month mentioned in the content.</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;2022-12-30&quot;">
+  <data key="d0">"DATE"</data>
+  <data key="d1">"2022-12-30 is a specific date mentioned in the content.</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;MY BIRTHDAY&quot;">
+  <data key="d0">"NUMERIC"</data>
+  <data key="d1">"My birthday is a date to be inferred."</data>
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+</node>
+<node id="&quot;DECEMBER &quot;">
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+  <data key="d1">"December is a month mentioned in the content, possibly relevant to the organization's historical context.</data>
+  <data key="d0">"UNKNOWN"</data>
+</node>
+<node id="&quot;MONTH&quot;">
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+  <data key="d1">"December is a month mentioned in the content, possibly relevant to the organization's historical context.</data>
+  <data key="d0">"UNKNOWN"</data>
+</node>
+<node id="&quot;PAGE&quot;">
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+  <data key="d1">"My birthday is an inferred entity, possibly located on a page of personal details."</data>
+  <data key="d0">"UNKNOWN"</data>
+</node>
+<node id="&quot;2024 &quot;">
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+  <data key="d1">"2024 is a year mentioned in the content, possibly relevant to the organization's historical context.</data>
+  <data key="d0">"UNKNOWN"</data>
+</node>
+<node id="&quot;YEAR&quot;">
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+  <data key="d1">"2024 is a year mentioned in the content, possibly relevant to the organization's historical context.</data>
+  <data key="d0">"UNKNOWN"</data>
+</node>
+<node id="&quot;ALGORITHM &quot;">
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+  <data key="d1">"algorithm is part of the organization, possibly related to its metrics or performance."</data>
+  <data key="d0">"UNKNOWN"</data>
+</node>
+<node id="&quot;ORGS&quot;">
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+  <data key="d1">"algorithm is part of the organization, possibly related to its metrics or performance."</data>
+  <data key="d0">"UNKNOWN"</data>
+</node>
+<node id="&quot;2023 &quot;">
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+  <data key="d1">"2023 is a year mentioned in the content, possibly relevant to the organization's historical context.'</data>
+  <data key="d0">"UNKNOWN"</data>
+</node>
+<node id="&quot;STATS &quot;">
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+  <data key="d1">"stats is part of the organization, possibly related to its metrics or performance.</data>
+  <data key="d0">"UNKNOWN"</data>
+</node>
+<node id="&quot;NAVBAR&quot;">
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+  <data key="d1">"navbar is part of the organization's location or interface"</data>
+  <data key="d0">"UNKNOWN"</data>
+</node>
+<node id="&quot;2022 &quot;">
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+  <data key="d1">"2022 is a year mentioned in the content, possibly relevant to the organization's historical context."</data>
+  <data key="d0">"UNKNOWN"</data>
+</node>
+<node id="&quot;ORGANIZATION&quot;">
+  <data key="d2">chunk-c297db8db476b285e576cf0dec34f174</data>
+  <data key="d1">"user is a member of the organization, using its services."</data>
+  <data key="d0">"UNKNOWN"</data>
+</node>
+<edge source="&quot;E_17&quot;" target="&quot;BIRTHDAY&quot;">
   <data key="d3">1.0</data>
-  <data key="d4">User ('birthday_date', 1.0) November</data>
-  <data key="d5">('birthday_date', 1.0) November</data>
+  <data key="d4">birthday part_of e_17</data>
+  <data key="d5">part_of e_17</data>
   <data key="d6">UNKNOWN</data>
 </edge>
-<edge source="&quot;USER&quot;" target="&quot;NOVEMBER_17&quot;">
-  <data key="d3">1.0</data>
-  <data key="d4">User ('birthday_date', 1.0) November 17</data>
-  <data key="d5">('birthday_date', 1.0) November 17</data>
-  <data key="d6">UNKNOWN</data>
-</edge>
-<edge source="&quot;USER&quot;" target="&quot;NOVEMBER_17_IS&quot;">
-  <data key="d3">1.0</data>
-  <data key="d4">User ('birthday_date', 1.0) November 17 is</data>
-  <data key="d5">('birthday_date', 1.0) November 17 is</data>
-  <data key="d6">UNKNOWN</data>
-</edge>
-<edge source="&quot;USER&quot;" target="&quot;STATE&quot;">
-  <data key="d3">1.0</data>
-  <data key="d4">User ('located_in', 0.7) state</data>
-  <data key="d5">('located_in', 0.7) state</data>
-  <data key="d6">UNKNOWN</data>
-</edge>
-<edge source="&quot;USER&quot;" target="&quot;STATE_WHEN_YOU&quot;">
-  <data key="d3">1.0</data>
-  <data key="d4">User ('located_in', 0.7) state when you</data>
-  <data key="d5">('located_in', 0.7) state when you</data>
-  <data key="d6">UNKNOWN</data>
-</edge>
-<edge source="&quot;USER&quot;" target="&quot;2024&quot;">
-  <data key="d3">7.0</data>
-  <data key="d4">"The user's birthday falls within this specific year."</data>
-  <data key="d5">"time frame, personal celebration"</data>
-  <data key="d6">chunk-89057ae80f3309b31106a80402fd542f</data>
-</edge>
-<edge source="&quot;USER&quot;" target="&quot;AI ASSISTANT&quot;">
-  <data key="d3">7.0</data>
-  <data key="d4">"The user interacts with the AI assistant as a service provider."</data>
-  <data key="d5">"user-service interaction"</data>
-  <data key="d6">chunk-516e3a601b04c6beb0f1a1358e5d1672</data>
-</edge>
-<edge source="&quot;USER-PROVIDED PERSONAL DETAILS&quot;" target="&quot;YOU&quot;">
+<edge source="&quot;USER&quot;" target="&quot;JESSICA&quot;">
   <data key="d3">8.0</data>
-  <data key="d4">"The AI assistant stores user-provided personal details to offer tailored assistance."</data>
-  <data key="d5">"personalization, memory utilization"</data>
-  <data key="d6">chunk-ebdd9db65cd7e8557d1425da931543db</data>
+  <data key="d4">"The user is Jessica.</data>
+  <data key="d5">"identification"</data>
+  <data key="d6">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
 </edge>
-<edge source="&quot;AI ASSISTANT'S LONG-TERM MEMORY&quot;" target="&quot;USER'S DEVICE&quot;">
+<edge source="&quot;USER&quot;" target="&quot;2315645970528&quot;">
+  <data key="d3">27.0</data>
+  <data key="d4">"The user is identified by this unique identifier.</data>
+  <data key="d5">"identification"</data>
+  <data key="d6">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</edge>
+<edge source="&quot;USER&quot;" target="&quot;JID&quot;">
+  <data key="d3">7.0</data>
+  <data key="d4">"The user is identified by this identifier in internal systems.</data>
+  <data key="d5">"internal identification"</data>
+  <data key="d6">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</edge>
+<edge source="&quot;USER&quot;" target="&quot;JEREMY&quot;">
+  <data key="d3">7.0</data>
+  <data key="d4">"The user is Jeremy.</data>
+  <data key="d5">"identification"</data>
+  <data key="d6">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</edge>
+<edge source="&quot;USER&quot;" target="&quot;MY BIRTHDAY&quot;">
+  <data key="d3">22.0</data>
+  <data key="d4">"My birthday is likely a personal detail requested by the user."&lt;SEP&gt;"user is likely asking for their birthday."</data>
+  <data key="d5">"personal query"&lt;SEP&gt;"querying personal details"</data>
+  <data key="d6">chunk-c297db8db476b285e576cf0dec34f174</data>
+</edge>
+<edge source="&quot;USER&quot;" target="&quot;NAVBAR&quot;">
+  <data key="d3">7.0</data>
+  <data key="d4">"user is accessing the navbar, possibly as a part of their organization's interface."</data>
+  <data key="d5">"interacting with interface"</data>
+  <data key="d6">chunk-c297db8db476b285e576cf0dec34f174</data>
+</edge>
+<edge source="&quot;USER&quot;" target="&quot;ORGANIZATION&quot;">
+  <data key="d3">8.0</data>
+  <data key="d4">"user is a member of the organization, using its services."</data>
+  <data key="d5">"organizational membership"</data>
+  <data key="d6">chunk-c297db8db476b285e576cf0dec34f174</data>
+</edge>
+<edge source="&quot;ROLE&quot;" target="&quot;METADATA&quot;">
+  <data key="d3">5.0</data>
+  <data key="d4">"Role is part of the metadata system, but the exact nature is unclear.</data>
+  <data key="d5">"system relationship"</data>
+  <data key="d6">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</edge>
+<edge source="&quot;ERC&quot;" target="&quot;METADATA&quot;">
+  <data key="d3">12.0</data>
+  <data key="d4">"Metadata is a system and ERC is part of it, but the exact nature is unclear.</data>
+  <data key="d5">"system relationship"</data>
+  <data key="d6">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</edge>
+<edge source="&quot;ERC&quot;" target="&quot; ERC &quot;">
+  <data key="d3">8.0</data>
+  <data key="d4">"ERC oversees the user's interaction with the system.</data>
+  <data key="d5">"system oversight"</data>
+  <data key="d6">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</edge>
+<edge source="&quot;TIMESTAMP&quot;" target="&quot;USER &quot;">
+  <data key="d3">5.0</data>
+  <data key="d4">"The user uses the timestamp for logging purposes.</data>
+  <data key="d5">"logging documentation"</data>
+  <data key="d6">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</edge>
+<edge source="&quot;ERC &quot;" target="&quot;MINISPACER&quot;">
   <data key="d3">6.0</data>
-  <data key="d4">"The user's device information is stored in the AI assistant's long-term memory for context-aware assistance."</data>
-  <data key="d5">"data storage, personalization"</data>
-  <data key="d6">chunk-ebdd9db65cd7e8557d1425da931543db</data>
+  <data key="d4">"ERC uses minispacer for tracking API misuse usage.</data>
+  <data key="d5">"API misuse tracking"</data>
+  <data key="d6">chunk-f0f6d8ab7ae04b2203d823b84153b25f</data>
+</edge>
+<edge source="&quot;LOCATION&quot;" target="&quot;NAVBAR&quot;">
+  <data key="d3">8.0</data>
+  <data key="d4">"navbar is part of the organization's location or interface"</data>
+  <data key="d5">"interface location"</data>
+  <data key="d6">chunk-c297db8db476b285e576cf0dec34f174</data>
+</edge>
+<edge source="&quot;MY BIRTHDAY&quot;" target="&quot;PAGE&quot;">
+  <data key="d3">9.0</data>
+  <data key="d4">"My birthday is an inferred entity, possibly located on a page of personal details."</data>
+  <data key="d5">"personal details page"</data>
+  <data key="d6">chunk-c297db8db476b285e576cf0dec34f174</data>
+</edge>
+<edge source="&quot;DECEMBER &quot;" target="&quot;MONTH&quot;">
+  <data key="d3">10.0</data>
+  <data key="d4">"December is a month mentioned in the content, possibly relevant to the organization's historical context.</data>
+  <data key="d5">"historical context"</data>
+  <data key="d6">chunk-c297db8db476b285e576cf0dec34f174</data>
+</edge>
+<edge source="&quot;2024 &quot;" target="&quot;YEAR&quot;">
+  <data key="d3">9.0</data>
+  <data key="d4">"2024 is a year mentioned in the content, possibly relevant to the organization's historical context.</data>
+  <data key="d5">"historical context"</data>
+  <data key="d6">chunk-c297db8db476b285e576cf0dec34f174</data>
+</edge>
+<edge source="&quot;YEAR&quot;" target="&quot;2023 &quot;">
+  <data key="d3">8.0</data>
+  <data key="d4">"2023 is a year mentioned in the content, possibly relevant to the organization's historical context.'</data>
+  <data key="d5">"historical context"</data>
+  <data key="d6">chunk-c297db8db476b285e576cf0dec34f174</data>
+</edge>
+<edge source="&quot;YEAR&quot;" target="&quot;2022 &quot;">
+  <data key="d3">7.0</data>
+  <data key="d4">"2022 is a year mentioned in the content, possibly relevant to the organization's historical context."</data>
+  <data key="d5">"historical context"</data>
+  <data key="d6">chunk-c297db8db476b285e576cf0dec34f174</data>
+</edge>
+<edge source="&quot;ALGORITHM &quot;" target="&quot;ORGS&quot;">
+  <data key="d3">11.0</data>
+  <data key="d4">"algorithm is part of the organization, possibly related to its metrics or performance."</data>
+  <data key="d5">"org metrics"</data>
+  <data key="d6">chunk-c297db8db476b285e576cf0dec34f174</data>
+</edge>
+<edge source="&quot;ORGS&quot;" target="&quot;STATS &quot;">
+  <data key="d3">11.0</data>
+  <data key="d4">"stats is part of the organization, possibly related to its metrics or performance.</data>
+  <data key="d5">"org metrics"</data>
+  <data key="d6">chunk-c297db8db476b285e576cf0dec34f174</data>
 </edge>
 </graph></graphml>

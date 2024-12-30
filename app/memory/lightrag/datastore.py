@@ -1,5 +1,6 @@
 """Enhanced relational database operations for LightRAG memory system."""
 
+import json
 import logging
 import sqlite3
 import uuid
@@ -167,13 +168,23 @@ class MemoryDatastore:
 
             # Create collections table
             cur.execute("""
-            CREATE TABLE IF NOT EXISTS collections (
-                id TEXT PRIMARY KEY,
-                name TEXT NOT NULL,
-                description TEXT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            );
+                CREATE TABLE IF NOT EXISTS collections (
+                    id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    description TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+
+            # Create cache table
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS cache (
+                    key TEXT PRIMARY KEY,
+                    value TEXT NOT NULL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    expires_at DATETIME
+                );
             """)
 
             # Create collection members table
@@ -513,22 +524,130 @@ class MemoryDatastore:
             f"Failed to get relations for entity: {entity_id}"
         )
 
-    def search_entities(self, search_term: str, limit: int = 10) -> List[Dict]:
-        """Search for entities by name, description, or synonyms."""
+    def search_entities(self, search_term: str, limit: int = 10, metadata_key: Optional[str] = None, include_chunks: bool = False) -> List[Dict]:
+        """Enhanced search for entities with semantic and hierarchical support.
+
+        Args:
+            search_term: The term to search for
+            limit: Maximum number of results to return
+            metadata_key: Optional metadata key to filter by
+            include_chunks: Whether to include chunk entities in results
+
+        Returns:
+            List of matching entities with related chunks and context
+        """
         def operation(cur: sqlite3.Cursor) -> List[Dict]:
-            cur.execute("""
+            # First, find matching documents
+            doc_query = """
                 SELECT e.* FROM entities e
                 LEFT JOIN synonyms s ON e.id = s.entity_id
-                WHERE e.name LIKE ? OR e.description LIKE ? OR s.synonym LIKE ?
-                GROUP BY e.id
-                LIMIT ?
-            """, (f"%{search_term}%", f"%{search_term}%", f"%{search_term}%", limit))
-            return self._rows_to_dicts(cur.fetchall(), 'entity')
+                LEFT JOIN metadata m ON e.id = m.entity_id
+                WHERE e.hierarchy_level = 'document'
+                AND (e.name LIKE ? OR e.description LIKE ? OR s.synonym LIKE ?)
+            """
+            if metadata_key:
+                doc_query += " AND m.key = ? AND m.value LIKE ?"
+
+            doc_query += " GROUP BY e.id LIMIT ?"
+
+            doc_params = [f"%{search_term}%",
+                          f"%{search_term}%", f"%{search_term}%"]
+            if metadata_key:
+                doc_params.extend([metadata_key, f"%{search_term}%"])
+            doc_params.append(limit)
+
+            cur.execute(doc_query, doc_params)
+            documents = self._rows_to_dicts(cur.fetchall(), 'entity')
+
+            results = []
+
+            # For each matching document, find related chunks
+            for doc in documents:
+                # Get document metadata
+                cur.execute("""
+                    SELECT key, value FROM metadata
+                    WHERE entity_id = ?
+                """, (doc['id'],))
+                doc['metadata'] = {row[0]: row[1] for row in cur.fetchall()}
+
+                # Get related chunks if requested
+                if include_chunks:
+                    chunk_query = """
+                        SELECT e.* FROM entities e
+                        WHERE e.parent_id = ?
+                        AND e.hierarchy_level = 'chunk'
+                        ORDER BY CAST(json_extract(e.metadata, '$.start_pos') AS INTEGER)
+                    """
+                    cur.execute(chunk_query, (doc['id'],))
+                    chunks = self._rows_to_dicts(cur.fetchall(), 'entity')
+
+                    # Add chunk metadata
+                    for chunk in chunks:
+                        cur.execute("""
+                            SELECT key, value FROM metadata
+                            WHERE entity_id = ?
+                        """, (chunk['id'],))
+                        chunk['metadata'] = {row[0]: row[1]
+                                             for row in cur.fetchall()}
+
+                    doc['chunks'] = chunks
+
+                results.append(doc)
+
+            # If no documents found, search chunks directly
+            if not results and include_chunks:
+                chunk_query = """
+                    SELECT e.* FROM entities e
+                    LEFT JOIN synonyms s ON e.id = s.entity_id
+                    LEFT JOIN metadata m ON e.id = m.entity_id
+                    WHERE e.hierarchy_level = 'chunk'
+                    AND (e.name LIKE ? OR e.description LIKE ? OR s.synonym LIKE ?)
+                """
+                if metadata_key:
+                    chunk_query += " AND m.key = ? AND m.value LIKE ?"
+
+                chunk_query += " GROUP BY e.id LIMIT ?"
+
+                chunk_params = [f"%{search_term}%",
+                                f"%{search_term}%", f"%{search_term}%"]
+                if metadata_key:
+                    chunk_params.extend([metadata_key, f"%{search_term}%"])
+                chunk_params.append(limit)
+
+                cur.execute(chunk_query, chunk_params)
+                chunks = self._rows_to_dicts(cur.fetchall(), 'entity')
+
+                # Add chunk metadata and parent document info
+                for chunk in chunks:
+                    cur.execute("""
+                        SELECT key, value FROM metadata
+                        WHERE entity_id = ?
+                    """, (chunk['id'],))
+                    chunk['metadata'] = {row[0]: row[1]
+                                         for row in cur.fetchall()}
+
+                    # Get parent document
+                    if chunk.get('parent_id'):
+                        cur.execute("""
+                            SELECT * FROM entities
+                            WHERE id = ?
+                        """, (chunk['parent_id'],))
+                        parent = self._row_to_dict(cur.fetchone(), 'entity')
+                        if parent:
+                            chunk['parent_document'] = parent
+
+                results.extend(chunks)
+
+            return results
 
         return self._execute_with_connection(
             operation,
             f"Failed to search entities with term: {search_term}"
         )
+
+    def search_entities_by_metadata(self, key: str, value: str, limit: int = 10) -> List[Dict]:
+        """Search for entities by specific metadata key-value pair."""
+        return self.search_entities(value, limit, metadata_key=key)
 
     def add_access_control(self, entity_id: str, access_level: str, granted_to: str) -> str:
         """Add access control to an entity."""
@@ -802,6 +921,36 @@ class MemoryDatastore:
         return self._execute_with_connection(
             operation,
             f"Failed to search collections with term: {search_term}"
+        )
+
+    def get_cache_entry(self, key: str) -> Optional[Dict]:
+        """Retrieve a cache entry by its key if it hasn't expired."""
+        def operation(cur: sqlite3.Cursor) -> Optional[Dict]:
+            cur.execute("""
+                SELECT value FROM cache
+                WHERE key = ? AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
+            """, (key,))
+            result = cur.fetchone()
+            return json.loads(result[0]) if result else None
+
+        return self._execute_with_connection(
+            operation,
+            f"Failed to get cache entry for key: {key}"
+        )
+
+    def set_cache_entry(self, key: str, value: Dict, expiration: Optional[timedelta] = None) -> None:
+        """Store a value in the cache with an optional expiration time."""
+        def operation(cur: sqlite3.Cursor) -> None:
+            expires_at = (datetime.now() +
+                          expiration).isoformat() if expiration else None
+            cur.execute("""
+                INSERT OR REPLACE INTO cache (key, value, expires_at)
+                VALUES (?, ?, ?)
+            """, (key, json.dumps(value), expires_at))
+
+        self._execute_with_connection(
+            operation,
+            f"Failed to set cache entry for key: {key}"
         )
 
     def enhanced_search(self, search_term: str, limit: int = 10) -> Dict:

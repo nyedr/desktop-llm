@@ -3427,3 +3427,1232 @@
 2024-12-30 00:57:23,331 - lightrag - WARNING - low_level_keywords is empty
 2024-12-30 00:57:24,202 - lightrag - INFO - kw_prompt result:
 2024-12-30 00:57:24,202 - lightrag - WARNING - low_level_keywords is empty
+2024-12-30 14:15:32,951 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 14:15:32,951 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 14:15:32,951 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 14:15:32,951 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 14:16:09,493 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:16:09,766 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:16:09,766 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:16:15,298 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:16:23,877 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2024-12-30 14:16:23,884 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:16:23,885 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:16:23,885 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:16:24,071 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:16:25,905 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2024-12-30 14:17:30,504 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 14:17:30,504 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 14:17:30,505 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 14:17:30,505 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 14:18:00,894 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:18:01,178 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:18:01,178 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:18:01,433 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:18:03,014 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2024-12-30 14:18:03,025 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:18:03,026 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:18:03,026 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:18:03,326 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:18:04,911 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2024-12-30 14:19:25,187 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 14:19:25,187 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 14:19:25,187 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 14:19:25,188 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 14:19:49,944 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:19:50,232 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:19:50,232 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:19:50,413 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:19:52,360 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2024-12-30 14:19:52,375 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:19:52,376 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:19:52,376 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:19:52,691 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:19:54,814 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2024-12-30 14:20:54,833 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 14:20:54,834 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 14:20:54,834 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 14:20:54,834 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 14:21:00,629 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:21:00,922 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:21:00,922 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:21:01,195 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:21:07,661 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:21:07,662 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:21:07,662 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 14:21:07,662 - lightrag - INFO - Inserting 9 vectors to entities
+2024-12-30 14:21:08,091 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 14:21:08,091 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 14:21:08,094 - lightrag - INFO - Writing graph with 9 nodes, 0 edges
+2024-12-30 14:21:08,280 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:21:08,282 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:21:08,282 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:21:08,561 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:21:12,787 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:21:12,926 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:21:12,926 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:21:12,927 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:21:12,927 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:21:12,927 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:21:12,927 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:21:12,927 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:21:13,261 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:21:13,261 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 14:21:13,261 - lightrag - INFO - Inserting 6 vectors to entities
+2024-12-30 14:21:13,263 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:21:13,849 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 14:21:13,849 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 14:21:13,856 - lightrag - INFO - Writing graph with 15 nodes, 3 edges
+2024-12-30 14:21:13,860 - lightrag - INFO - Writing graph with 15 nodes, 3 edges
+2024-12-30 14:21:14,595 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:21:14,596 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:21:14,596 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:21:14,995 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:21:46,798 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:21:46,925 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:21:46,925 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:21:46,926 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:21:46,926 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:21:46,926 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:21:46,926 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:21:46,926 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:21:47,170 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:21:47,171 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:21:47,384 - lightrag - INFO - Inserting 18 vectors to entities
+2024-12-30 14:21:47,863 - lightrag - INFO - Writing graph with 30 nodes, 4 edges
+2024-12-30 14:21:47,866 - lightrag - INFO - Inserting 1 vectors to relationships
+2024-12-30 14:21:48,123 - lightrag - INFO - Writing graph with 30 nodes, 4 edges
+2024-12-30 14:21:48,126 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:21:48,127 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:21:48,128 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:21:48,458 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:22:00,781 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:22:01,182 - lightrag - WARNING - Entity '"STATE"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:01,183 - lightrag - WARNING - Entity '"STATE_WHEN_YOU"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:01,183 - lightrag - WARNING - Relationship from '"USER"' to '"STATE"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:01,183 - lightrag - WARNING - Relationship from '"USER"' to '"STATE_WHEN_YOU"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:01,183 - lightrag - INFO - Inserting 2 vectors to entities
+2024-12-30 14:22:01,410 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:22:01,411 - lightrag - INFO - Inserting 2 vectors to relationships
+2024-12-30 14:22:01,608 - lightrag - INFO - Inserting 17 vectors to entities
+2024-12-30 14:22:02,185 - lightrag - INFO - Writing graph with 43 nodes, 7 edges
+2024-12-30 14:22:02,188 - lightrag - INFO - Inserting 1 vectors to relationships
+2024-12-30 14:22:02,507 - lightrag - INFO - Writing graph with 43 nodes, 7 edges
+2024-12-30 14:22:02,714 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:22:02,715 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:22:02,716 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:22:03,015 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:22:18,119 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:22:18,173 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:18,173 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:18,173 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:18,173 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:18,174 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:18,174 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:18,174 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:22:18,484 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:22:18,484 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 14:22:18,484 - lightrag - INFO - Inserting 16 vectors to entities
+2024-12-30 14:22:18,485 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:22:19,205 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 14:22:19,205 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 14:22:19,212 - lightrag - INFO - Writing graph with 54 nodes, 7 edges
+2024-12-30 14:22:19,217 - lightrag - INFO - Writing graph with 54 nodes, 7 edges
+2024-12-30 14:22:19,219 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:22:19,220 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:22:19,220 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:22:19,430 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:22:26,958 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:22:27,399 - lightrag - WARNING - Entity '"STATE"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:27,399 - lightrag - WARNING - Entity '"STATE_WHEN_YOU"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:27,399 - lightrag - WARNING - Relationship from '"USER"' to '"STATE"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:27,400 - lightrag - WARNING - Relationship from '"USER"' to '"STATE_WHEN_YOU"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:27,400 - lightrag - INFO - Inserting 2 vectors to entities
+2024-12-30 14:22:27,628 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:22:27,630 - lightrag - INFO - Inserting 2 vectors to relationships
+2024-12-30 14:22:27,908 - lightrag - INFO - Inserting 8 vectors to entities
+2024-12-30 14:22:28,353 - lightrag - INFO - Writing graph with 56 nodes, 8 edges
+2024-12-30 14:22:28,356 - lightrag - INFO - Inserting 1 vectors to relationships
+2024-12-30 14:22:28,638 - lightrag - INFO - Writing graph with 56 nodes, 8 edges
+2024-12-30 14:22:29,409 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:29,409 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:29,409 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:29,410 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:29,410 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:29,410 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:22:29,410 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:22:29,659 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:22:29,934 - lightrag - INFO - Writing graph with 56 nodes, 8 edges
+2024-12-30 14:24:06,178 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 14:24:06,178 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 14:24:06,179 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 14:24:06,179 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 14:24:19,851 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:24:20,228 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:24:20,229 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:24:20,417 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:24:33,317 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:24:33,321 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:24:33,324 - lightrag - INFO - Inserting 11 vectors to entities
+2024-12-30 14:24:33,707 - lightrag - INFO - Inserting 2 vectors to relationships
+2024-12-30 14:24:33,905 - lightrag - INFO - Writing graph with 11 nodes, 2 edges
+2024-12-30 14:24:34,078 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:24:34,079 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:24:34,079 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:24:34,365 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:24:34,477 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:24:34,477 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:24:34,477 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:24:34,477 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:24:34,478 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:24:34,478 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:24:34,478 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:24:42,165 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:24:42,167 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:24:42,446 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:24:42,451 - lightrag - INFO - Writing graph with 23 nodes, 15 edges
+2024-12-30 14:24:42,453 - lightrag - INFO - Inserting 14 vectors to entities
+2024-12-30 14:24:42,907 - lightrag - INFO - Inserting 10 vectors to relationships
+2024-12-30 14:24:43,379 - lightrag - INFO - Writing graph with 23 nodes, 15 edges
+2024-12-30 14:24:44,548 - lightrag - INFO - kw_prompt result:
+2024-12-30 14:24:44,932 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:24:44,932 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:24:44,933 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:24:44,933 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:24:44,933 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:24:44,933 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:24:44,933 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:24:45,192 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:24:45,408 - lightrag - INFO - Writing graph with 23 nodes, 15 edges
+2024-12-30 14:24:45,410 - lightrag - INFO - Local query uses 23 entites, 15 relations, 2 text units
+2024-12-30 14:24:45,603 - lightrag - INFO - Global query uses 17 entites, 15 relations, 2 text units
+2024-12-30 14:24:48,336 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:24:48,337 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:24:48,337 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:24:48,618 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:25:16,348 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:25:16,352 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:25:16,352 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 14:25:16,353 - lightrag - INFO - Inserting 31 vectors to entities
+2024-12-30 14:25:17,090 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 14:25:17,091 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 14:25:17,097 - lightrag - INFO - Writing graph with 52 nodes, 15 edges
+2024-12-30 14:25:17,099 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:25:17,100 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:25:17,100 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:25:17,302 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:25:24,684 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:25:25,138 - lightrag - WARNING - Entity '"STATE"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:25:25,139 - lightrag - WARNING - Entity '"STATE_WHEN_YOU"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:25:25,139 - lightrag - WARNING - Relationship from '"USER"' to '"STATE"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:25:25,139 - lightrag - WARNING - Relationship from '"USER"' to '"STATE_WHEN_YOU"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:25:25,139 - lightrag - INFO - Inserting 2 vectors to entities
+2024-12-30 14:25:25,405 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:25:25,406 - lightrag - INFO - Inserting 2 vectors to relationships
+2024-12-30 14:25:25,603 - lightrag - INFO - Inserting 15 vectors to entities
+2024-12-30 14:25:26,180 - lightrag - INFO - Writing graph with 60 nodes, 27 edges
+2024-12-30 14:25:26,183 - lightrag - INFO - Inserting 10 vectors to relationships
+2024-12-30 14:25:26,557 - lightrag - INFO - Writing graph with 60 nodes, 27 edges
+2024-12-30 14:25:26,813 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:25:26,815 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:25:26,815 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:25:27,077 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:30:51,025 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 14:30:51,026 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 14:30:51,027 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 14:30:51,027 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 14:30:57,632 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:30:57,937 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:30:57,937 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:30:58,934 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:31:03,538 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:31:03,538 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:31:03,539 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 14:31:03,539 - lightrag - INFO - Inserting 4 vectors to entities
+2024-12-30 14:31:03,773 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 14:31:03,773 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 14:31:03,776 - lightrag - INFO - Writing graph with 4 nodes, 0 edges
+2024-12-30 14:31:03,949 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:31:03,949 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:31:03,949 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:31:04,176 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:35:14,440 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:35:14,441 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:35:14,442 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2024-12-30 14:35:14,442 - lightrag - WARNING - No new entities and relationships found
+2024-12-30 14:35:14,525 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:14,525 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:14,527 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:14,527 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:14,527 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:14,527 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:14,527 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:35:14,529 - lightrag - INFO - Writing graph with 7 nodes, 3 edges
+2024-12-30 14:35:17,112 - lightrag - INFO - kw_prompt result:
+2024-12-30 14:35:17,320 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:35:17,564 - lightrag - INFO - Writing graph with 7 nodes, 3 edges
+2024-12-30 14:35:17,566 - lightrag - INFO - Local query uses 4 entites, 3 relations, 1 text units
+2024-12-30 14:35:17,818 - lightrag - WARNING - No valid text chunks found
+2024-12-30 14:35:17,818 - lightrag - INFO - Global query uses 4 entites, 3 relations, 0 text units
+2024-12-30 14:35:19,674 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:19,675 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:19,675 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:19,675 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:19,675 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:19,675 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:19,676 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:35:19,979 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:35:19,996 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:35:19,998 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:35:19,998 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:35:20,494 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:35:20,499 - lightrag - INFO - Writing graph with 7 nodes, 3 edges
+2024-12-30 14:35:29,357 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:35:29,360 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:35:29,361 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 14:35:29,361 - lightrag - INFO - Inserting 15 vectors to entities
+2024-12-30 14:35:29,887 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 14:35:29,887 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 14:35:29,890 - lightrag - INFO - Writing graph with 20 nodes, 3 edges
+2024-12-30 14:35:29,891 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:35:29,892 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:35:29,892 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:35:30,096 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:35:34,777 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:35:35,459 - lightrag - WARNING - Entity '"STATE"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:35,460 - lightrag - WARNING - Entity '"STATE_WHEN_YOU"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:35,460 - lightrag - WARNING - Relationship from '"USER"' to '"STATE"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:35,460 - lightrag - WARNING - Relationship from '"USER"' to '"STATE_WHEN_YOU"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:35:35,460 - lightrag - INFO - Inserting 2 vectors to entities
+2024-12-30 14:35:35,656 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:35:35,656 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 14:35:35,656 - lightrag - INFO - Inserting 11 vectors to entities
+2024-12-30 14:35:35,657 - lightrag - INFO - Inserting 2 vectors to relationships
+2024-12-30 14:35:36,576 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 14:35:36,576 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 14:35:36,580 - lightrag - INFO - Writing graph with 26 nodes, 5 edges
+2024-12-30 14:35:36,585 - lightrag - INFO - Writing graph with 26 nodes, 5 edges
+2024-12-30 14:35:36,866 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:35:36,868 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:35:36,868 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:35:37,149 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:36:31,104 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:36:31,191 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:36:31,191 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:36:31,191 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:36:31,191 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:36:31,192 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:36:31,192 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:36:31,192 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:36:31,477 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:36:31,478 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 14:36:31,478 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:36:31,480 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:36:32,064 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 14:36:32,065 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 14:36:32,072 - lightrag - INFO - Writing graph with 29 nodes, 5 edges
+2024-12-30 14:36:32,079 - lightrag - INFO - Writing graph with 29 nodes, 5 edges
+2024-12-30 14:36:32,083 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:36:32,083 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:36:32,083 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:36:32,423 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:47:07,014 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 14:47:07,015 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 14:47:07,015 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 14:47:07,015 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 14:47:13,802 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:47:14,095 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:47:14,095 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:47:15,098 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2024-12-30 14:47:15,100 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:47:15,101 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:47:15,101 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:47:15,311 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:47:20,895 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:47:20,898 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:47:20,900 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 14:47:20,900 - lightrag - INFO - Inserting 11 vectors to entities
+2024-12-30 14:47:21,342 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 14:47:21,342 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 14:47:21,345 - lightrag - INFO - Writing graph with 11 nodes, 0 edges
+2024-12-30 14:47:21,499 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:47:21,500 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:47:21,500 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:47:21,690 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:47:33,079 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:47:33,156 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:47:33,156 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:47:33,158 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:47:33,158 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:47:33,158 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:47:33,158 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:47:33,158 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:47:33,423 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:47:33,425 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:47:33,640 - lightrag - INFO - Inserting 18 vectors to entities
+2024-12-30 14:47:34,355 - lightrag - INFO - Writing graph with 21 nodes, 12 edges
+2024-12-30 14:47:34,357 - lightrag - INFO - Inserting 9 vectors to relationships
+2024-12-30 14:47:34,793 - lightrag - INFO - Writing graph with 21 nodes, 12 edges
+2024-12-30 14:47:36,431 - lightrag - INFO - kw_prompt result:
+2024-12-30 14:47:36,839 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:47:36,839 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:47:36,840 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:47:36,840 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:47:36,840 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:47:36,840 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:47:36,841 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:47:37,136 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:47:37,409 - lightrag - INFO - Writing graph with 21 nodes, 12 edges
+2024-12-30 14:47:37,410 - lightrag - INFO - Local query uses 21 entites, 12 relations, 2 text units
+2024-12-30 14:47:37,599 - lightrag - INFO - Global query uses 11 entites, 12 relations, 1 text units
+2024-12-30 14:48:37,797 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:48:37,798 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:48:37,798 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:48:38,052 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:48:52,435 - lightrag - INFO - Writing graph with 21 nodes, 12 edges
+2024-12-30 14:48:52,438 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:48:52,439 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:48:52,439 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:48:52,650 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:49:11,668 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:49:11,669 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:49:11,669 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2024-12-30 14:49:11,670 - lightrag - WARNING - No new entities and relationships found
+2024-12-30 14:49:11,674 - lightrag - INFO - Writing graph with 21 nodes, 12 edges
+2024-12-30 14:49:11,854 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:49:11,856 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:49:11,856 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:49:12,090 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:49:26,101 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:49:26,170 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:49:26,170 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:49:26,170 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:49:26,172 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:49:26,172 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:49:26,172 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:49:26,172 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:49:26,472 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:49:26,473 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 14:49:26,473 - lightrag - INFO - Inserting 1 vectors to entities
+2024-12-30 14:49:26,474 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:49:27,189 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 14:49:27,189 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 14:49:27,194 - lightrag - INFO - Writing graph with 21 nodes, 12 edges
+2024-12-30 14:49:27,206 - lightrag - INFO - Writing graph with 21 nodes, 12 edges
+2024-12-30 14:49:28,340 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:49:28,340 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:49:28,340 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:49:28,341 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:49:28,341 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:49:28,341 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:49:28,341 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:49:28,706 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:49:29,053 - lightrag - INFO - Writing graph with 21 nodes, 12 edges
+2024-12-30 14:50:03,402 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 14:50:03,402 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 14:50:03,402 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 14:50:03,402 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 14:50:08,792 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:50:09,164 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:50:09,164 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:50:09,165 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:50:09,166 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:50:09,166 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:50:09,606 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:50:09,607 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:50:30,571 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:50:30,575 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:50:30,579 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:50:30,581 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:50:30,582 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 14:50:30,583 - lightrag - INFO - Inserting 9 vectors to entities
+2024-12-30 14:50:31,067 - lightrag - INFO - Inserting 12 vectors to entities
+2024-12-30 14:50:31,068 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 14:50:31,068 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 14:50:31,517 - lightrag - INFO - Writing graph with 20 nodes, 14 edges
+2024-12-30 14:50:31,520 - lightrag - INFO - Inserting 14 vectors to relationships
+2024-12-30 14:50:31,694 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:50:31,702 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:50:31,702 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:50:32,478 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:32,479 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:32,479 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:32,479 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:32,479 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:32,479 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:32,480 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:50:32,480 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:50:32,484 - lightrag - INFO - Writing graph with 23 nodes, 17 edges
+2024-12-30 14:50:37,468 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 14:50:37,469 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 14:50:37,469 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 14:50:37,470 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:50:37,471 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:50:37,945 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 14:50:37,949 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:50:45,093 - lightrag - INFO - Writing graph with 30 nodes, 17 edges
+2024-12-30 14:50:45,096 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 14:50:45,099 - lightrag - INFO - Inserting 15 vectors to entities
+2024-12-30 14:50:45,530 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 14:50:45,531 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 14:50:45,531 - lightrag - INFO - Inserting 25 vectors to entities
+2024-12-30 14:50:45,532 - lightrag - INFO - Inserting 1 vectors to relationships
+2024-12-30 14:50:46,406 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 14:50:46,406 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 14:50:46,480 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:46,480 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:46,480 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:46,480 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:46,481 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:46,481 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:46,481 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:50:46,487 - lightrag - INFO - Writing graph with 44 nodes, 18 edges
+2024-12-30 14:50:46,764 - lightrag - INFO - Writing graph with 44 nodes, 18 edges
+2024-12-30 14:50:48,113 - lightrag - INFO - kw_prompt result:
+2024-12-30 14:50:48,367 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:50:49,382 - lightrag - INFO - kw_prompt result:
+2024-12-30 14:50:49,852 - lightrag - INFO - Writing graph with 44 nodes, 18 edges
+2024-12-30 14:50:49,856 - lightrag - INFO - Local query uses 38 entites, 17 relations, 4 text units
+2024-12-30 14:50:50,079 - lightrag - INFO - Local query uses 38 entites, 17 relations, 4 text units
+2024-12-30 14:50:50,315 - lightrag - INFO - Global query uses 20 entites, 18 relations, 2 text units
+2024-12-30 14:50:52,800 - lightrag - INFO - Global query uses 20 entites, 18 relations, 2 text units
+2024-12-30 14:50:55,612 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:55,612 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:55,612 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:55,612 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:55,614 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:55,614 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:55,614 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:50:55,985 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:50:56,274 - lightrag - INFO - Writing graph with 44 nodes, 18 edges
+2024-12-30 14:50:57,363 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:57,363 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:57,363 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:57,364 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:57,364 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:57,364 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 14:50:57,364 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 14:50:57,709 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 14:50:57,995 - lightrag - INFO - Writing graph with 44 nodes, 18 edges
+2024-12-30 14:57:30,162 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 14:57:30,162 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 14:57:30,162 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 14:57:30,162 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 15:01:41,843 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 15:01:41,843 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 15:01:41,844 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 15:01:41,844 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 15:01:46,926 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 15:01:47,241 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 15:01:47,242 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 15:01:48,209 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 15:01:52,461 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 15:01:52,467 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 15:01:52,468 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 15:01:52,468 - lightrag - INFO - Inserting 7 vectors to entities
+2024-12-30 15:01:52,850 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 15:01:52,850 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 15:01:52,854 - lightrag - INFO - Writing graph with 7 nodes, 0 edges
+2024-12-30 15:01:53,087 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 15:01:53,089 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 15:01:53,089 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 15:01:53,393 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 15:01:59,429 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 15:01:59,515 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:01:59,515 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:01:59,515 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:01:59,515 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:01:59,515 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:01:59,516 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:01:59,516 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 15:01:59,778 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 15:01:59,779 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 15:01:59,779 - lightrag - INFO - Inserting 22 vectors to entities
+2024-12-30 15:01:59,780 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 15:02:00,577 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 15:02:00,577 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 15:02:00,583 - lightrag - INFO - Writing graph with 27 nodes, 3 edges
+2024-12-30 15:02:00,590 - lightrag - INFO - Writing graph with 27 nodes, 3 edges
+2024-12-30 15:02:01,542 - lightrag - INFO - kw_prompt result:
+2024-12-30 15:02:01,756 - lightrag - INFO - Local query uses 27 entites, 3 relations, 2 text units
+2024-12-30 15:02:01,935 - lightrag - WARNING - No valid text chunks found
+2024-12-30 15:02:01,935 - lightrag - INFO - Global query uses 4 entites, 3 relations, 0 text units
+2024-12-30 15:02:04,659 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:02:04,659 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:02:04,659 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:02:04,660 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:02:04,660 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:02:04,660 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:02:04,660 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 15:02:05,060 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 15:02:05,317 - lightrag - INFO - Writing graph with 27 nodes, 3 edges
+2024-12-30 15:02:17,380 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 15:02:17,382 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 15:02:17,382 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 15:02:17,586 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 15:02:23,065 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 15:02:23,069 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 15:02:23,071 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 15:02:23,071 - lightrag - INFO - Inserting 16 vectors to entities
+2024-12-30 15:02:23,693 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 15:02:23,693 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 15:02:23,698 - lightrag - INFO - Writing graph with 38 nodes, 3 edges
+2024-12-30 15:02:24,257 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 15:02:24,258 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 15:02:24,258 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 15:02:24,636 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 15:02:29,469 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 15:02:29,474 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 15:02:29,475 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 15:02:29,476 - lightrag - INFO - Inserting 9 vectors to entities
+2024-12-30 15:02:30,185 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 15:02:30,185 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 15:02:30,191 - lightrag - INFO - Writing graph with 45 nodes, 3 edges
+2024-12-30 15:02:31,182 - lightrag - INFO - kw_prompt result:
+2024-12-30 15:02:31,514 - lightrag - INFO - Local query uses 45 entites, 3 relations, 4 text units
+2024-12-30 15:02:31,691 - lightrag - WARNING - No valid text chunks found
+2024-12-30 15:02:31,691 - lightrag - INFO - Global query uses 4 entites, 3 relations, 0 text units
+2024-12-30 15:08:18,124 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 15:08:18,125 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 15:08:18,125 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 15:08:18,125 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 15:08:23,554 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 15:08:23,795 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 15:08:23,795 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 15:08:24,728 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 15:08:30,760 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 15:08:30,764 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 15:08:30,766 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 15:08:30,766 - lightrag - INFO - Inserting 11 vectors to entities
+2024-12-30 15:08:31,316 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 15:08:31,316 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 15:08:31,319 - lightrag - INFO - Writing graph with 11 nodes, 0 edges
+2024-12-30 15:08:31,499 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 15:08:31,500 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 15:08:31,500 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 15:08:31,695 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 15:12:31,923 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 15:12:32,003 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 15:12:32,003 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 15:12:32,003 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 15:12:32,275 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 15:12:32,276 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 15:12:32,279 - lightrag - INFO - Writing graph with 12 nodes, 0 edges
+2024-12-30 15:12:34,113 - lightrag - INFO - kw_prompt result:
+2024-12-30 15:12:34,374 - lightrag - INFO - Local query uses 12 entites, 0 relations, 2 text units
+2024-12-30 15:12:34,614 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 15:12:38,497 - lightrag - INFO - kw_prompt result:
+2024-12-30 15:12:38,704 - lightrag - INFO - Local query uses 12 entites, 0 relations, 2 text units
+2024-12-30 15:12:38,890 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 15:16:34,164 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 15:16:34,164 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 15:16:34,165 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 15:16:34,165 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 15:16:40,082 - lightrag - INFO - kw_prompt result:
+2024-12-30 15:16:40,446 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 15:16:42,224 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:16:42,224 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:16:42,224 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:16:42,224 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:16:42,224 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:16:42,225 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:16:42,225 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 15:16:43,663 - lightrag - INFO - kw_prompt result:
+2024-12-30 15:16:44,199 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 15:16:46,810 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 15:16:47,089 - lightrag - INFO - Writing graph with 4 nodes, 3 edges
+2024-12-30 15:16:48,146 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:16:48,147 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:16:48,147 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:16:48,147 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:16:48,147 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:16:48,147 - lightrag - WARNING - Relationship from '"USER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 15:16:48,147 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 15:16:48,378 - lightrag - INFO - Inserting 3 vectors to relationships
+2024-12-30 15:16:48,603 - lightrag - INFO - Writing graph with 4 nodes, 3 edges
+2024-12-30 15:18:00,054 - lightrag - INFO - kw_prompt result:
+2024-12-30 15:18:00,432 - lightrag - WARNING - No valid text units found
+2024-12-30 15:18:00,891 - lightrag - INFO - Local query uses 3 entites, 3 relations, 0 text units
+2024-12-30 15:18:01,235 - lightrag - WARNING - No valid text chunks found
+2024-12-30 15:18:01,235 - lightrag - INFO - Global query uses 4 entites, 3 relations, 0 text units
+2024-12-30 15:20:18,461 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 15:20:18,462 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 15:20:18,462 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 15:20:18,462 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 15:32:30,160 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 15:32:30,161 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 15:32:30,161 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 15:32:30,161 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 15:32:42,318 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 15:32:42,573 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 15:32:42,574 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 15:32:43,527 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 15:32:52,889 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 15:32:52,892 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 15:32:52,892 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 15:32:52,893 - lightrag - INFO - Inserting 13 vectors to entities
+2024-12-30 15:32:53,259 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 15:32:53,260 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 15:32:53,263 - lightrag - INFO - Writing graph with 13 nodes, 0 edges
+2024-12-30 15:32:53,416 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 15:32:53,417 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 15:32:53,417 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 15:32:53,627 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 15:33:22,409 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 15:33:22,413 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 15:33:22,415 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 15:33:22,416 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 15:33:22,819 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 15:33:22,819 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 15:33:22,822 - lightrag - INFO - Writing graph with 14 nodes, 0 edges
+2024-12-30 15:33:26,058 - lightrag - INFO - kw_prompt result:
+2024-12-30 15:33:26,268 - lightrag - INFO - Local query uses 14 entites, 0 relations, 2 text units
+2024-12-30 15:33:26,580 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 15:33:33,693 - lightrag - INFO - kw_prompt result:
+2024-12-30 15:41:40,563 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 15:41:40,564 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 15:41:40,564 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 15:41:40,565 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 15:42:41,739 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 15:42:41,739 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 15:42:41,740 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 15:42:41,740 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 15:43:36,099 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 15:43:36,099 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 15:43:36,099 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 15:43:36,101 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 15:43:42,265 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 15:43:42,683 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 15:43:42,683 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 15:43:43,766 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 15:43:59,374 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 15:43:59,376 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 15:43:59,377 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 15:43:59,377 - lightrag - INFO - Inserting 21 vectors to entities
+2024-12-30 15:43:59,914 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 15:43:59,914 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 15:43:59,918 - lightrag - INFO - Writing graph with 21 nodes, 0 edges
+2024-12-30 15:44:00,138 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 15:44:00,139 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 15:44:00,139 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 15:44:00,384 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 15:44:13,130 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 15:44:13,132 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 15:44:13,132 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 15:44:13,132 - lightrag - INFO - Inserting 8 vectors to entities
+2024-12-30 15:44:13,479 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 15:44:13,479 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 15:44:13,482 - lightrag - INFO - Writing graph with 26 nodes, 0 edges
+2024-12-30 15:44:14,527 - lightrag - INFO - kw_prompt result:
+2024-12-30 15:44:14,765 - lightrag - INFO - Local query uses 26 entites, 0 relations, 2 text units
+2024-12-30 15:44:14,966 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 15:44:18,747 - lightrag - INFO - kw_prompt result:
+2024-12-30 15:44:19,014 - lightrag - INFO - Local query uses 26 entites, 0 relations, 2 text units
+2024-12-30 15:44:19,260 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 15:47:48,145 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 15:47:48,145 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 15:47:48,145 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 15:47:48,146 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 15:49:28,562 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 15:49:28,563 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 15:49:28,563 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 15:49:28,564 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 15:49:34,607 - lightrag - INFO - kw_prompt result:
+2024-12-30 15:49:35,510 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 15:51:19,517 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 15:51:19,518 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 15:51:19,518 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 15:51:19,519 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 15:51:26,673 - lightrag - INFO - kw_prompt result:
+2024-12-30 15:51:26,958 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 15:52:22,166 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 15:52:22,167 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 15:52:22,167 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 15:52:22,167 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 15:52:29,239 - lightrag - INFO - kw_prompt result:
+2024-12-30 15:52:29,476 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 16:58:57,593 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 16:58:57,594 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 16:58:57,594 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 16:58:57,594 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 17:02:39,844 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 17:02:39,846 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 17:02:39,846 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 17:02:39,846 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 17:02:48,972 - lightrag - INFO - kw_prompt result:
+2024-12-30 17:02:50,107 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 17:02:52,349 - lightrag - INFO - kw_prompt result:
+2024-12-30 17:02:52,765 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 17:03:45,519 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 17:03:45,522 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 17:03:45,522 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 17:03:45,523 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 17:04:05,191 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 17:04:05,192 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 17:04:05,192 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 17:04:05,193 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 17:04:10,103 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:04:10,347 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:04:10,347 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:04:10,562 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:04:23,680 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:04:23,682 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:04:23,684 - lightrag - INFO - Inserting 18 vectors to entities
+2024-12-30 17:04:24,289 - lightrag - INFO - Inserting 12 vectors to relationships
+2024-12-30 17:04:25,076 - lightrag - INFO - Writing graph with 18 nodes, 12 edges
+2024-12-30 17:04:25,230 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:04:25,231 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:04:25,231 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:04:25,443 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:04:35,944 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:04:35,945 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:04:35,948 - lightrag - INFO - Inserting 16 vectors to entities
+2024-12-30 17:04:36,453 - lightrag - INFO - Inserting 10 vectors to relationships
+2024-12-30 17:04:36,902 - lightrag - INFO - Writing graph with 32 nodes, 22 edges
+2024-12-30 17:04:37,852 - lightrag - INFO - kw_prompt result:
+2024-12-30 17:04:38,062 - lightrag - INFO - Local query uses 31 entites, 22 relations, 2 text units
+2024-12-30 17:04:38,242 - lightrag - INFO - Global query uses 27 entites, 22 relations, 2 text units
+2024-12-30 17:19:40,279 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:19:40,281 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:19:40,281 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:19:41,646 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:21:00,179 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:21:00,190 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:21:00,190 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 17:21:00,191 - lightrag - INFO - Inserting 164 vectors to entities
+2024-12-30 17:21:04,530 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 17:21:04,531 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 17:21:04,548 - lightrag - INFO - Writing graph with 193 nodes, 22 edges
+2024-12-30 17:21:04,807 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:21:04,808 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:21:04,808 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:21:04,996 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:21:17,655 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:21:17,658 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:21:17,659 - lightrag - INFO - Inserting 20 vectors to entities
+2024-12-30 17:21:18,275 - lightrag - INFO - Inserting 1 vectors to relationships
+2024-12-30 17:21:18,460 - lightrag - INFO - Writing graph with 202 nodes, 23 edges
+2024-12-30 17:21:19,432 - lightrag - INFO - kw_prompt result:
+2024-12-30 17:21:19,619 - lightrag - INFO - Local query uses 60 entites, 3 relations, 4 text units
+2024-12-30 17:21:19,799 - lightrag - INFO - Global query uses 29 entites, 23 relations, 3 text units
+2024-12-30 17:27:32,092 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 17:27:32,092 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 17:27:32,093 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 17:27:32,093 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 17:29:32,069 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 17:29:32,069 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 17:29:32,071 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 17:29:32,072 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 17:29:39,260 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:29:39,495 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:29:39,495 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:29:40,394 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:34:06,624 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:34:06,636 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:34:06,637 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 17:34:06,638 - lightrag - INFO - Inserting 165 vectors to entities
+2024-12-30 17:34:10,932 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 17:34:10,932 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 17:34:10,945 - lightrag - INFO - Writing graph with 165 nodes, 0 edges
+2024-12-30 17:34:11,390 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:34:11,391 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:34:11,391 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:34:11,639 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:34:39,097 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:34:39,104 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:34:39,106 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 17:34:39,107 - lightrag - INFO - Inserting 2 vectors to entities
+2024-12-30 17:34:39,345 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 17:34:39,345 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 17:34:39,354 - lightrag - INFO - Writing graph with 166 nodes, 0 edges
+2024-12-30 17:34:40,604 - lightrag - INFO - kw_prompt result:
+2024-12-30 17:34:40,791 - lightrag - INFO - Local query uses 60 entites, 0 relations, 2 text units
+2024-12-30 17:34:40,970 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 17:34:43,913 - lightrag - INFO - kw_prompt result:
+2024-12-30 17:34:44,324 - lightrag - INFO - Local query uses 60 entites, 0 relations, 2 text units
+2024-12-30 17:34:44,681 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 17:38:31,760 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 17:38:31,761 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 17:38:31,761 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 17:38:31,761 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 17:38:37,460 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:38:37,834 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:38:37,835 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:38:38,037 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:39:02,697 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:39:02,700 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:39:02,701 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 17:39:02,701 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 17:39:03,017 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 17:39:03,018 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 17:39:03,024 - lightrag - INFO - Writing graph with 3 nodes, 0 edges
+2024-12-30 17:40:22,772 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 17:40:22,773 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 17:40:22,773 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 17:40:22,773 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 17:40:32,374 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:40:32,627 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:40:32,627 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:40:32,878 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:40:40,886 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:40:40,891 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:40:40,894 - lightrag - INFO - Inserting 14 vectors to entities
+2024-12-30 17:40:41,463 - lightrag - INFO - Inserting 12 vectors to relationships
+2024-12-30 17:40:42,355 - lightrag - INFO - Writing graph with 15 nodes, 12 edges
+2024-12-30 17:42:03,999 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 17:42:04,000 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 17:42:04,000 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 17:42:04,000 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 17:42:09,162 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:42:09,422 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:42:09,422 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:42:09,620 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:42:15,974 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:42:15,977 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:42:15,977 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 17:42:15,978 - lightrag - INFO - Inserting 11 vectors to entities
+2024-12-30 17:42:16,373 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 17:42:16,373 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 17:42:16,377 - lightrag - INFO - Writing graph with 11 nodes, 0 edges
+2024-12-30 17:42:16,453 - lightrag - WARNING - Entity '"D6BC951C-3327-4504-A02A-FBD45CDAD58D"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:42:16,454 - lightrag - WARNING - Entity '"A0F261DF-3B38-492F-A721-D250AB690269"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:42:16,454 - lightrag - WARNING - Entity '"0656EBE2-DD40-4060-B7FA-7110E5482EC0"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:42:16,454 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 17:42:16,796 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 17:42:16,796 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 17:42:16,798 - lightrag - INFO - Writing graph with 14 nodes, 0 edges
+2024-12-30 17:42:16,951 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:42:16,953 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:42:16,953 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:42:17,154 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:48:18,821 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:48:18,826 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:48:18,827 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 17:48:18,827 - lightrag - INFO - Inserting 23 vectors to entities
+2024-12-30 17:48:20,185 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 17:48:20,185 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 17:48:20,188 - lightrag - INFO - Writing graph with 27 nodes, 0 edges
+2024-12-30 17:48:20,266 - lightrag - WARNING - Entity '"59287F1B-0E66-4707-A32B-D1425C3946DF"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:48:20,267 - lightrag - WARNING - Entity '"4A69A222-43D4-420E-B48E-CF73545F90A1"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:48:20,267 - lightrag - WARNING - Entity '"DDDBFE03-4652-443B-8B21-4C9D83497451"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:48:20,267 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 17:48:20,490 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 17:48:20,490 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 17:48:20,493 - lightrag - INFO - Writing graph with 30 nodes, 0 edges
+2024-12-30 17:48:21,443 - lightrag - INFO - kw_prompt result:
+2024-12-30 17:48:21,669 - lightrag - INFO - Local query uses 30 entites, 0 relations, 2 text units
+2024-12-30 17:48:21,848 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 17:48:26,563 - lightrag - INFO - kw_prompt result:
+2024-12-30 17:48:26,800 - lightrag - INFO - Local query uses 30 entites, 0 relations, 2 text units
+2024-12-30 17:48:26,990 - lightrag - WARNING - No high level context found. Switching to local mode.
+2024-12-30 17:49:10,270 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 17:49:10,271 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 17:49:10,271 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 17:49:10,271 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 17:49:42,399 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:49:42,703 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:49:42,703 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:49:42,929 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:49:52,298 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:49:52,302 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:49:52,304 - lightrag - INFO - Inserting 15 vectors to entities
+2024-12-30 17:49:52,804 - lightrag - INFO - Inserting 2 vectors to relationships
+2024-12-30 17:49:53,103 - lightrag - INFO - Writing graph with 15 nodes, 2 edges
+2024-12-30 17:51:36,966 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 17:51:36,967 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 17:51:36,968 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 17:51:36,968 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 17:53:12,189 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:53:12,442 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:53:12,442 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:53:12,649 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:53:27,753 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:53:27,754 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:53:27,756 - lightrag - INFO - Inserting 9 vectors to entities
+2024-12-30 17:53:28,178 - lightrag - INFO - Inserting 8 vectors to relationships
+2024-12-30 17:53:28,797 - lightrag - INFO - Writing graph with 10 nodes, 8 edges
+2024-12-30 17:54:32,135 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 17:54:32,135 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 17:54:32,136 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 17:54:32,136 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 17:54:37,258 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:54:37,501 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:54:37,501 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:54:37,720 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:54:52,567 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:54:52,568 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:54:52,568 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2024-12-30 17:54:52,568 - lightrag - WARNING - No new entities and relationships found
+2024-12-30 17:54:52,573 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2024-12-30 17:54:52,660 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:54:52,661 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:54:52,661 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:54:52,662 - lightrag - WARNING - Relationship from '"NOVEMBER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:54:52,662 - lightrag - WARNING - Relationship from '"NOVEMBER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:54:52,662 - lightrag - WARNING - Relationship from '"NOVEMBER_17"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:54:52,662 - lightrag - WARNING - Relationship from '"NOVEMBER_17"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:54:52,662 - lightrag - WARNING - Relationship from '"NOVEMBER_17_IS"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:54:52,663 - lightrag - WARNING - Relationship from '"NOVEMBER_17_IS"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:54:52,663 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 17:54:52,971 - lightrag - INFO - Inserting 6 vectors to relationships
+2024-12-30 17:54:53,345 - lightrag - INFO - Writing graph with 3 nodes, 3 edges
+2024-12-30 17:54:53,483 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:54:53,483 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:54:53,483 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:54:53,717 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:55:01,628 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:55:01,630 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:55:01,630 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2024-12-30 17:55:01,630 - lightrag - WARNING - No new entities and relationships found
+2024-12-30 17:55:01,635 - lightrag - INFO - Writing graph with 3 nodes, 3 edges
+2024-12-30 17:55:01,704 - lightrag - WARNING - Entity '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:55:01,705 - lightrag - WARNING - Entity '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:55:01,705 - lightrag - WARNING - Entity '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:55:01,705 - lightrag - WARNING - Relationship from '"NOVEMBER"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:55:01,705 - lightrag - WARNING - Relationship from '"NOVEMBER"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:55:01,705 - lightrag - WARNING - Relationship from '"NOVEMBER_17"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:55:01,705 - lightrag - WARNING - Relationship from '"NOVEMBER_17"' to '"NOVEMBER_17_IS"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:55:01,706 - lightrag - WARNING - Relationship from '"NOVEMBER_17_IS"' to '"NOVEMBER"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:55:01,706 - lightrag - WARNING - Relationship from '"NOVEMBER_17_IS"' to '"NOVEMBER_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 17:55:01,706 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 17:55:02,021 - lightrag - INFO - Inserting 6 vectors to relationships
+2024-12-30 17:55:02,403 - lightrag - INFO - Writing graph with 3 nodes, 3 edges
+2024-12-30 17:55:03,630 - lightrag - INFO - kw_prompt result:
+2024-12-30 17:55:03,810 - lightrag - WARNING - No valid text units found
+2024-12-30 17:55:03,811 - lightrag - INFO - Local query uses 3 entites, 3 relations, 0 text units
+2024-12-30 17:55:03,984 - lightrag - WARNING - No valid text chunks found
+2024-12-30 17:55:03,985 - lightrag - INFO - Global query uses 3 entites, 6 relations, 0 text units
+2024-12-30 17:55:21,023 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:55:21,023 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:55:21,023 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:55:21,205 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:55:23,372 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:55:23,373 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:55:23,374 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2024-12-30 17:55:23,374 - lightrag - WARNING - No new entities and relationships found
+2024-12-30 17:55:23,378 - lightrag - INFO - Writing graph with 3 nodes, 3 edges
+2024-12-30 17:55:23,661 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 17:55:23,663 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 17:55:23,663 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 17:55:23,925 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 17:55:33,387 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 17:55:33,390 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 17:55:33,392 - lightrag - INFO - Inserting 17 vectors to entities
+2024-12-30 17:55:34,454 - lightrag - INFO - Inserting 2 vectors to relationships
+2024-12-30 17:55:34,724 - lightrag - INFO - Writing graph with 20 nodes, 5 edges
+2024-12-30 17:55:35,876 - lightrag - INFO - kw_prompt result:
+2024-12-30 17:55:36,061 - lightrag - INFO - Local query uses 20 entites, 5 relations, 1 text units
+2024-12-30 17:55:36,251 - lightrag - INFO - Global query uses 6 entites, 8 relations, 1 text units
+2024-12-30 18:05:24,130 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 18:05:24,130 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 18:05:24,131 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 18:05:24,131 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 18:05:39,542 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 18:05:39,855 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 18:05:39,855 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 18:05:40,828 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 18:05:47,942 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 18:05:47,943 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 18:05:47,944 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 18:05:47,944 - lightrag - INFO - Inserting 11 vectors to entities
+2024-12-30 18:05:48,334 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 18:05:48,335 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 18:05:48,338 - lightrag - INFO - Writing graph with 11 nodes, 0 edges
+2024-12-30 18:05:48,436 - lightrag - WARNING - Entity '"E_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:05:48,436 - lightrag - WARNING - Entity '"BIRTHDAY"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:05:48,436 - lightrag - WARNING - Relationship from '"BIRTHDAY"' to '"E_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:05:48,436 - lightrag - INFO - Inserting 2 vectors to entities
+2024-12-30 18:05:48,738 - lightrag - INFO - Inserting 1 vectors to relationships
+2024-12-30 18:05:48,917 - lightrag - INFO - Writing graph with 12 nodes, 1 edges
+2024-12-30 18:05:49,060 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 18:05:49,061 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 18:05:49,062 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 18:05:49,246 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 18:06:00,115 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 18:06:00,115 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 18:06:00,117 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2024-12-30 18:06:00,117 - lightrag - WARNING - No new entities and relationships found
+2024-12-30 18:06:00,120 - lightrag - INFO - Writing graph with 12 nodes, 1 edges
+2024-12-30 18:06:00,243 - lightrag - WARNING - Entity '"E_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:06:00,243 - lightrag - WARNING - Entity '"BIRTHDAY"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:06:00,244 - lightrag - WARNING - Relationship from '"BIRTHDAY"' to '"E_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:06:00,244 - lightrag - INFO - Inserting 2 vectors to entities
+2024-12-30 18:06:00,444 - lightrag - INFO - Inserting 1 vectors to relationships
+2024-12-30 18:06:00,637 - lightrag - INFO - Writing graph with 12 nodes, 1 edges
+2024-12-30 18:06:01,806 - lightrag - INFO - kw_prompt result:
+2024-12-30 18:06:01,997 - lightrag - INFO - Local query uses 12 entites, 1 relations, 1 text units
+2024-12-30 18:06:02,183 - lightrag - WARNING - No valid text chunks found
+2024-12-30 18:06:02,183 - lightrag - INFO - Global query uses 2 entites, 1 relations, 0 text units
+2024-12-30 18:06:20,053 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 18:06:20,054 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 18:06:20,054 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 18:06:20,254 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 18:06:26,657 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 18:06:26,658 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 18:06:26,659 - lightrag - WARNING - Didn't extract any relationships
+2024-12-30 18:06:26,659 - lightrag - INFO - Inserting 9 vectors to entities
+2024-12-30 18:06:26,999 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 18:06:27,000 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 18:06:27,003 - lightrag - INFO - Writing graph with 21 nodes, 1 edges
+2024-12-30 18:06:27,069 - lightrag - WARNING - Entity '"BIRTHDAY"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:06:27,070 - lightrag - INFO - Inserting 1 vectors to entities
+2024-12-30 18:06:27,269 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 18:06:27,269 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 18:06:27,272 - lightrag - INFO - Writing graph with 21 nodes, 1 edges
+2024-12-30 18:06:27,429 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 18:06:27,430 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 18:06:27,430 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 18:06:27,661 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 18:06:39,473 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 18:06:39,478 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 18:06:39,481 - lightrag - INFO - Inserting 12 vectors to entities
+2024-12-30 18:06:39,923 - lightrag - INFO - Inserting 8 vectors to relationships
+2024-12-30 18:06:40,249 - lightrag - INFO - Writing graph with 35 nodes, 9 edges
+2024-12-30 18:06:40,353 - lightrag - WARNING - Entity '"BIRTHDAY"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:06:40,353 - lightrag - INFO - Inserting 1 vectors to entities
+2024-12-30 18:06:40,529 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 18:06:40,529 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 18:06:40,533 - lightrag - INFO - Writing graph with 35 nodes, 9 edges
+2024-12-30 18:06:42,024 - lightrag - INFO - kw_prompt result:
+2024-12-30 18:06:42,237 - lightrag - INFO - Local query uses 31 entites, 7 relations, 3 text units
+2024-12-30 18:06:42,474 - lightrag - INFO - Global query uses 12 entites, 9 relations, 1 text units
+2024-12-30 18:09:04,056 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 18:09:04,057 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 18:09:04,057 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 18:09:04,057 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 18:09:20,414 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 18:09:20,415 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 18:09:20,415 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 18:09:20,416 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 18:09:27,006 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 18:09:27,260 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 18:09:27,261 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 18:09:27,443 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 18:09:57,547 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 18:09:57,550 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 18:09:57,551 - lightrag - INFO - Inserting 39 vectors to entities
+2024-12-30 18:09:58,718 - lightrag - INFO - Inserting 44 vectors to relationships
+2024-12-30 18:10:01,073 - lightrag - INFO - Writing graph with 45 nodes, 44 edges
+2024-12-30 18:10:01,199 - lightrag - WARNING - Entity '"E_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:10:01,200 - lightrag - WARNING - Entity '"BIRTHDAY"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:10:01,200 - lightrag - WARNING - Relationship from '"BIRTHDAY"' to '"E_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:10:01,200 - lightrag - INFO - Inserting 2 vectors to entities
+2024-12-30 18:10:01,411 - lightrag - INFO - Inserting 1 vectors to relationships
+2024-12-30 18:10:01,645 - lightrag - INFO - Writing graph with 46 nodes, 45 edges
+2024-12-30 18:10:01,904 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 18:10:01,906 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 18:10:01,906 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 18:10:02,204 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 18:10:06,284 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 18:10:06,285 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 18:10:06,286 - lightrag - INFO - Inserting 3 vectors to entities
+2024-12-30 18:10:06,529 - lightrag - INFO - Inserting 2 vectors to relationships
+2024-12-30 18:10:06,759 - lightrag - INFO - Writing graph with 48 nodes, 47 edges
+2024-12-30 18:10:06,859 - lightrag - WARNING - Entity '"E_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:10:06,859 - lightrag - WARNING - Entity '"BIRTHDAY"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:10:06,859 - lightrag - WARNING - Relationship from '"BIRTHDAY"' to '"E_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:10:06,859 - lightrag - INFO - Inserting 2 vectors to entities
+2024-12-30 18:10:07,078 - lightrag - INFO - Inserting 1 vectors to relationships
+2024-12-30 18:10:07,261 - lightrag - INFO - Writing graph with 48 nodes, 47 edges
+2024-12-30 18:10:08,706 - lightrag - INFO - kw_prompt result:
+2024-12-30 18:10:08,936 - lightrag - INFO - Local query uses 41 entites, 46 relations, 2 text units
+2024-12-30 18:10:09,122 - lightrag - INFO - Global query uses 31 entites, 47 relations, 2 text units
+2024-12-30 18:10:27,561 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 18:10:27,563 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 18:10:27,564 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 18:10:27,762 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 18:10:41,391 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 18:10:41,391 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 18:10:41,392 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2024-12-30 18:10:41,392 - lightrag - WARNING - No new entities and relationships found
+2024-12-30 18:10:41,399 - lightrag - INFO - Writing graph with 48 nodes, 47 edges
+2024-12-30 18:10:41,489 - lightrag - WARNING - Entity '"BIRTHDAY"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:10:41,490 - lightrag - INFO - Inserting 1 vectors to entities
+2024-12-30 18:10:41,687 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 18:10:41,687 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 18:10:41,694 - lightrag - INFO - Writing graph with 48 nodes, 47 edges
+2024-12-30 18:10:41,901 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 18:10:41,902 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 18:10:41,903 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 18:10:42,105 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 18:11:05,657 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 18:11:05,657 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 18:11:05,657 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2024-12-30 18:11:05,657 - lightrag - WARNING - No new entities and relationships found
+2024-12-30 18:11:05,664 - lightrag - INFO - Writing graph with 48 nodes, 47 edges
+2024-12-30 18:11:05,749 - lightrag - WARNING - Entity '"BIRTHDAY"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:11:05,750 - lightrag - INFO - Inserting 1 vectors to entities
+2024-12-30 18:11:05,956 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 18:11:05,956 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 18:11:05,963 - lightrag - INFO - Writing graph with 48 nodes, 47 edges
+2024-12-30 18:11:07,470 - lightrag - INFO - kw_prompt result:
+2024-12-30 18:11:07,688 - lightrag - INFO - Local query uses 41 entites, 46 relations, 2 text units
+2024-12-30 18:11:07,920 - lightrag - INFO - Global query uses 31 entites, 47 relations, 2 text units
+2024-12-30 18:28:56,067 - lightrag - INFO - Logger initialized for working directory: light_rag_data
+2024-12-30 18:28:56,068 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2024-12-30 18:28:56,068 - lightrag - INFO - Load KV full_docs with 0 data
+2024-12-30 18:28:56,068 - lightrag - INFO - Load KV text_chunks with 0 data
+2024-12-30 18:29:04,303 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 18:29:04,697 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 18:29:04,697 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 18:29:05,691 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 18:29:21,508 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 18:29:21,509 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 18:29:21,510 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2024-12-30 18:29:21,510 - lightrag - WARNING - No new entities and relationships found
+2024-12-30 18:29:21,513 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2024-12-30 18:29:21,629 - lightrag - WARNING - Entity '"E_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:29:21,630 - lightrag - WARNING - Entity '"BIRTHDAY"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:29:21,630 - lightrag - WARNING - Relationship from '"BIRTHDAY"' to '"E_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:29:21,630 - lightrag - INFO - Inserting 2 vectors to entities
+2024-12-30 18:29:21,850 - lightrag - INFO - Inserting 1 vectors to relationships
+2024-12-30 18:29:22,054 - lightrag - INFO - Writing graph with 2 nodes, 1 edges
+2024-12-30 18:29:22,190 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 18:29:22,190 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 18:29:22,191 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 18:29:22,396 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 18:29:41,384 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 18:29:41,391 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 18:29:41,393 - lightrag - INFO - Inserting 33 vectors to entities
+2024-12-30 18:29:42,414 - lightrag - INFO - Inserting 9 vectors to relationships
+2024-12-30 18:29:42,734 - lightrag - INFO - Writing graph with 41 nodes, 10 edges
+2024-12-30 18:29:42,822 - lightrag - WARNING - Entity '"E_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:29:42,822 - lightrag - WARNING - Entity '"BIRTHDAY"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:29:42,822 - lightrag - WARNING - Relationship from '"BIRTHDAY"' to '"E_17"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:29:42,822 - lightrag - INFO - Inserting 2 vectors to entities
+2024-12-30 18:29:43,087 - lightrag - INFO - Inserting 1 vectors to relationships
+2024-12-30 18:29:43,345 - lightrag - INFO - Writing graph with 41 nodes, 10 edges
+2024-12-30 18:29:45,690 - lightrag - INFO - kw_prompt result:
+2024-12-30 18:29:45,955 - lightrag - INFO - Local query uses 35 entites, 9 relations, 1 text units
+2024-12-30 18:29:46,158 - lightrag - INFO - Global query uses 15 entites, 10 relations, 1 text units
+2024-12-30 18:30:04,346 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 18:30:04,347 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 18:30:04,347 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 18:30:04,549 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 18:30:15,206 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 18:30:15,208 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 18:30:15,209 - lightrag - INFO - Inserting 18 vectors to entities
+2024-12-30 18:30:15,692 - lightrag - INFO - Inserting 11 vectors to relationships
+2024-12-30 18:30:16,092 - lightrag - INFO - Writing graph with 70 nodes, 21 edges
+2024-12-30 18:30:16,163 - lightrag - WARNING - Entity '"BIRTHDAY"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:30:16,164 - lightrag - INFO - Inserting 1 vectors to entities
+2024-12-30 18:30:16,448 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 18:30:16,449 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 18:30:16,455 - lightrag - INFO - Writing graph with 70 nodes, 21 edges
+2024-12-30 18:30:16,638 - lightrag - INFO - [New Docs] inserting 1 docs
+2024-12-30 18:30:16,640 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2024-12-30 18:30:16,640 - lightrag - INFO - Inserting 1 vectors to chunks
+2024-12-30 18:30:16,860 - lightrag - INFO - [Entity Extraction]...
+2024-12-30 18:31:08,741 - lightrag - INFO - Inserting entities into storage...
+2024-12-30 18:31:08,742 - lightrag - INFO - Inserting relationships into storage...
+2024-12-30 18:31:08,742 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2024-12-30 18:31:08,743 - lightrag - WARNING - No new entities and relationships found
+2024-12-30 18:31:08,748 - lightrag - INFO - Writing graph with 70 nodes, 21 edges
+2024-12-30 18:31:08,819 - lightrag - WARNING - Entity '"BIRTHDAY"' has an UNKNOWN source_id. Please check the source mapping.
+2024-12-30 18:31:08,819 - lightrag - INFO - Inserting 1 vectors to entities
+2024-12-30 18:31:09,194 - lightrag - INFO - Inserting 0 vectors to relationships
+2024-12-30 18:31:09,195 - lightrag - WARNING - You insert an empty data to vector DB
+2024-12-30 18:31:09,200 - lightrag - INFO - Writing graph with 70 nodes, 21 edges
+2024-12-30 18:31:12,263 - lightrag - INFO - kw_prompt result:
+2024-12-30 18:31:12,509 - lightrag - INFO - Local query uses 52 entites, 14 relations, 2 text units
+2024-12-30 18:31:12,753 - lightrag - INFO - Global query uses 29 entites, 21 relations, 2 text units

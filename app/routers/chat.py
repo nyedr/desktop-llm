@@ -14,7 +14,6 @@ from app.dependencies.providers import (
     get_lightrag_manager
 )
 from app.memory.lightrag.manager import EnhancedLightRAGManager
-from app.ner_utils import advanced_ner_and_relationship_inference
 from app.functions.filters import apply_filters
 from app.functions.utils import (
     validate_tool_response,
@@ -36,6 +35,7 @@ from app.functions.base import (
 import asyncio
 from pydantic import BaseModel
 from app.models.memory import MemoryType
+from datetime import datetime
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -303,6 +303,80 @@ async def verify_model_availability(
     return None
 
 
+async def process_memory_context(
+    messages: List[StrictChatMessage],
+    langchain_service: LangChainService,
+    chat_request: ChatRequest,
+    request_id: str
+) -> List[StrictChatMessage]:
+    """Process memory context in the background without blocking.
+    Returns the processed messages with memory context if successful."""
+    try:
+        # Only process user and assistant messages
+        filtered_messages = [
+            msg for msg in messages
+            if (isinstance(msg, dict) and msg.get("role") in ["user", "assistant"]) or
+               (hasattr(msg, "role") and msg.role in ["user", "assistant"])
+        ]
+
+        if not filtered_messages:
+            logger.info(f"[{request_id}] No messages to process")
+            return messages
+
+        # Ensure conversation_id is set to prevent null entries
+        if not chat_request.conversation_id:
+            chat_request.conversation_id = request_id
+
+        # Format messages for storage
+        formatted_messages = []
+        for msg in filtered_messages:
+            role = msg.get("role") if isinstance(msg, dict) else msg.role
+            content = msg.get("content") if isinstance(
+                msg, dict) else msg.content
+            formatted_messages.append({
+                "role": role,
+                "content": content,
+                "conversation_id": chat_request.conversation_id,
+                "timestamp": datetime.utcnow().isoformat()
+            })
+
+        # Process conversation with proper metadata
+        processed_messages = await langchain_service.process_conversation(
+            messages=formatted_messages,
+            memory_type=chat_request.memory_type,
+            conversation_id=chat_request.conversation_id,
+            enable_summarization=chat_request.enable_summarization,
+            metadata_filter=chat_request.memory_filter,
+            top_k=chat_request.top_k_memories
+        )
+        logger.info(
+            f"[{request_id}] Added {chat_request.memory_type} memory context")
+
+        # Preserve system messages in the final output
+        system_messages = [
+            msg for msg in messages
+            if (isinstance(msg, dict) and msg.get("role") == "system") or
+               (hasattr(msg, "role") and msg.role == "system")
+        ]
+
+        # Combine messages maintaining order
+        final_messages = []
+        for msg in messages:
+            if (isinstance(msg, dict) and msg.get("role") == "system") or \
+               (hasattr(msg, "role") and msg.role == "system"):
+                final_messages.append(msg)
+            else:
+                if processed_messages:
+                    final_messages.append(processed_messages.pop(0))
+
+        final_messages.extend(processed_messages)
+        return final_messages
+
+    except Exception as e:
+        logger.warning(f"[{request_id}] Failed to add memory context: {e}")
+        return messages
+
+
 async def stream_chat_response(
     request: Request,
     chat_request: ChatRequest,
@@ -347,29 +421,26 @@ async def stream_chat_response(
 
             chat_request.messages = data["messages"]
 
-        # Process conversation with LangChain
+        # Start memory processing in background if enabled
+        memory_task = None
         if chat_request.enable_memory and langchain_service:
-            try:
-                chat_request.messages = await langchain_service.process_conversation(
-                    messages=chat_request.messages,
-                    memory_type=chat_request.memory_type,
-                    conversation_id=chat_request.conversation_id,
-                    enable_summarization=chat_request.enable_summarization,
-                    metadata_filter=chat_request.memory_filter,
-                    top_k=chat_request.top_k_memories
+            memory_task = asyncio.create_task(
+                process_memory_context(
+                    messages=chat_request.messages.copy(),  # Create a copy to avoid modification
+                    langchain_service=langchain_service,
+                    chat_request=chat_request,
+                    request_id=request_id
                 )
-                logger.info(
-                    f"[{request_id}] Added {chat_request.memory_type} memory context")
-            except Exception as e:
-                logger.warning(
-                    f"[{request_id}] Failed to add memory context: {e}")
+            )
+            logger.info(
+                f"[{request_id}] Memory processing started in background")
 
         # Apply pipeline if present
         processed_messages = chat_request.messages
         if pipeline:
             logger.debug(f"[{request_id}] Applying pipeline: {pipeline.name}")
             try:
-                pipeline_data = await pipeline.pipe({"messages": chat_request.messages})
+                pipeline_data = await pipeline.pipe({"messages": processed_messages})
                 logger.debug(
                     f"[{request_id}] Pipeline result: {pipeline_data}")
 
@@ -379,10 +450,8 @@ async def stream_chat_response(
                     logger.warning(
                         f"[{request_id}] Pipeline returned empty messages, using original messages")
 
-                # Handle pipeline summary
                 if "summary" in pipeline_data:
                     pipeline_summary = pipeline_data["summary"]
-                    # Send initial summary event
                     yield ChatStreamEvent(
                         event="pipeline",
                         data=json.dumps({
@@ -391,12 +460,11 @@ async def stream_chat_response(
                         })
                     )
 
-                    # Process detailed results if available
                     if isinstance(pipeline_summary, dict):
                         for key, value in pipeline_summary.items():
                             if isinstance(value, list):
                                 for item in value:
-                                    if item:  # Only send non-empty items
+                                    if item:
                                         yield ChatStreamEvent(
                                             event="pipeline",
                                             data=json.dumps({
@@ -405,9 +473,7 @@ async def stream_chat_response(
                                                 "status": "processing"
                                             })
                                         )
-                                        await asyncio.sleep(0.1)
 
-                    # Send completion event
                     yield ChatStreamEvent(
                         event="pipeline",
                         data=json.dumps({
@@ -425,16 +491,16 @@ async def stream_chat_response(
                 return
 
         # Log the context window before streaming response
-        if chat_request.messages:
+        if processed_messages:
             print(f"\nContext window for request {request_id}:", flush=True)
-            for msg in chat_request.messages:
+            for msg in processed_messages:
                 role = msg.get("role") if isinstance(msg, dict) else msg.role
                 content = msg.get("content") if isinstance(
                     msg, dict) else msg.content
                 print(f"{role}: {content}", flush=True)
             print("\nResponse:", flush=True)
 
-        # Stream the response
+        # Stream the response immediately without waiting for memory processing
         first_response = True
         async for chunk in agent.chat(
             messages=processed_messages,
@@ -444,9 +510,9 @@ async def stream_chat_response(
             stream=True,
             tools=function_schemas if chat_request.enable_tools else None,
             enable_tools=chat_request.enable_tools,
-            enable_memory=chat_request.enable_memory,
-            memory_filter=chat_request.memory_filter,
-            top_k_memories=chat_request.top_k_memories
+            enable_memory=False,  # Disable memory since we're handling it separately
+            memory_filter=None,
+            top_k_memories=None
         ):
             if first_response:
                 yield ChatStreamEvent(event="start", data=json.dumps({"status": "streaming"}))
@@ -462,17 +528,22 @@ async def stream_chat_response(
 
             if isinstance(chunk, dict):
                 if "tool_calls" in chunk:
-                    # Handle tool calls
                     for event in await handle_tool_calls(request_id, chunk, function_service):
                         yield event
                     tool_call_in_progress = True
                 else:
-                    # Handle assistant message
                     yield await handle_assistant_message(request_id, chunk, filters)
                     tool_call_in_progress = False
             else:
-                # Handle string chunk
                 yield await handle_string_chunk(request_id, chunk, filters)
+
+        # Wait for memory processing to complete in the background
+        if memory_task:
+            try:
+                await memory_task
+            except Exception as e:
+                logger.warning(
+                    f"[{request_id}] Background memory processing failed: {e}")
 
     except Exception as e:
         logger.error(
@@ -530,33 +601,19 @@ async def add_memory(
     metadata: Optional[Dict[str, Any]] = None,
     manager: EnhancedLightRAGManager = Depends(get_lightrag_manager)
 ):
-    """Add a memory to the specified collection using EnhancedLightRAGManager."""
+    """Add a memory to the specified collection using EnhancedLightRAGManager.
+    This is a non-blocking operation that processes memory in the background."""
     try:
-        await manager.ingestor.ingest_text(
-            text=memory_text,
-            metadata=metadata,
-            parent_id=None  # Adjust as needed for hierarchy
+        # Create task for background processing
+        asyncio.create_task(
+            manager.ingestor.ingest_text(
+                text=memory_text,
+                metadata=metadata,
+                parent_id=None
+            )
         )
-        return {"status": "success", "message": "Memory added successfully."}
+        return {"status": "success", "message": "Memory ingestion started"}
     except Exception as e:
-        logger.error(f"Error adding memory: {e}", exc_info=True)
+        logger.error(f"Error scheduling memory ingestion: {e}", exc_info=True)
         raise HTTPException(
-            status_code=500, detail=f"Failed to add memory: {e}")
-
-
-@router.post("/chat/parse")
-async def parse_chat_message(
-    message: str,
-    user_id: str,
-    manager: EnhancedLightRAGManager = Depends(get_lightrag_manager)
-):
-    """Parse chat message for entities and relationships using EnhancedLightRAGManager."""
-    try:
-        # Perform NER and relationship inference
-        advanced_ner_and_relationship_inference(message, user_id, manager)
-
-        return {"status": "success", "message": "Message parsed successfully"}
-    except Exception as e:
-        logger.error(f"Error parsing chat message: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500, detail=f"Failed to parse chat message: {e}")
+            status_code=500, detail=f"Failed to schedule memory ingestion: {e}")
