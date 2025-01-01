@@ -2,6 +2,7 @@
 
 import logging
 from typing import Optional
+from pathlib import Path
 
 from app.core.service_locator import get_service_locator
 from app.services.agent import Agent
@@ -9,6 +10,7 @@ from app.services.model_service import ModelService
 from app.services.function_service import FunctionService
 from app.services.mcp_service import MCPService
 from app.memory.lightrag.manager import EnhancedLightRAGManager
+from app.memory.lightrag.config import LIGHTRAG_DATA_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -75,18 +77,30 @@ class Providers:
         return cls._mcp_service
 
     @classmethod
-    def get_lightrag_manager(cls) -> EnhancedLightRAGManager:
+    async def get_lightrag_manager(cls) -> EnhancedLightRAGManager:
         """Get or create EnhancedLightRAG manager instance."""
         if cls._lightrag_manager is None:
-            cls._lightrag_manager = EnhancedLightRAGManager()
+            # Create working directory if it doesn't exist
+            working_dir = Path(LIGHTRAG_DATA_DIR)
+            working_dir.mkdir(parents=True, exist_ok=True)
+
+            # Create manager with working directory
+            cls._lightrag_manager = EnhancedLightRAGManager(working_dir)
+
             # Register with service locator
             get_service_locator().register_service(
                 "lightrag_manager", cls._lightrag_manager)
+
+            # Initialize the manager
+            await cls._lightrag_manager.initialize()
+
         return cls._lightrag_manager
 
     @classmethod
-    def cleanup(cls):
+    async def cleanup(cls):
         """Clean up all service instances."""
+        if cls._lightrag_manager:
+            await cls._lightrag_manager.stop()
         cls._agent = None
         cls._model_service = None
         cls._function_service = None

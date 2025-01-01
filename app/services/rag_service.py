@@ -8,6 +8,12 @@ from lightrag.llm import ollama_embedding
 import numpy as np
 from dotenv import load_dotenv
 from pathlib import Path
+from app.memory.lightrag.config import (
+    LIGHTRAG_DATA_DIR,
+    DEFAULT_EMBEDDING_MODEL,
+    DEFAULT_EMBEDDING_DIM,
+    DEFAULT_MAX_TOKENS
+)
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +22,7 @@ project_root = Path(__file__).parent.parent.parent
 env_path = project_root / '.env'
 load_dotenv(env_path)
 logger.debug(f"Loading environment variables from: {env_path}")
-logger.debug(
-    f"OpenRouter API Key present: {bool(os.getenv('OPENROUTER_API_KEY'))}")
+logger.debug(f"OpenRouter API Key present: {bool(os.getenv('OPENROUTER_API_KEY'))}")
 
 API_BASE_URL = "https://openrouter.ai/api/v1"
 
@@ -34,35 +39,27 @@ API_MODEL_LIST = [
     "meta-llama/llama-3.2-3b-instruct"
 ]
 
-DEFAULT_WORKING_DIR = "./lightrag_storage"
 DEFAULT_MODEL = "meta-llama/llama-3.2-3b-instruct"
-DEFAULT_EMBEDDING_DIM = 768  # nomic-embed-text embedding dimension
-DEFAULT_MAX_TOKENS = 32768  # LightRAG's default max tokens
-DEFAULT_EMBEDDING_MODEL = "nomic-embed-text"  # Ollama's embedding model
-
 
 class OpenRouterError(Exception):
     """Base exception for OpenRouter API errors."""
     pass
 
-
 class OpenRouterAPIKeyError(OpenRouterError):
     """Raised when there are issues with the OpenRouter API key."""
     pass
-
 
 class OpenRouterModelError(OpenRouterError):
     """Raised when there are issues with model selection or availability."""
     pass
 
-
 async def get_embeddings(texts: List[str], model: str = DEFAULT_EMBEDDING_MODEL) -> np.ndarray:
     """
-    Get embeddings for texts using Ollama's nomic-embed-text model.
+    Get embeddings for texts using the configured embedding model.
 
     Args:
         texts: List of texts to get embeddings for
-        model: Embedding model to use (defaults to nomic-embed-text)
+        model: Embedding model to use (defaults to config.DEFAULT_EMBEDDING_MODEL)
 
     Returns:
         np.ndarray: Array of embeddings
@@ -79,22 +76,19 @@ async def get_embeddings(texts: List[str], model: str = DEFAULT_EMBEDDING_MODEL)
     except Exception as e:
         raise Exception(f"Failed to get embeddings: {str(e)}")
 
-
 def create_lightrag(
-    working_dir: str = DEFAULT_WORKING_DIR,
+    working_dir: str = LIGHTRAG_DATA_DIR,
     model_name: str = DEFAULT_MODEL,
-    embedding_dim: int = DEFAULT_EMBEDDING_DIM,
-    max_tokens: int = DEFAULT_MAX_TOKENS,
     embedding_model: str = DEFAULT_EMBEDDING_MODEL,
 ) -> LightRAG:
-    """Create and configure a LightRAG instance with Ollama integration for embeddings."""
+    """Create and configure a LightRAG instance with configured embedding model."""
     # Create working directory if it doesn't exist
     os.makedirs(working_dir, exist_ok=True)
 
-    # Create embedding function using Ollama's nomic-embed-text
+    # Create embedding function using configured model
     embedding_func = EmbeddingFunc(
-        embedding_dim=embedding_dim,
-        max_token_size=max_tokens,
+        embedding_dim=DEFAULT_EMBEDDING_DIM,
+        max_token_size=DEFAULT_MAX_TOKENS,
         func=lambda texts: get_embeddings(texts, model=embedding_model)
     )
 
@@ -104,12 +98,12 @@ def create_lightrag(
             raise OpenRouterAPIKeyError(
                 "OPENROUTER_API_KEY environment variable must be set when using OpenRouter models")
 
-    # Initialize LightRAG with configuration from documentation
+    # Initialize LightRAG with configuration
     rag = LightRAG(
         working_dir=working_dir,
         llm_model_func=openrouter_llm_complete,
         llm_model_name=model_name,
-        llm_model_max_token_size=max_tokens,
+        llm_model_max_token_size=DEFAULT_MAX_TOKENS,
         embedding_func=embedding_func,
         enable_llm_cache=True,
         chunk_token_size=1200,
@@ -127,7 +121,6 @@ def create_lightrag(
     logger.info(
         f"Initialized LightRAG with model {model_name} and {embedding_model} embeddings in directory {working_dir}")
     return rag
-
 
 async def openrouter_llm_complete(
     prompt: str,

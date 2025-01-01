@@ -19,8 +19,8 @@ DEFAULT_RETENTION_DAYS = 30  # Default retention period for memories
 
 # Embedding model settings
 DEFAULT_EMBEDDING_MODEL = os.getenv(
-    'EMBEDDING_MODEL', 'bge-m3')  # Default embedding model
-# Default embedding dimensions
-DEFAULT_EMBEDDING_DIM = int(os.getenv('EMBEDDING_DIM', '1024'))
+    'EMBEDDING_MODEL', 'nomic-embed-text')  # Default embedding model
+# Default embedding dimensions for nomic-embed-text
+DEFAULT_EMBEDDING_DIM = int(os.getenv('EMBEDDING_DIM', '768'))
 # Maximum tokens for embeddings
-DEFAULT_MAX_TOKENS = int(os.getenv('MAX_TOKENS', '8192'))
+DEFAULT_MAX_TOKENS = int(os.getenv('MAX_TOKENS', '32768'))

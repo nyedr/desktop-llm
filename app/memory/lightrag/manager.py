@@ -2,13 +2,12 @@
 
 import hashlib
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import List, Optional, Dict, Union
 from pathlib import Path
 import json
 
 from lightrag import QueryParam
-import numpy as np
 from .config import LIGHTRAG_DATA_DIR
 from .datastore import MemoryDatastore
 from .ingestion import MemoryIngestor
@@ -35,6 +34,7 @@ class EnhancedLightRAGManager(LightRAGManager):
         self.datastore = None
         self.ingestor = None
         self.tasks = None
+        self._initialized = False
 
     async def initialize(self):
         """Initialize the memory system and all components."""
@@ -62,78 +62,6 @@ class EnhancedLightRAGManager(LightRAGManager):
         except Exception as e:
             logger.error(
                 f"Failed to initialize Enhanced LightRAGManager: {str(e)}")
-            raise
-
-    async def start(self):
-        """Start the memory system and background tasks."""
-        logger.info("Starting enhanced memory system")
-        await self.tasks.start()
-
-    async def stop(self):
-        """Stop the memory system and background tasks."""
-        logger.info("Stopping enhanced memory system")
-        await self.tasks.stop()
-
-    async def add_memory(
-        self,
-        text: str,
-        collection: MemoryType = MemoryType.EPHEMERAL,
-        metadata: Optional[Dict] = None,
-        max_chunk_tokens: Optional[int] = None,
-        chunk_size: Optional[int] = None
-    ) -> str:
-        """Add a new memory with background processing."""
-        try:
-            # Generate content hash for deduplication
-            content_hash = hashlib.md5(text.encode('utf-8')).hexdigest()
-
-            # Check cache for existing memory with same content
-            cache_key = f"content_hash_{content_hash}"
-            existing = self.datastore.get_cache(cache_key)
-            if existing:
-                logger.info(
-                    f"Found existing memory for content hash {content_hash}")
-                return existing["memory_id"]
-
-            # Generate memory ID
-            memory_id = hashlib.sha256(
-                f"{content_hash}_{datetime.now().isoformat()}".encode()
-            ).hexdigest()[:32]
-
-            # Format metadata
-            full_metadata = metadata or {}
-            full_metadata.update({
-                "timestamp": datetime.now().isoformat(),
-                "collection": collection.value,
-                "memory_id": memory_id,
-                "content_hash": content_hash,
-                "storage_type": "chunk" if chunk_size else "full"
-            })
-
-            # Store metadata
-            for key, value in full_metadata.items():
-                self.datastore.set_metadata(memory_id, key, str(value))
-
-            # Cache the content hash to memory ID mapping
-            self.datastore.set_cache(cache_key, {
-                "memory_id": memory_id,
-                "timestamp": full_metadata["timestamp"]
-            }, expiration=None)  # No expiration for content hash cache
-
-            # Queue for processing
-            await self.tasks.queue_memory_processing(text, {
-                **full_metadata,
-                "memory_id": memory_id,
-                "chunk_size": chunk_size,
-                "max_chunk_tokens": max_chunk_tokens
-            })
-
-            logger.info(
-                f"Added memory {memory_id} to collection {collection.value}")
-            return memory_id
-
-        except Exception as e:
-            logger.error(f"Error adding memory: {str(e)}", exc_info=True)
             raise
 
     async def retrieve_memories(
@@ -169,18 +97,12 @@ class EnhancedLightRAGManager(LightRAGManager):
             # Execute query
             result = await self.rag.aquery(query, param)
 
-            # Ensure embeddings are numpy arrays
-            if hasattr(result, 'embeddings') and isinstance(result.embeddings, list):
-                result.embeddings = np.array(result.embeddings)
-
             # Process results
-            if isinstance(result, str):
-                matches = [{"content": result, "metadata": {}, "score": 1.0}]
-            elif isinstance(result, dict) and "matches" in result:
-                processed_matches = []
-                seen_hashes = set()
+            matches = []
+            seen_hashes = set()
 
-                for match in result["matches"]:
+            if result and hasattr(result, 'matches'):
+                for match in result.matches:
                     try:
                         content = match.get("content", "")
                         if not content:
@@ -208,7 +130,7 @@ class EnhancedLightRAGManager(LightRAGManager):
                                         memory_id)
                                     metadata.update(stored_metadata)
 
-                                processed_matches.append({
+                                matches.append({
                                     "content": content,
                                     "metadata": metadata,
                                     "score": match.get("score", 1.0),
@@ -225,18 +147,24 @@ class EnhancedLightRAGManager(LightRAGManager):
                         logger.warning(f"Error processing match: {str(e)}")
                         continue
 
-                matches = processed_matches[:top_k]
-            else:
-                matches = []
-
             # Cache results for future queries
             self.datastore.set_cache(cache_key, {
-                "matches": matches,
+                "matches": matches[:top_k],
                 "timestamp": datetime.now().isoformat()
-            }, expiration=timedelta(minutes=30))  # Cache for 30 minutes
+            })
 
-            return matches
+            return matches[:top_k]
 
         except Exception as e:
             logger.error(f"Error retrieving memories: {str(e)}", exc_info=True)
             return []
+
+    async def start(self):
+        """Start the memory system and background tasks."""
+        logger.info("Starting enhanced memory system")
+        await self.tasks.start()
+
+    async def stop(self):
+        """Stop the memory system and background tasks."""
+        logger.info("Stopping enhanced memory system")
+        await self.tasks.stop()
