@@ -8,6 +8,7 @@ from pathlib import Path
 import json
 
 from lightrag import QueryParam
+import numpy as np
 from .config import LIGHTRAG_DATA_DIR
 from .datastore import MemoryDatastore
 from .ingestion import MemoryIngestor
@@ -167,6 +168,10 @@ class EnhancedLightRAGManager(LightRAGManager):
 
             # Execute query
             result = await self.rag.aquery(query, param)
+
+            # Ensure embeddings are numpy arrays
+            if hasattr(result, 'embeddings') and isinstance(result.embeddings, list):
+                result.embeddings = np.array(result.embeddings)
 
             # Process results
             if isinstance(result, str):

@@ -71,7 +71,11 @@ async def get_embeddings(texts: List[str], model: str = DEFAULT_EMBEDDING_MODEL)
         Exception: If embedding fails
     """
     try:
-        return await ollama_embedding(texts, embed_model=model)
+        embeddings = await ollama_embedding(texts, embed_model=model)
+        # Convert to numpy array if not already
+        if not isinstance(embeddings, np.ndarray):
+            embeddings = np.array(embeddings)
+        return embeddings
     except Exception as e:
         raise Exception(f"Failed to get embeddings: {str(e)}")
 

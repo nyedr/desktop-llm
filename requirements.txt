@@ -56,10 +56,13 @@ markdownify>=0.11.6
 
 # NLP and Entity Recognition
 spacy>=3.7.2
-lightrag-hku>=1.0.8
 aioboto3>=13.3.0
 
 # File Processing
 PyMuPDF>=1.23.8
 python-docx>=1.0.1
 PyPDF2>=3.0.0
+
+# Memory
+nano_vectordb>=0.0.4.3
+lightrag-hku>=1.0.8
