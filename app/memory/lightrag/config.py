@@ -3,9 +3,12 @@
 import os
 from pathlib import Path
 
+# Get project root directory
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+
 # Base directory for memory storage
 LIGHTRAG_DATA_DIR = os.getenv(
-    'LIGHTRAG_DATA_DIR', str(Path.home() / '.lightrag'))
+    'LIGHTRAG_DATA_DIR', str(PROJECT_ROOT / 'lightrag'))
 
 # Task intervals (in seconds)
 MEMORY_QUEUE_PROCESS_DELAY = 0.1

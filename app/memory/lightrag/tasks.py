@@ -69,9 +69,6 @@ class MemoryTasks:
                     "Missing memory_id or conversation_id in metadata")
                 return
 
-            # Format memory text with metadata
-            memory_text = f"METADATA: {json.dumps(metadata)}\nCONTENT: {text}"
-
             # Handle chunking if specified
             chunk_size = metadata.get('chunk_size')
             if chunk_size:
@@ -84,12 +81,16 @@ class MemoryTasks:
                         "chunk_index": i,
                         "total_chunks": len(chunks)
                     }
-                    chunk_text = f"METADATA: {json.dumps(chunk_metadata)}\nCONTENT: {chunk}"
-                    # Store chunk in LightRAG
-                    await self.manager.rag.ainsert(chunk_text)
+                    await self.manager.ingestor.ingest_text(
+                        text=chunk,
+                        metadata=chunk_metadata
+                    )
             else:
-                # Store full document in LightRAG
-                await self.manager.rag.ainsert(memory_text)
+                # Store full document
+                await self.manager.ingestor.ingest_text(
+                    text=text,
+                    metadata=metadata
+                )
 
             logger.info(f"Stored memory text with ID: {memory_id}")
 

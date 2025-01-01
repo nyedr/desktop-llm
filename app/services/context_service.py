@@ -215,16 +215,19 @@ class LLMContext:
             ])
 
             if conversation:
-                await self.lightrag_manager.ingestor.ingest_text(
+                # Queue memory for background processing
+                await self.lightrag_manager.tasks.queue_memory_processing(
                     text=conversation,
                     metadata={
+                        "memory_id": str(uuid.uuid4()),
                         "conversation_id": self.conversation_id,
                         "request_id": self.request_id,
                         "model": self.model,
                         "timestamp": datetime.now().isoformat()
                     }
                 )
-                logger.info(f"[{self.request_id}] Stored conversation memory")
+                logger.info(
+                    f"[{self.request_id}] Queued conversation memory for processing")
 
         except Exception as e:
             logger.warning(

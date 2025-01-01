@@ -91,8 +91,9 @@ class Providers:
             get_service_locator().register_service(
                 "lightrag_manager", cls._lightrag_manager)
 
-            # Initialize the manager
+            # Initialize and start the manager
             await cls._lightrag_manager.initialize()
+            await cls._lightrag_manager.start()
 
         return cls._lightrag_manager
 

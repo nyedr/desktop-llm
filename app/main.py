@@ -75,11 +75,11 @@ async def initialize_service(service_name: str, get_service_fn, state: ServiceSt
     """Initialize a service and update its state."""
     try:
         state.set_status(ServiceStatus.INITIALIZING)
-        service = get_service_fn()
+        service = await get_service_fn() if asyncio.iscoroutinefunction(get_service_fn) else get_service_fn()
         state.service = service
 
         if hasattr(service, 'initialize'):
-            if isinstance(service, Providers.get_lightrag_manager().__class__):
+            if isinstance(service, (await Providers.get_lightrag_manager()).__class__):
                 # Initialize LightRAG manager
                 await service.initialize()
                 if not getattr(service, '_initialized', False):

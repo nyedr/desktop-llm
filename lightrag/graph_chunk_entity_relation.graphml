@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"><key id="d2" for="node" attr.name="source_id" attr.type="string"/>
+<key id="d1" for="node" attr.name="description" attr.type="string"/>
+<key id="d0" for="node" attr.name="entity_type" attr.type="string"/>
+<graph edgedefault="undirected"><node id="&quot;USER&quot;">
+  <data key="d0">"PERSON"</data>
+  <data key="d1">"user is a person who inquired about the weather."</data>
+  <data key="d2">chunk-3ef7d39ea917249211faa34468be72ab</data>
+</node>
+<node id="&quot;NEW YORK&quot;">
+  <data key="d0">"GEO"</data>
+  <data key="d1">"New York is a location in the United States."</data>
+  <data key="d2">chunk-3ef7d39ea917249211faa34468be72ab</data>
+</node>
+<node id="&quot;WEATHER&quot;">
+  <data key="d0">"CATEGORY"</data>
+  <data key="d1">"Weather refers to atmospheric conditions at a given place."</data>
+  <data key="d2">chunk-3ef7d39ea917249211faa34468be72ab</data>
+</node>
+</graph></graphml>
