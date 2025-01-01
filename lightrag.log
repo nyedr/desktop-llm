@@ -6721,3 +6721,31 @@
 2025-01-01 02:35:53,884 - lightrag - INFO - Inserting 10 vectors to entities
 2025-01-01 02:35:54,341 - lightrag - INFO - Inserting 13 vectors to relationships
 2025-01-01 02:35:55,232 - lightrag - INFO - Writing graph with 10 nodes, 13 edges
+2025-01-01 02:48:08,993 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 02:48:08,993 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 02:48:08,993 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 02:48:08,993 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 02:48:47,079 - lightrag - INFO - kw_prompt result:
+2025-01-01 02:48:47,615 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 02:48:49,368 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 02:48:49,714 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 02:48:49,714 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 02:48:49,946 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 02:48:54,363 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 02:48:54,364 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 02:48:54,366 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-01 02:48:54,654 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-01 02:48:54,838 - lightrag - INFO - Writing graph with 2 nodes, 1 edges
+2025-01-01 02:51:00,589 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 02:51:00,589 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 02:51:00,589 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 02:51:00,590 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 02:51:02,914 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 02:51:03,175 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 02:51:03,175 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 02:51:03,367 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 02:51:09,529 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 02:51:09,532 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 02:51:09,534 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-01 02:51:09,845 - lightrag - INFO - Inserting 2 vectors to relationships
+2025-01-01 02:51:10,151 - lightrag - INFO - Writing graph with 3 nodes, 2 edges
