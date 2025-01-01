@@ -9,7 +9,7 @@ import httpx
 
 from ollama import AsyncClient
 from app.core.config import config
-from app.functions.base import ToolResponse
+from app.models.function import ToolResponse
 from app.models.chat import StrictChatMessage
 from app.models.model import Model
 from app.models.completion import CompletionResponse

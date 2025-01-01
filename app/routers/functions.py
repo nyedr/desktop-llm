@@ -2,15 +2,15 @@
 
 import logging
 from typing import Dict, Any, List, Optional
-from fastapi import APIRouter, Request, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, Request, Depends, HTTPException
 from pydantic import BaseModel, Field
 import importlib
 import json
 from pathlib import Path
 
-from app.dependencies.providers import get_function_service
+from app.dependencies.providers import Providers
 from app.services.function_service import FunctionService
-from app.models.function_models import RegisterFunctionRequest
+from app.models.function import RegisterFunctionRequest
 from app.functions.registry import function_registry
 
 logger = logging.getLogger(__name__)
@@ -130,7 +130,7 @@ async def register_function(request: RegisterFunctionRequest):
 @router.delete("/{name}")
 async def unregister_function(
     name: str,
-    function_service: FunctionService = Depends(get_function_service)
+    function_service: FunctionService = Depends(Providers.get_function_service)
 ) -> Dict[str, Any]:
     """Unregister a function."""
     logger.info(f"Unregistering function: {name}")
@@ -149,7 +149,7 @@ async def unregister_function(
 @router.get("", response_model=List[FunctionResponse])
 async def list_functions(
     request: Request,
-    function_service: FunctionService = Depends(get_function_service)
+    function_service: FunctionService = Depends(Providers.get_function_service)
 ) -> List[Dict[str, Any]]:
     """List all registered functions."""
     logger.info(
@@ -171,7 +171,7 @@ async def list_functions(
 @router.post("/execute")
 async def execute_function(
     request: ExecuteFunctionRequest,
-    function_service: FunctionService = Depends(get_function_service)
+    function_service: FunctionService = Depends(Providers.get_function_service)
 ) -> Dict[str, Any]:
     """Execute a registered function."""
     logger.info(f"Executing function: {request.name}")

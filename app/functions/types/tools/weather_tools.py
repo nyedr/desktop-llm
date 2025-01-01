@@ -1,9 +1,8 @@
 """Weather-related tools."""
 
 import logging
-from typing import Dict, Any, ClassVar, List
-from app.functions.base import Tool, FunctionType, register_function, InputValidationError
-from pydantic import Field
+from typing import ClassVar, Dict, Any, List
+from app.models.function import InputValidationError, Tool, FunctionType, register_function
 
 logger = logging.getLogger(__name__)
 

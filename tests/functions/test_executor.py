@@ -3,7 +3,7 @@
 import pytest
 from typing import Dict, Any, Literal
 from pydantic import Field
-from app.functions.base import (
+from app.models.function import (
     Tool,
     FunctionError,
     ExecutionError,
@@ -13,10 +13,12 @@ from app.functions.base import (
 from app.functions.executor import FunctionExecutor
 from app.functions.registry import FunctionRegistry
 
+
 class MockTool(Tool):
     """Mock tool for testing."""
     name: str = Field(default="mock_tool", description="Mock tool for testing")
-    description: str = Field(default="A mock tool for testing", description="Mock tool description")
+    description: str = Field(
+        default="A mock tool for testing", description="Mock tool description")
     parameters: dict = Field(default={
         "type": "object",
         "properties": {
@@ -30,12 +32,14 @@ class MockTool(Tool):
             raise ValueError("Mock failure")
         return {"result": args.get("input", "")}
 
+
 @pytest.fixture
 def registry():
     """Create a function registry with mock functions."""
     registry = FunctionRegistry()
     registry.register(MockTool)
     return registry
+
 
 @pytest.fixture
 def executor(registry):
@@ -44,11 +48,13 @@ def executor(registry):
     executor.registry = registry
     return executor
 
+
 @pytest.mark.asyncio
 async def test_successful_execution(executor):
     """Test successful function execution."""
     result = await executor.execute("mock_tool", {"input": "test"})
     assert result == {"result": "test"}
+
 
 @pytest.mark.asyncio
 async def test_function_not_found(executor):
@@ -58,6 +64,7 @@ async def test_function_not_found(executor):
     assert "Function not found" in str(exc.value)
     assert exc.value.function_name == "nonexistent"
 
+
 @pytest.mark.asyncio
 async def test_input_validation_error(executor):
     """Test input validation error handling."""
@@ -65,6 +72,7 @@ async def test_input_validation_error(executor):
         await executor.execute("mock_tool", {})  # Missing required 'input'
     assert "Invalid input parameters" in str(exc.value)
     assert exc.value.function_name == "mock_tool"
+
 
 @pytest.mark.asyncio
 async def test_execution_error(executor):

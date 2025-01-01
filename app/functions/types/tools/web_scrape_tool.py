@@ -6,7 +6,7 @@ import requests
 from typing import Dict, Any, Optional
 import markdownify
 
-from app.functions.base import Tool, FunctionType, register_function, ExecutionError
+from app.models.function import Tool, FunctionType, register_function, ExecutionError
 
 logger = logging.getLogger(__name__)
 

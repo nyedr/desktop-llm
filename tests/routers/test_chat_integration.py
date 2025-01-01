@@ -5,8 +5,7 @@ from unittest.mock import AsyncMock, patch
 
 from app.main import app
 from app.models.chat import ChatRequest
-from app.services.chroma_service import ChromaService
-from app.services.langchain_service import LangChainService
+from app.memory.lightrag.manager import EnhancedLightRAGManager
 
 
 @pytest.fixture
@@ -16,35 +15,23 @@ def test_client():
 
 
 @pytest.fixture
-def mock_chroma_service():
-    """Create a mock ChromaService."""
-    with patch("app.dependencies.providers.Providers.get_chroma_service") as mock:
-        service = AsyncMock(spec=ChromaService)
-        service.retrieve_memories.return_value = [
+def mock_lightrag_manager():
+    """Create a mock LightRAG manager."""
+    with patch("app.dependencies.providers.Providers.get_lightrag_manager") as mock:
+        manager = AsyncMock(spec=EnhancedLightRAGManager)
+        manager.query_memories.return_value = [
             {
                 "document": "Previous conversation about Python: User likes type hints",
                 "metadata": {"type": "memory", "timestamp": "2024-01-01T00:00:00"},
                 "relevance_score": 0.95
             }
         ]
-        mock.return_value = service
-        yield service
-
-
-@pytest.fixture
-def mock_langchain_service():
-    """Create a mock LangChainService."""
-    with patch("app.dependencies.providers.Providers.get_langchain_service") as mock:
-        service = AsyncMock(spec=LangChainService)
-        service.query_memory.return_value = {
-            "result": "Test summary"
-        }
-        mock.return_value = service
-        yield service
+        mock.return_value = manager
+        yield manager
 
 
 @pytest.mark.asyncio
-async def test_chat_with_memory_enabled(test_client, mock_chroma_service, mock_langchain_service):
+async def test_chat_with_memory_enabled(test_client, mock_lightrag_manager):
     """Test chat endpoint with memory enabled."""
     request = ChatRequest(
         messages=[
@@ -59,14 +46,14 @@ async def test_chat_with_memory_enabled(test_client, mock_chroma_service, mock_l
     assert response.status_code == 200
 
     # Verify memory retrieval was called
-    mock_chroma_service.retrieve_memories.assert_called_once()
+    mock_lightrag_manager.query_memories.assert_called_once()
 
     # Verify memory was stored after chat
-    mock_chroma_service.add_memory.assert_called_once()
+    mock_lightrag_manager.add_memory.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_chat_with_memory_disabled(test_client, mock_chroma_service, mock_langchain_service):
+async def test_chat_with_memory_disabled(test_client, mock_lightrag_manager):
     """Test chat endpoint with memory disabled."""
     request = ChatRequest(
         messages=[
@@ -80,11 +67,11 @@ async def test_chat_with_memory_disabled(test_client, mock_chroma_service, mock_
     assert response.status_code == 200
 
     # Verify memory retrieval was not called
-    mock_chroma_service.retrieve_memories.assert_not_called()
+    mock_lightrag_manager.query_memories.assert_not_called()
 
 
 @pytest.mark.asyncio
-async def test_chat_with_memory_filter(test_client, mock_chroma_service, mock_langchain_service):
+async def test_chat_with_memory_filter(test_client, mock_lightrag_manager):
     """Test chat endpoint with memory filter."""
     request = ChatRequest(
         messages=[
@@ -99,12 +86,12 @@ async def test_chat_with_memory_filter(test_client, mock_chroma_service, mock_la
     assert response.status_code == 200
 
     # Verify memory filter was passed
-    call_args = mock_chroma_service.retrieve_memories.call_args
+    call_args = mock_lightrag_manager.query_memories.call_args
     assert call_args[1]["filter_dict"] == {"type": "programming"}
 
 
 @pytest.mark.asyncio
-async def test_chat_with_streaming(test_client, mock_chroma_service, mock_langchain_service):
+async def test_chat_with_streaming(test_client, mock_lightrag_manager):
     """Test chat endpoint with streaming enabled."""
     request = ChatRequest(
         messages=[
@@ -129,11 +116,11 @@ async def test_chat_with_streaming(test_client, mock_chroma_service, mock_langch
 
 
 @pytest.mark.asyncio
-async def test_chat_error_handling(test_client, mock_chroma_service, mock_langchain_service):
+async def test_chat_error_handling(test_client, mock_lightrag_manager):
     """Test chat endpoint error handling."""
-    # Simulate Chroma service error
-    mock_chroma_service.retrieve_memories.side_effect = Exception(
-        "Chroma error")
+    # Simulate LightRAG error
+    mock_lightrag_manager.query_memories.side_effect = Exception(
+        "LightRAG error")
 
     request = ChatRequest(
         messages=[
@@ -148,7 +135,7 @@ async def test_chat_error_handling(test_client, mock_chroma_service, mock_langch
 
 
 @pytest.mark.asyncio
-async def test_chat_with_tools(test_client, mock_chroma_service, mock_langchain_service):
+async def test_chat_with_tools(test_client, mock_lightrag_manager):
     """Test chat endpoint with tools enabled."""
     request = ChatRequest(
         messages=[
@@ -163,13 +150,13 @@ async def test_chat_with_tools(test_client, mock_chroma_service, mock_langchain_
     assert response.status_code == 200
 
     # Verify tool-related memory was stored
-    call_args = mock_chroma_service.add_memory.call_args
+    call_args = mock_lightrag_manager.add_memory.call_args
     metadata = call_args[1]["metadata"]
     assert metadata["has_tools"] is True
 
 
 @pytest.mark.asyncio
-async def test_chat_with_filters(test_client, mock_chroma_service, mock_langchain_service):
+async def test_chat_with_filters(test_client, mock_lightrag_manager):
     """Test chat endpoint with filters enabled."""
     request = ChatRequest(
         messages=[
@@ -184,13 +171,13 @@ async def test_chat_with_filters(test_client, mock_chroma_service, mock_langchai
     assert response.status_code == 200
 
     # Verify filter-related memory was stored
-    call_args = mock_chroma_service.add_memory.call_args
+    call_args = mock_lightrag_manager.add_memory.call_args
     metadata = call_args[1]["metadata"]
     assert metadata["has_filters"] is True
 
 
 @pytest.mark.asyncio
-async def test_chat_performance(test_client, mock_chroma_service, mock_langchain_service):
+async def test_chat_performance(test_client, mock_lightrag_manager):
     """Test chat endpoint performance with large context."""
     # Create a large conversation
     large_conversation = [
@@ -210,4 +197,4 @@ async def test_chat_performance(test_client, mock_chroma_service, mock_langchain
     assert response.status_code == 200
 
     # Verify context was properly managed
-    assert mock_chroma_service.retrieve_memories.called
+    assert mock_lightrag_manager.query_memories.called

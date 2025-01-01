@@ -7,7 +7,7 @@ import sys
 from typing import Dict, Type, List, Optional, Any
 from pathlib import Path
 
-from app.functions.base import (
+from app.models.function import (
     BaseFunction,
     Filter,
     Tool,

@@ -4,7 +4,7 @@ import logging
 from typing import Dict, Any, List, Optional, Type
 from app.core.config import config
 from app.models.chat import AssistantMessage, StrictChatMessage, SystemMessage, ToolMessage, UserMessage
-from app.functions.base import (
+from app.models.function import (
     ToolResponse, FilterResponse, PipelineResponse,
     FunctionResult, ValidationError
 )

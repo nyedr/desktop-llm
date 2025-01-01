@@ -1,162 +1,97 @@
-"""Unit tests for the MemoryDatastore service."""
+"""Tests for the MemoryDatastore class."""
 
 import pytest
+import sqlite3
 from datetime import datetime, timedelta
 from app.memory.lightrag.datastore import MemoryDatastore
-from app.memory.lightrag.config import DB_PATH
-from pathlib import Path
 
 
 @pytest.fixture
-def datastore(tmp_path):
-    """Fixture providing a clean MemoryDatastore instance for each test."""
-    test_db = tmp_path / "test.db"
-    return MemoryDatastore(test_db)
+def datastore():
+    """Create a test datastore instance."""
+    ds = MemoryDatastore(":memory:")  # Use in-memory SQLite for testing
+    return ds
 
 
-class TestMemoryHierarchy:
-    """Test suite for memory hierarchy functionality."""
+def test_metadata_operations(datastore):
+    """Test metadata storage and retrieval."""
+    memory_id = "test_memory"
 
-    def test_set_entity_hierarchy(self, datastore):
-        """Test setting hierarchy level and parent for an entity."""
-        entity_id = "test-entity"
-        datastore.create_entity(entity_id, "Test Entity", "test")
+    # Test setting metadata
+    datastore.set_metadata(memory_id, "key1", "value1")
+    datastore.set_metadata(memory_id, "key2", "value2")
 
-        # Set hierarchy level
-        entity = datastore.set_entity_hierarchy(entity_id, "chunk")
-        assert entity["hierarchy_level"] == "chunk"
+    # Test getting metadata
+    assert datastore.get_metadata(memory_id) == {
+        "key1": "value1",
+        "key2": "value2"
+    }
 
-        # Set parent
-        parent_id = "parent-entity"
-        datastore.create_entity(parent_id, "Parent Entity", "test")
-        result = datastore.set_entity_hierarchy(entity_id, "chunk", parent_id)
-        assert result["parent_id"] == parent_id
-
-    def test_get_entity_hierarchy(self, datastore):
-        """Test retrieving hierarchy information for an entity."""
-        entity_id = "test-entity"
-        datastore.create_entity(entity_id, "Test Entity", "test")
-        datastore.set_entity_hierarchy(entity_id, "chunk")
-
-        hierarchy = datastore.get_entity_hierarchy(entity_id)
-        assert hierarchy["hierarchy_level"] == "chunk"
-
-    def test_get_child_entities(self, datastore):
-        """Test retrieving child entities for a parent."""
-        parent_id = "parent-entity"
-        datastore.create_entity(parent_id, "Parent Entity", "test")
-
-        # Create child entities
-        for i in range(3):
-            entity_id = f"child-entity-{i}"
-            datastore.create_entity(entity_id, f"Child Entity {i}", "test")
-            datastore.set_entity_hierarchy(entity_id, "chunk", parent_id)
-
-        children = datastore.get_child_entities(parent_id)
-        assert len(children) == 3
-        for child in children:
-            assert child["parent_id"] == parent_id
+    # Test updating metadata
+    datastore.set_metadata(memory_id, "key1", "updated_value")
+    assert datastore.get_metadata(memory_id)["key1"] == "updated_value"
 
 
-class TestCollectionManagement:
-    """Test suite for collection management functionality."""
+def test_cache_operations(datastore):
+    """Test cache storage and retrieval."""
+    cache_key = "test_cache"
+    cache_data = {"test": "data"}
 
-    def test_create_collection(self, datastore):
-        """Test creating a new collection."""
-        collection = datastore.create_collection(
-            "Test Collection", "Test Description")
-        assert collection["name"] == "Test Collection"
-        assert collection["description"] == "Test Description"
+    # Test setting cache without expiration
+    datastore.set_cache(cache_key, cache_data)
+    assert datastore.get_cache(cache_key) == cache_data
 
-    def test_add_to_collection(self, datastore):
-        """Test adding entities to a collection."""
-        collection = datastore.create_collection("Test Collection")
-        entity_id = "test-entity"
-        datastore.create_entity(entity_id, "Test Entity", "test")
+    # Test setting cache with expiration
+    future_cache = {"future": "data"}
+    datastore.set_cache("future_key", future_cache,
+                        expiration=datetime.now() + timedelta(minutes=5))
+    assert datastore.get_cache("future_key") == future_cache
 
-        member_id = datastore.add_to_collection(collection["id"], entity_id)
-        assert member_id is not None
-
-    def test_remove_from_collection(self, datastore):
-        """Test removing entities from a collection."""
-        collection = datastore.create_collection("Test Collection")
-        entity_id = "test-entity"
-        datastore.create_entity(entity_id, "Test Entity", "test")
-        datastore.add_to_collection(collection["id"], entity_id)
-
-        removed_count = datastore.remove_from_collection(
-            collection["id"], entity_id)
-        assert removed_count == 1
-
-    def test_get_collection_members(self, datastore):
-        """Test retrieving members of a collection."""
-        collection = datastore.create_collection("Test Collection")
-
-        # Add multiple entities
-        for i in range(3):
-            entity_id = f"test-entity-{i}"
-            datastore.create_entity(entity_id, f"Test Entity {i}", "test")
-            datastore.add_to_collection(collection["id"], entity_id)
-
-        members = datastore.get_collection_members(collection["id"])
-        assert len(members) == 3
+    # Test expired cache
+    past_cache = {"past": "data"}
+    datastore.set_cache("past_key", past_cache,
+                        expiration=datetime.now() - timedelta(minutes=5))
+    assert datastore.get_cache("past_key") is None
 
 
-class TestEnhancedSearch:
-    """Test suite for enhanced search functionality."""
+def test_cache_cleanup(datastore):
+    """Test automatic cache cleanup."""
+    # Add some expired entries
+    past = datetime.now() - timedelta(minutes=10)
+    datastore.set_cache("expired1", {"data": 1}, expiration=past)
+    datastore.set_cache("expired2", {"data": 2}, expiration=past)
 
-    def test_enhanced_search(self, datastore):
-        """Test the enhanced search across entities and collections."""
-        # Create test entities
-        for i in range(3):
-            entity_id = f"test-entity-{i}"
-            datastore.create_entity(entity_id, f"Test Entity {i}", "test")
+    # Add some valid entries
+    future = datetime.now() + timedelta(minutes=10)
+    datastore.set_cache("valid1", {"data": 3}, expiration=future)
+    datastore.set_cache("valid2", {"data": 4}, expiration=future)
 
-        # Create test collection
-        collection = datastore.create_collection(
-            "Test Collection", "Test Description")
+    # Run cleanup
+    datastore.cleanup_expired_cache()
 
-        # Perform search
-        results = datastore.enhanced_search("Test")
-        assert len(results["entities"]) == 3
-        assert len(results["collections"]) == 1
-
-    def test_search_collections(self, datastore):
-        """Test searching for collections by name and description."""
-        datastore.create_collection(
-            "Test Collection 1", "First test collection")
-        datastore.create_collection(
-            "Test Collection 2", "Second test collection")
-
-        results = datastore.search_collections("test")
-        assert len(results) == 2
+    # Check results
+    assert datastore.get_cache("expired1") is None
+    assert datastore.get_cache("expired2") is None
+    assert datastore.get_cache("valid1") is not None
+    assert datastore.get_cache("valid2") is not None
 
 
-@pytest.mark.integration
-class TestIntegration:
-    """Integration tests for combined functionality."""
+def test_database_initialization(datastore):
+    """Test database initialization and table creation."""
+    # Check that tables exist
+    with sqlite3.connect(datastore.db_path) as conn:
+        cursor = conn.cursor()
 
-    def test_hierarchy_with_collections(self, datastore):
-        """Test combining hierarchy and collection features."""
-        # Create parent entity
-        parent_id = "parent-entity"
-        datastore.create_entity(parent_id, "Parent Entity", "test")
+        # Check metadata table
+        cursor.execute("""
+            SELECT name FROM sqlite_master 
+            WHERE type='table' AND name='metadata'
+        """)
+        assert cursor.fetchone() is not None
 
-        # Create child entities
-        for i in range(3):
-            entity_id = f"child-entity-{i}"
-            datastore.create_entity(entity_id, f"Child Entity {i}", "test")
-            datastore.set_entity_hierarchy(entity_id, "chunk", parent_id)
-
-        # Create collection and add parent
-        collection = datastore.create_collection("Test Collection")
-        datastore.add_to_collection(collection["id"], parent_id)
-
-        # Verify collection members include parent
-        members = datastore.get_collection_members(collection["id"])
-        assert len(members) == 1
-        assert members[0]["id"] == parent_id
-
-        # Verify hierarchy is maintained
-        children = datastore.get_child_entities(parent_id)
-        assert len(children) == 3
+        # Check cache table
+        cursor.execute("""
+            SELECT name FROM sqlite_master 
+            WHERE type='table' AND name='cache'
+        """)
+        assert cursor.fetchone() is not None

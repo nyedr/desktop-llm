@@ -1,4 +1,4 @@
-from app.functions.base import Tool, FunctionType
+from app.models.function import Tool, FunctionType
 
 
 class SimpleTool(Tool):

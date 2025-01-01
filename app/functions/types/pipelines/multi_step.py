@@ -1,7 +1,7 @@
 """Example pipeline that performs multiple processing steps."""
 
 from typing import Dict, Any
-from app.functions.base import Pipeline, FunctionType, register_function
+from app.models.function import Pipeline, FunctionType, register_function
 from app.functions.utils import ensure_strict_message
 
 

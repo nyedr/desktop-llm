@@ -7,7 +7,7 @@ from app.functions.types.pipelines import *
 __all__ = [
     # Tools
     "WebScrapeTool",
-    "AddMemoryTool",
+    "WeatherTool",
     # Filters
     "TextModifierFilter",
     # Pipelines

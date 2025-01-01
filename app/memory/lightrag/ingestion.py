@@ -22,192 +22,124 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 
 class ContentChunker:
-    """Handles content chunking and hierarchical organization."""
+    """Handles text chunking with overlap."""
 
     @staticmethod
     def chunk_text(text: str) -> List[Tuple[str, Dict]]:
-        """Split text into meaningful chunks with metadata and deduplication."""
+        """Split text into overlapping chunks."""
+        if not text:
+            return []
+
         chunks = []
         start = 0
-        text_length = len(text)
-        previous_chunk_hash = None
+        previous_hash = None
 
-        while start < text_length:
-            end = min(start + MAX_CHUNK_SIZE, text_length)
+        while start < len(text):
+            # Calculate end position
+            end = min(start + MAX_CHUNK_SIZE, len(text))
 
-            # Try to find a natural break point
-            break_point = ContentChunker._find_break_point(text, start, end)
-            if break_point > start + MIN_CHUNK_SIZE:
-                end = break_point
+            # Adjust end to avoid splitting words
+            if end < len(text):
+                while end > start and not text[end].isspace():
+                    end -= 1
+                if end == start:
+                    end = min(start + MAX_CHUNK_SIZE, len(text))
 
+            # Extract chunk
             chunk = text[start:end].strip()
-            if chunk:
-                # Generate content hash that includes overlap context
-                chunk_hash = ContentChunker._generate_chunk_hash(
-                    text, start, end)
+            if not chunk:
+                break
 
-                # Skip if this chunk is too similar to previous chunk
-                if previous_chunk_hash and ContentChunker._chunk_similarity(chunk_hash, previous_chunk_hash) > 0.8:
-                    start = end - OVERLAP_SIZE if end - OVERLAP_SIZE > start else end
-                    continue
+            # Generate chunk hash
+            chunk_hash = hashlib.md5(chunk.encode('utf-8')).hexdigest()
 
-                chunks.append((chunk, {
-                    'start_pos': start,
-                    'end_pos': end,
-                    'length': end - start,
-                    'chunk_hash': chunk_hash,
-                    'previous_chunk_hash': previous_chunk_hash
-                }))
-                previous_chunk_hash = chunk_hash
+            # Create chunk metadata
+            chunk_meta = {
+                'start_pos': start,
+                'end_pos': end,
+                'chunk_hash': chunk_hash,
+                'previous_chunk_hash': previous_hash
+            }
 
-            start = end - OVERLAP_SIZE if end - OVERLAP_SIZE > start else end
+            chunks.append((chunk, chunk_meta))
+            previous_hash = chunk_hash
+
+            # Move start position for next chunk
+            start = max(start + MIN_CHUNK_SIZE, end - OVERLAP_SIZE)
 
         return chunks
 
-    @staticmethod
-    def _generate_chunk_hash(text: str, start: int, end: int) -> str:
-        """Generate a unique hash for a chunk that includes context."""
-        import hashlib
-        # Include surrounding text for better uniqueness
-        context_start = max(0, start - 100)
-        context_end = min(len(text), end + 100)
-        context = text[context_start:context_end]
-        return hashlib.sha256(context.encode('utf-8')).hexdigest()
+
+class TextProcessor:
+    """Processes plain text content."""
 
     @staticmethod
-    def _chunk_similarity(hash1: str, hash2: str) -> float:
-        """Calculate similarity between two chunk hashes."""
-        # Simple similarity based on hash prefix match
-        match_length = 0
-        for c1, c2 in zip(hash1, hash2):
-            if c1 == c2:
-                match_length += 1
-            else:
-                break
-        return match_length / len(hash1)
-
-    @staticmethod
-    def _find_break_point(text: str, start: int, end: int) -> int:
-        """Find a natural break point in the text."""
-        # Look for paragraph breaks first
-        para_break = text.rfind('\n\n', start, end)
-        if para_break != -1:
-            return para_break + 2
-
-        # Look for sentence breaks
-        sentence_break = max(
-            text.rfind('. ', start, end),
-            text.rfind('! ', start, end),
-            text.rfind('? ', start, end)
-        )
-        if sentence_break != -1:
-            return sentence_break + 2
-
-        # Fall back to word breaks
-        word_break = text.rfind(' ', start, end)
-        return word_break if word_break != -1 else end
-
-
-class FileProcessor:
-    """Base class for file type specific processors."""
-
-    @classmethod
-    def supported_types(cls) -> List[str]:
-        """Return list of supported MIME types."""
-        return []
-
-    @classmethod
-    async def process(cls, file_path: Path) -> Optional[List[Tuple[str, Dict]]]:
-        """Process file and return chunked content with metadata."""
-        return None
-
-
-class TextProcessor(FileProcessor):
-    """Processor for plain text files."""
-
-    @classmethod
-    def supported_types(cls) -> List[str]:
+    def supported_types() -> List[str]:
+        """Return supported MIME types."""
         return ['text/plain']
 
-    @classmethod
-    async def process(cls, file_path: Path) -> Optional[List[Tuple[str, Dict]]]:
+    @staticmethod
+    async def process(path: Path) -> List[Tuple[str, Dict]]:
+        """Process text file into chunks."""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-                return ContentChunker.chunk_text(content)
+            with open(path, 'r', encoding='utf-8') as f:
+                text = f.read()
+            return ContentChunker.chunk_text(text)
         except Exception as e:
-            logger.error(f"Failed to process text file {file_path}: {str(e)}")
-            return None
+            logger.error(f"Error processing text file {path}: {e}")
+            return []
 
 
-class PDFProcessor(FileProcessor):
-    """Processor for PDF files."""
+class PDFProcessor:
+    """Processes PDF documents."""
 
-    @classmethod
-    def supported_types(cls) -> List[str]:
+    @staticmethod
+    def supported_types() -> List[str]:
+        """Return supported MIME types."""
         return ['application/pdf']
 
-    @classmethod
-    async def process(cls, file_path: Path) -> Optional[List[Tuple[str, Dict]]]:
+    @staticmethod
+    async def process(path: Path) -> List[Tuple[str, Dict]]:
+        """Process PDF file into chunks."""
         try:
-            from PyPDF2 import PdfReader
-            import re
-
-            # Initialize PDF reader
-            reader = PdfReader(file_path)
-            full_text = ""
-
-            # Extract text from each page
-            for page in reader.pages:
-                page_text = page.extract_text()
-                if page_text:
-                    # Clean up text
-                    page_text = re.sub(r'\s+', ' ', page_text).strip()
-                    full_text += page_text + "\n"
-
-            if not full_text.strip():
-                logger.warning(f"No text extracted from PDF: {file_path}")
-                return None
-
-            return ContentChunker.chunk_text(full_text)
+            import fitz  # PyMuPDF
+            doc = fitz.open(path)
+            text = ""
+            for page in doc:
+                text += page.get_text()
+            doc.close()
+            return ContentChunker.chunk_text(text)
+        except ImportError:
+            logger.error("PyMuPDF not installed. Cannot process PDF files.")
+            return []
         except Exception as e:
-            logger.error(f"Failed to process PDF file {file_path}: {str(e)}")
-            return None
+            logger.error(f"Error processing PDF file {path}: {e}")
+            return []
 
 
-class DOCXProcessor(FileProcessor):
-    """Processor for DOCX files."""
+class DOCXProcessor:
+    """Processes DOCX documents."""
 
-    @classmethod
-    def supported_types(cls) -> List[str]:
+    @staticmethod
+    def supported_types() -> List[str]:
+        """Return supported MIME types."""
         return ['application/vnd.openxmlformats-officedocument.wordprocessingml.document']
 
-    @classmethod
-    async def process(cls, file_path: Path) -> Optional[List[Tuple[str, Dict]]]:
+    @staticmethod
+    async def process(path: Path) -> List[Tuple[str, Dict]]:
+        """Process DOCX file into chunks."""
         try:
             from docx import Document
-            import re
-
-            # Load DOCX document
-            doc = Document(file_path)
-            full_text = ""
-
-            # Extract text from paragraphs
-            for para in doc.paragraphs:
-                para_text = para.text.strip()
-                if para_text:
-                    # Clean up text
-                    para_text = re.sub(r'\s+', ' ', para_text)
-                    full_text += para_text + "\n"
-
-            if not full_text.strip():
-                logger.warning(f"No text extracted from DOCX: {file_path}")
-                return None
-
-            return ContentChunker.chunk_text(full_text)
+            doc = Document(path)
+            text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+            return ContentChunker.chunk_text(text)
+        except ImportError:
+            logger.error(
+                "python-docx not installed. Cannot process DOCX files.")
+            return []
         except Exception as e:
-            logger.error(f"Failed to process DOCX file {file_path}: {str(e)}")
-            return None
+            logger.error(f"Error processing DOCX file {path}: {e}")
+            return []
 
 
 class MemoryIngestor:
@@ -255,62 +187,24 @@ class MemoryIngestor:
         doc_title = metadata.get(
             'title', 'Untitled Document') if metadata else 'Untitled Document'
 
-        # Create document entity metadata
+        # Create document entity with minimal metadata
         doc_metadata = {
             'is_document': 'true',
             'title': doc_title,
             'length': len(text),
-            'chunk_count': 0,  # Will be updated as chunks are added
             'content_hash': content_hash,
-            'timestamp': datetime.now().isoformat()
-        }
-        if metadata:
-            doc_metadata.update(metadata)
-
-        # Store document metadata without the full text
-        await self.manager.insert_entity({
-            **doc_metadata,
+            'timestamp': datetime.now().isoformat(),
             'hierarchy_level': 'document',
             'parent_id': parent_id if parent_id else None,
             'entity_id': doc_entity_id
-        })
+        }
 
-        # Chunk the content
-        chunks = ContentChunker.chunk_text(text)
-        doc_metadata['chunk_count'] = len(chunks)
+        # Format text with metadata for LightRAG
+        memory_text = f"METADATA: {doc_metadata}\nCONTENT: {text}"
 
-        # Ingest chunks with proper parent reference
-        for chunk, chunk_meta in chunks:
-            # Check for duplicate chunk using chunk_hash
-            if await self.manager.chunk_exists(chunk_meta['chunk_hash']):
-                logger.debug(
-                    f"Skipping duplicate chunk: {chunk_meta['chunk_hash']}")
-                continue
-
-            # Create chunk metadata with parent reference
-            chunk_metadata = {
-                'start_pos': str(chunk_meta['start_pos']),
-                'end_pos': str(chunk_meta['end_pos']),
-                'is_chunk': 'true',
-                'doc_title': doc_title,
-                'parent_id': doc_entity_id,  # Reference parent document
-                'chunk_hash': chunk_meta['chunk_hash'],
-                'previous_chunk_hash': chunk_meta['previous_chunk_hash'],
-                'hierarchy_level': 'chunk'
-            }
-
-            # Add document metadata to chunk
-            if metadata:
-                chunk_metadata.update(metadata)
-
-            # Store chunk in LightRAG with combined metadata
-            await self.manager.insert_text(chunk, chunk_metadata)
-
-        # Update document entity with final chunk count and chunk references
-        await self.manager.update_entity(doc_entity_id, {
-            'chunk_count': len(chunks),
-            'chunk_references': [c[1]['chunk_hash'] for c in chunks]
-        })
+        # Store in LightRAG
+        await self.manager.rag.ainsert(memory_text)
+        logger.info(f"Stored document with ID: {doc_entity_id}")
 
         return doc_entity_id
 
@@ -381,8 +275,11 @@ class MemoryIngestor:
             # Add file metadata to chunk
             chunk_metadata.update(metadata)
 
-            # Store chunk in LightRAG with combined metadata
-            await self.manager.insert_text(chunk, chunk_metadata)
+            # Format text with metadata for LightRAG
+            memory_text = f"METADATA: {chunk_metadata}\nCONTENT: {chunk}"
+
+            # Store in LightRAG
+            await self.manager.rag.ainsert(memory_text)
 
         return True
 

@@ -5,7 +5,6 @@ from pydantic import BaseModel
 
 from app.services.function_service import FunctionService
 from app.services.model_service import ModelService
-from app.services.langchain_service import LangChainService
 from app.core.config import config
 from app.models.chat import StrictChatMessage
 
@@ -27,7 +26,6 @@ class Agent:
         self,
         model_service: Optional[ModelService] = None,
         function_service: Optional[FunctionService] = None,
-        langchain_service: Optional[LangChainService] = None,
         model: str = config.DEFAULT_MODEL,
         temperature: float = config.MODEL_TEMPERATURE,
         max_tokens: int = config.MAX_TOKENS
@@ -37,7 +35,6 @@ class Agent:
         Args:
             model_service: Model service for LLM operations
             function_service: Function service for executing functions
-            langchain_service: Optional LangChain service for memory operations
             model: Model to use for chat
             temperature: Temperature for model sampling
             max_tokens: Maximum tokens for model output
@@ -48,7 +45,6 @@ class Agent:
 
         self.model_service = model_service
         self.function_service = function_service
-        self.langchain_service = langchain_service
         self.model = model
         self.temperature = temperature
         self.max_tokens = max_tokens
@@ -60,18 +56,6 @@ class Agent:
             return
         try:
             logger.info("Initializing Agent...")
-            if self.langchain_service:
-                logger.info(
-                    "LangChain service found, ensuring initialization...")
-                if not getattr(self.langchain_service, '_initialized', False):
-                    logger.warning(
-                        "LangChain service not initialized, skipping memory features")
-                    self.langchain_service = None
-                else:
-                    logger.info("LangChain service initialized successfully")
-            else:
-                logger.info(
-                    "No LangChain service provided, memory features will be disabled")
             self._initialized = True
             logger.info("Agent initialized successfully")
         except Exception as e:
@@ -113,12 +97,9 @@ class Agent:
         max_tokens: Optional[int] = None,
         stream: bool = True,
         tools: Optional[List[Dict[str, Any]]] = None,
-        enable_tools: bool = False,
-        enable_memory: bool = True,
-        memory_filter: Optional[Dict[str, Any]] = None,
-        top_k_memories: int = 5
+        enable_tools: bool = True
     ) -> AsyncGenerator[str, None]:
-        """Generate chat completions with optional memory context."""
+        """Generate chat completions."""
         try:
             # Ensure agent is initialized
             if not self._initialized:
@@ -130,28 +111,9 @@ class Agent:
             else:
                 logger.debug("No tools enabled for chat")
 
-            # Convert messages to list if needed
-            if not isinstance(messages, list):
-                messages = [messages]
-
-            # Keep track of messages for the conversation
-            conversation = list(messages)
-
-            # Add memory context if enabled and LangChain service is available
-            if enable_memory and self.langchain_service:
-                try:
-                    conversation = await self.langchain_service.process_conversation(
-                        conversation,
-                        metadata_filter=memory_filter,
-                        top_k=top_k_memories
-                    )
-                    logger.debug("Added memory context to conversation")
-                except Exception as e:
-                    logger.warning(f"Failed to add memory context: {e}")
-
             # Get response from model service
             async for response in self.model_service.chat(
-                messages=conversation,
+                messages=messages,
                 model=model or self.model,
                 temperature=temperature or self.temperature,
                 max_tokens=max_tokens or self.max_tokens,

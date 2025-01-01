@@ -3,7 +3,7 @@
 import json
 import logging
 from typing import Dict, Any, List, Tuple, Union
-from app.functions.base import Filter, FilterResponse
+from app.models.function import Filter, FilterResponse
 from app.functions.utils import validate_filter_response, create_error_response
 from app.models.chat import ChatStreamEvent
 

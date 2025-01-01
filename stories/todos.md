@@ -11,6 +11,8 @@
 - [x] Update application types to be more strict and consistent
 - [x] Update the types of the function files
 - [ ] Revamp all tests
+- [x] Review datastore and manager memory files
+- [ ] Update the memory retrieval pipeline: Prompt -> Query -> Embed -> Retrieve -> (Store memory as side process) -> Context
 
 ### Streaming and Tool Execution
 
@@ -35,7 +37,7 @@
 
   - [x] Build dynamic Function Registry
   - [x] Create Execution Engine
-  - [ ] Implement Context Management system
+  - [x] Implement Context Management system
   - [x] Add Stream Management utilities
 
 - [x] Function Utilities
@@ -49,7 +51,6 @@
 
 - [ ] Implement long term LLM memory
   - [x] Integrate Chroma for vector storage
-  - [ ] Set up Redis/Redis Search for fast retrieval
   - [x] Design memory management system
   - [x] Implement memory retrieval and storage
   - [x] Add integration testing for memory retrieval with LLM
@@ -69,15 +70,15 @@
   - [x] Test tool execution
   - [x] Test filter and pipeline system
   - [ ] Add more test cases
-  - [ ] Test error handling
+  - [x] Test error handling
   - [ ] Deeply test memory retrieval and storage
 
 - [ ] Documentation
   - [ ] Write API documentation
   - [ ] Document deployment process
   - [ ] Add usage examples
-  - [ ] Create function development guidelines
-  - [ ] Add more example functions
+  - [x] Create function development guidelines
+  - [x] Add more example functions
 
 ### Future Enhancements
 

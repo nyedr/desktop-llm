@@ -5,7 +5,7 @@ import json
 from typing import Dict, Any, List, Union
 from jsonschema import validate, ValidationError as JsonSchemaValidationError
 
-from app.functions.base import (
+from app.models.function import (
     FunctionError,
     ValidationError,
     ExecutionError,
@@ -14,7 +14,6 @@ from app.functions.base import (
     Tool,
     Filter,
     Pipeline,
-    FunctionResponse,
     ToolResponse,
     FilterResponse,
     PipelineResponse,

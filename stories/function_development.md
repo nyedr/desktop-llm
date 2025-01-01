@@ -50,7 +50,7 @@ When creating new functions, parameters are now defined in the `@register_functi
 
 ```python
 from typing import Dict, Any, Literal
-from app.functions.base import Tool, FunctionType
+from app.models.function import Tool, FunctionType
 from pydantic import Field, ConfigDict
 
 @register_function(

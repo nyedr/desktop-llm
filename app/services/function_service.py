@@ -3,7 +3,7 @@
 import logging
 from typing import Dict, Any, Optional, List, Type
 from app.functions import function_registry, executor
-from app.functions.base import BaseFunction, Tool, FunctionType, ToolResponse
+from app.models.function import BaseFunction, Tool, FunctionType, ToolResponse
 import json
 
 logger = logging.getLogger(__name__)

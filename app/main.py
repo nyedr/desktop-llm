@@ -9,8 +9,7 @@ if sys.platform == 'win32':
 import logging
 import uuid
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Dict
-from pathlib import Path
+from typing import AsyncGenerator
 from enum import Enum
 
 from fastapi import FastAPI, Request
@@ -22,7 +21,6 @@ from fastapi.responses import JSONResponse
 
 from app.dependencies.providers import Providers
 from app.routers import chat, functions, completion, health
-from app.functions.registry import function_registry
 
 # Configure logging
 logging.basicConfig(
@@ -66,9 +64,11 @@ class ServiceState:
     def set_status(self, status: ServiceStatus, error: Exception = None):
         """Update service status and error state."""
         if self.status != status:  # Only log status changes
-            logger.info(f"Service status: {self.status.value}")
+            self.status = status
+            logger.info(f"Service status changed to: {status.value}")
         if error:
             logger.error(f"Service error: {error}")
+            self.error = error
 
 
 async def initialize_service(service_name: str, get_service_fn, state: ServiceState) -> bool:
@@ -88,68 +88,12 @@ async def initialize_service(service_name: str, get_service_fn, state: ServiceSt
                 await service.initialize()
 
         state.set_status(ServiceStatus.READY)
-        logger.info(f"{service_name} initialized")
+        logger.info(
+            f"{service_name} initialized with status: {state.status.value}")
         return True
     except Exception as e:
         state.set_status(ServiceStatus.FAILED, e)
         return False
-
-
-async def register_default_functions(function_service):
-    """Register default functions during startup."""
-    try:
-        # Add workspace root to Python path
-        workspace_root = str(Path(__file__).parent.parent)
-        if workspace_root not in sys.path:
-            sys.path.insert(0, workspace_root)
-
-        try:
-            # Discover all function types
-            base_dir = Path(__file__).parent
-
-            # Discover tools
-            tools_dir = base_dir / "functions" / "types" / "tools"
-            await function_registry.discover_functions(tools_dir)
-
-            # Discover filters
-            filters_dir = base_dir / "functions" / "types" / "filters"
-            await function_registry.discover_functions(filters_dir)
-
-            # Discover pipelines
-            pipelines_dir = base_dir / "functions" / "types" / "pipelines"
-            await function_registry.discover_functions(pipelines_dir)
-
-            functions = function_registry.list_functions()
-            logger.info(f"Registered {len(functions)} functions")
-        except Exception as e:
-            logger.error(f"Error discovering functions: {e}")
-            raise
-
-        # Remove workspace root from Python path
-        if workspace_root in sys.path:
-            sys.path.remove(workspace_root)
-
-    except Exception as e:
-        logger.error(f"Error registering functions: {e}")
-        raise
-
-
-async def cleanup_services(service_states: Dict[str, ServiceState], is_shutting_down: bool) -> None:
-    """Clean up services in reverse order."""
-    logger.info("Cleaning up services...")
-    for service_name, state in reversed(list(service_states.items())):
-        if state.service and state.status == ServiceStatus.READY:
-            try:
-                if hasattr(state.service, 'close_session'):
-                    await state.service.close_session()
-                if is_shutting_down:
-                    state.set_status(ServiceStatus.OFFLINE)
-            except Exception as e:
-                logger.error(f"Error cleaning up {service_name} service: {e}")
-                if is_shutting_down:
-                    state.set_status(ServiceStatus.FAILED, e)
-    logger.info("Shutdown complete")
-
 
 # Initialize service states
 service_states = {
@@ -157,7 +101,6 @@ service_states = {
     "function": ServiceState(),
     "lightrag": ServiceState(),
     "mcp": ServiceState(),
-    "langchain": ServiceState(),
     "agent": ServiceState()
 }
 
@@ -169,29 +112,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     try:
         # Initialize base services first
-        lightrag_success = await initialize_service("LightRAG", Providers.get_lightrag_manager, service_states['lightrag'])
-        mcp_success = await initialize_service("MCP", Providers.get_mcp_service, service_states['mcp'])
+        await initialize_service("LightRAG", Providers.get_lightrag_manager, service_states['lightrag'])
+        await initialize_service("MCP", Providers.get_mcp_service, service_states['mcp'])
 
         # Initialize model and function services
         await initialize_service("Model", Providers.get_model_service, service_states['model'])
         await initialize_service("Function", Providers.get_function_service, service_states['function'])
-
-        # Initialize LangChain with dependencies
-        langchain_state = service_states['langchain']
-        if lightrag_success and mcp_success:
-            try:
-                langchain_state.set_status(ServiceStatus.INITIALIZING)
-                langchain_service = await Providers.get_langchain_service()
-                langchain_state.service = langchain_service
-                langchain_state.set_status(ServiceStatus.READY)
-                logger.info("LangChain Service initialized")
-            except Exception as e:
-                langchain_state.set_status(ServiceStatus.FAILED, e)
-                logger.error(f"Failed to initialize LangChain Service: {e}")
-        else:
-            langchain_state.set_status(ServiceStatus.FAILED)
-            logger.error(
-                "LangChain Service initialization skipped - dependencies not ready")
 
         # Initialize agent last since it depends on other services
         await initialize_service("Agent", Providers.get_agent, service_states['agent'])

@@ -6,10 +6,10 @@ from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, Request, Depends
 from pydantic import BaseModel, Field
 
-from app.dependencies.providers import get_model_service, get_function_service
+from app.dependencies.providers import Providers
 from app.services.model_service import ModelService
 from app.services.function_service import FunctionService
-from app.functions.base import FunctionType
+from app.models.function import FunctionType
 
 
 logger = logging.getLogger(__name__)
@@ -73,8 +73,8 @@ class HealthResponse(BaseModel):
 @router.get("/health", response_model=HealthResponse)
 async def health_check(
     request: Request,
-    model_service: ModelService = Depends(get_model_service),
-    function_service: FunctionService = Depends(get_function_service)
+    model_service: ModelService = Depends(Providers.get_model_service),
+    function_service: FunctionService = Depends(Providers.get_function_service)
 ) -> Dict[str, Any]:
     """Check the health of the API and its components."""
     request_id = str(id(request))

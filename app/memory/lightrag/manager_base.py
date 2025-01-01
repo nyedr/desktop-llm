@@ -7,7 +7,6 @@ from app.services.rag_service import create_lightrag
 from .datastore import MemoryDatastore
 from .tasks_base import MemoryTaskManager
 import logging
-from app.services.model_service import ModelService
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +29,6 @@ class LightRAGManager:
         self.datastore = None
         self.task_manager = None
         self._initialized = False
-        self._model_service = ModelService()  # Initialize ModelService
 
     @property
     def initialized(self) -> bool:
