@@ -13,6 +13,8 @@
 - [ ] Revamp all tests
 - [x] Review datastore and manager memory files
 - [ ] Update the memory retrieval pipeline: Prompt -> Query -> Embed -> Retrieve -> (Store memory as side process) -> Context
+- [ ] No llm memory cache
+- [ ] Only one messages is being stored in a conversation
 
 ### Streaming and Tool Execution
 

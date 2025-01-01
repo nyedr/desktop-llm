@@ -302,28 +302,6 @@ async def stream_chat_response(
             if string_event:
                 yield string_event
 
-        # Store memory after completion if enabled
-        if chat_request.enable_memory and lightrag_manager:
-            try:
-                await lightrag_manager.ingestor.ingest_text(
-                    text="\n".join([
-                        f"{msg.get('role') if isinstance(msg, dict) else msg.role}: {msg.get('content') if isinstance(msg, dict) else msg.content}"
-                        for msg in processed_messages
-                        if (isinstance(msg, dict) and msg.get('role') != 'system') or
-                           (hasattr(msg, 'role') and msg.role != 'system')
-                    ]),
-                    metadata={
-                        "conversation_id": chat_request.conversation_id or request_id,
-                        "request_id": request_id,
-                        "model": model,
-                        "timestamp": datetime.datetime.now().isoformat()
-                    }
-                )
-                logger.info(f"[{request_id}] Stored conversation memory")
-            except Exception as e:
-                logger.warning(
-                    f"[{request_id}] Error storing conversation memory: {e}")
-
         # Apply outlet filters if they exist
         if filters and processed_messages:
             data, filter_success = await apply_filters(

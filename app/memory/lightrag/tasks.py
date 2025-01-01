@@ -13,6 +13,7 @@ from .config import (
     MONITORING_INTERVAL
 )
 import json
+import hashlib
 
 logger = logging.getLogger(__name__)
 
@@ -69,34 +70,23 @@ class MemoryTasks:
                     "Missing memory_id or conversation_id in metadata")
                 return
 
-            # Handle chunking if specified
-            chunk_size = metadata.get('chunk_size')
-            if chunk_size:
-                # Split text into chunks
-                chunks = self.manager._split_text_into_chunks(text, chunk_size)
-                for i, chunk in enumerate(chunks):
-                    # Format chunk metadata
-                    chunk_metadata = {
-                        **metadata,
-                        "chunk_index": i,
-                        "total_chunks": len(chunks)
-                    }
-                    await self.manager.ingestor.ingest_text(
-                        text=chunk,
-                        metadata=chunk_metadata
-                    )
-            else:
-                # Store full document
-                await self.manager.ingestor.ingest_text(
-                    text=text,
-                    metadata=metadata
-                )
+            # Generate content hash for deduplication
+            content_hash = hashlib.md5(text.encode('utf-8')).hexdigest()
+            metadata['content_hash'] = content_hash
 
-            logger.info(f"Stored memory text with ID: {memory_id}")
+            # Check if this content has already been processed
+            if self.datastore.search_entities(content_hash, limit=1):
+                logger.info(
+                    f"Skipping duplicate content with hash {content_hash}")
+                return
+
+            # Add to queue instead of immediate processing
+            self._memory_queue.append((text, metadata))
+            logger.info(f"Queued memory text with ID: {memory_id}")
 
         except Exception as e:
             logger.error(
-                f"Error in background memory processing: {e}", exc_info=True)
+                f"Error queueing memory for processing: {e}", exc_info=True)
             raise
 
     async def _process_memory_queue(self):
@@ -108,7 +98,37 @@ class MemoryTasks:
                     memory_text, metadata = self._memory_queue.popleft()
 
                     try:
-                        await self.queue_memory_processing(memory_text, metadata)
+                        # Check again for duplicates before processing
+                        content_hash = metadata.get('content_hash')
+                        if content_hash and self.datastore.search_entities(content_hash, limit=1):
+                            logger.info(
+                                f"Skipping duplicate content during processing with hash {content_hash}")
+                            continue
+
+                        # Handle chunking if specified
+                        chunk_size = metadata.get('chunk_size')
+                        if chunk_size:
+                            # Split text into chunks and only store chunks
+                            chunks = self.manager._split_text_into_chunks(
+                                memory_text, chunk_size)
+                            for i, chunk in enumerate(chunks):
+                                # Format chunk metadata
+                                chunk_metadata = {
+                                    **metadata,
+                                    "total_chunks": len(chunks),
+                                    "chunk_index": i,
+                                    "is_chunk": True
+                                }
+                                await self.manager.ingestor.ingest_text(
+                                    text=chunk,
+                                    metadata=chunk_metadata
+                                )
+                        else:
+                            # Store full document only
+                            await self.manager.ingestor.ingest_text(
+                                text=memory_text,
+                                metadata=metadata
+                            )
                     except Exception as e:
                         logger.error(
                             f"Error processing memory in background: {str(e)}")
@@ -116,10 +136,8 @@ class MemoryTasks:
                         self._processing = False
 
                 await asyncio.sleep(MEMORY_QUEUE_PROCESS_DELAY)
-            except asyncio.CancelledError:
-                break
             except Exception as e:
-                logger.error(f"Memory processing task failed: {str(e)}")
+                logger.error(f"Error in memory queue processing: {str(e)}")
                 await asyncio.sleep(MEMORY_QUEUE_ERROR_RETRY_DELAY)
 
     async def _cleanup_task(self):

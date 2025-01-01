@@ -22,7 +22,8 @@ project_root = Path(__file__).parent.parent.parent
 env_path = project_root / '.env'
 load_dotenv(env_path)
 logger.debug(f"Loading environment variables from: {env_path}")
-logger.debug(f"OpenRouter API Key present: {bool(os.getenv('OPENROUTER_API_KEY'))}")
+logger.debug(
+    f"OpenRouter API Key present: {bool(os.getenv('OPENROUTER_API_KEY'))}")
 
 API_BASE_URL = "https://openrouter.ai/api/v1"
 
@@ -41,17 +42,21 @@ API_MODEL_LIST = [
 
 DEFAULT_MODEL = "meta-llama/llama-3.2-3b-instruct"
 
+
 class OpenRouterError(Exception):
     """Base exception for OpenRouter API errors."""
     pass
+
 
 class OpenRouterAPIKeyError(OpenRouterError):
     """Raised when there are issues with the OpenRouter API key."""
     pass
 
+
 class OpenRouterModelError(OpenRouterError):
     """Raised when there are issues with model selection or availability."""
     pass
+
 
 async def get_embeddings(texts: List[str], model: str = DEFAULT_EMBEDDING_MODEL) -> np.ndarray:
     """
@@ -76,6 +81,7 @@ async def get_embeddings(texts: List[str], model: str = DEFAULT_EMBEDDING_MODEL)
     except Exception as e:
         raise Exception(f"Failed to get embeddings: {str(e)}")
 
+
 def create_lightrag(
     working_dir: str = LIGHTRAG_DATA_DIR,
     model_name: str = DEFAULT_MODEL,
@@ -98,29 +104,40 @@ def create_lightrag(
             raise OpenRouterAPIKeyError(
                 "OPENROUTER_API_KEY environment variable must be set when using OpenRouter models")
 
-    # Initialize LightRAG with configuration
+    # Initialize LightRAG with documented configuration
     rag = LightRAG(
         working_dir=working_dir,
         llm_model_func=openrouter_llm_complete,
         llm_model_name=model_name,
-        llm_model_max_token_size=DEFAULT_MAX_TOKENS,
         embedding_func=embedding_func,
-        enable_llm_cache=True,
-        chunk_token_size=1200,
+        # Core parameters from documentation
+        chunk_token_size=500,
         chunk_overlap_token_size=100,
+        entity_extract_max_gleaning=5,
+        entity_summary_to_max_tokens=2000,
+        # Processing parameters
         embedding_batch_num=32,
         embedding_func_max_async=16,
         llm_model_max_async=16,
+        # Enable caching with LLM verification
+        enable_llm_cache=True,
         embedding_cache_config={
             "enabled": True,
             "similarity_threshold": 0.95,
-            "use_llm_check": False
+            "use_llm_check": True
+        },
+        # Simple addon params
+        addon_params={
+            "insert_batch_size": 10,
+            "memory_queue_size": 100,  # Increased queue size
+            "process_memory_interval": 0.1  # Faster processing interval
         }
     )
 
     logger.info(
         f"Initialized LightRAG with model {model_name} and {embedding_model} embeddings in directory {working_dir}")
     return rag
+
 
 async def openrouter_llm_complete(
     prompt: str,
@@ -136,12 +153,22 @@ async def openrouter_llm_complete(
             "OPENROUTER_API_KEY environment variable not set")
 
     # Check cache if available
-    if hashing_kv is not None and hasattr(hashing_kv, 'get'):
-        cache_key = f"openrouter_llm_{model_name}_{prompt}"
-        cached_response = hashing_kv.get(cache_key)
-        if cached_response:
-            logger.debug(f"Cache hit for prompt with model {model_name}")
-            return cached_response
+    if hashing_kv is not None:
+        try:
+            cache_key = f"openrouter_llm_{model_name}_{prompt}"
+            if hasattr(hashing_kv, 'aget'):
+                cached_response = await hashing_kv.aget(cache_key)
+            elif hasattr(hashing_kv, 'get_value'):
+                cached_response = hashing_kv.get_value(cache_key)
+            else:
+                cached_response = None
+
+            if cached_response:
+                logger.info(f"Cache hit for prompt with model {model_name}")
+                return cached_response
+            logger.debug(f"Cache miss for prompt with model {model_name}")
+        except Exception as e:
+            logger.warning(f"Error accessing cache: {e}")
 
     try:
         # Initialize OpenAI client
@@ -161,12 +188,20 @@ async def openrouter_llm_complete(
         )
 
         response_text = response.choices[0].message.content
+        logger.info(f"LLM response: {response_text}")
 
         # Cache response if available
-        if hashing_kv is not None and hasattr(hashing_kv, 'set'):
-            cache_key = f"openrouter_llm_{model_name}_{prompt}"
-            hashing_kv.set(cache_key, response_text)
-            logger.debug(f"Cached response for prompt with model {model_name}")
+        if hashing_kv is not None:
+            try:
+                cache_key = f"openrouter_llm_{model_name}_{prompt}"
+                if hasattr(hashing_kv, 'aset'):
+                    await hashing_kv.aset(cache_key, response_text)
+                elif hasattr(hashing_kv, 'set_value'):
+                    hashing_kv.set_value(cache_key, response_text)
+                logger.info(
+                    f"Cached response for prompt with model {model_name}")
+            except Exception as e:
+                logger.warning(f"Error caching response: {e}")
 
         return response_text
 
