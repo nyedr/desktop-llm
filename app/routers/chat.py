@@ -19,7 +19,7 @@ from app.dependencies.providers import Providers
 from app.utils.chat_setup import verify_model_availability, setup_chat_components
 from app.utils.memory_utils import store_conversation_memory
 from app.utils.filters import apply_filters
-from app.utils.chat_messages import handle_assistant_message, handle_string_chunk
+from app.utils.chat_messages import handle_string_chunk
 from app.utils.chat_tools import process_tool_stream
 
 router = APIRouter()
@@ -129,6 +129,8 @@ async def stream_chat_response(
 
         # Stream chat response
         current_tool_call = None
+        tool_response = None
+
         async for chunk in agent.chat(
             messages=processed_messages,
             model=model,
@@ -142,39 +144,29 @@ async def stream_chat_response(
                 continue
 
             # Process tool calls
-            tool_event, current_tool_call, is_complete = await process_tool_stream(
-                request_id=request_id,
-                chunk=chunk,
-                function_service=function_service,
-                current_tool_call=current_tool_call
-            )
-
-            if tool_event:
-                yield tool_event
-                continue
-
-            if is_complete:
-                yield ChatStreamEvent(
-                    event="function_call",
-                    data=json.dumps({"status": "complete"})
+            if isinstance(chunk, dict) and "tool_calls" in chunk:
+                tool_event, current_tool_call, is_complete = await process_tool_stream(
+                    request_id=request_id,
+                    chunk=chunk,
+                    function_service=function_service,
+                    current_tool_call=current_tool_call
                 )
+
+                if tool_event:
+                    yield tool_event
+
+                    # If tool call is complete, store the response and add to context
+                    if is_complete and tool_event.data:
+                        tool_data = json.loads(tool_event.data)
+                        if tool_data.get("role") == "tool":
+                            tool_response = tool_data
+                            processed_messages.append(tool_data)
                 continue
 
-            # Handle assistant messages
-            if isinstance(chunk, dict):
-                if assistant_event := await handle_assistant_message(chunk, filters, request_id):
-                    # Convert message to event format
-                    event = ChatStreamEvent(
-                        event="message",
-                        data=json.dumps(assistant_event)
-                    )
-                    yield event.model_dump_json() + "\n"
-                continue
-
-            # Handle string chunks
-            if string_event := await handle_string_chunk(request_id, chunk, filters):
-                yield string_event
-                if isinstance(chunk, str):
+            # Handle string chunks (assistant's final response)
+            if isinstance(chunk, str):
+                if string_event := await handle_string_chunk(request_id, chunk, filters):
+                    yield string_event
                     current_message["content"] += chunk
 
         # Store memory if needed

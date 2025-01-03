@@ -17,11 +17,12 @@
 - [x] Only one messages is being stored in a conversation
 - [x] Fix filters
 - [ ] Make a storage server that will embed and store the messages in the background, right now subsequent messages can cause delays due to the embedding process
-- [ ] Model has to be used via the rag query call to use memory, redesign agent to use rag query call
-- [ ] Test function calls with memory
-- [ ] Allow ollama to use memory, change agent to allow for memory
-- [ ] Do we need utils/memory_utils.py?
 - [ ] File (file storage as well) and image processing logic
+
+you ask something the AI thinks it can use a function to answer
+the AI calls the function chart_hits_per_artist(genre, search_years)
+you give another AI call back your raw retrieved data in a functions role
+the AI writes a response augmented by the knowledge
 
 ### Streaming and Tool Execution
 

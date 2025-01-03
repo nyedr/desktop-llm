@@ -8875,3 +8875,80 @@
 2025-01-03 03:11:25,320 - lightrag - INFO - kw_prompt result:
 2025-01-03 03:11:27,560 - lightrag - INFO - Local query uses 5 entites, 5 relations, 1 text units
 2025-01-03 03:11:29,840 - lightrag - INFO - Global query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:17:05,442 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 03:17:05,443 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 03:17:05,443 - lightrag - INFO - Load KV full_docs with 1 data
+2025-01-03 03:17:05,444 - lightrag - INFO - Load KV text_chunks with 1 data
+2025-01-03 03:17:05,445 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 5 nodes, 5 edges
+2025-01-03 03:17:15,214 - lightrag - INFO - kw_prompt result:
+2025-01-03 03:17:18,512 - lightrag - INFO - Local query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:17:20,766 - lightrag - INFO - Global query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:22:17,263 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 03:22:17,263 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 03:22:17,264 - lightrag - INFO - Load KV full_docs with 1 data
+2025-01-03 03:22:17,264 - lightrag - INFO - Load KV text_chunks with 1 data
+2025-01-03 03:22:17,266 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 5 nodes, 5 edges
+2025-01-03 03:24:10,249 - lightrag - INFO - kw_prompt result:
+2025-01-03 03:24:13,518 - lightrag - INFO - Local query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:24:15,765 - lightrag - INFO - Global query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:25:39,540 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 03:25:39,541 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 03:25:39,541 - lightrag - INFO - Load KV full_docs with 1 data
+2025-01-03 03:25:39,542 - lightrag - INFO - Load KV text_chunks with 1 data
+2025-01-03 03:25:39,543 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 5 nodes, 5 edges
+2025-01-03 03:25:44,752 - lightrag - INFO - kw_prompt result:
+2025-01-03 03:25:47,359 - lightrag - INFO - Local query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:25:49,629 - lightrag - INFO - Global query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:29:59,151 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 03:29:59,152 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 03:29:59,152 - lightrag - INFO - Load KV full_docs with 1 data
+2025-01-03 03:29:59,153 - lightrag - INFO - Load KV text_chunks with 1 data
+2025-01-03 03:29:59,154 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 5 nodes, 5 edges
+2025-01-03 03:30:05,004 - lightrag - INFO - kw_prompt result:
+2025-01-03 03:30:07,557 - lightrag - INFO - Local query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:30:09,823 - lightrag - INFO - Global query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:34:08,816 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 03:34:08,817 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 03:34:08,817 - lightrag - INFO - Load KV full_docs with 1 data
+2025-01-03 03:34:08,818 - lightrag - INFO - Load KV text_chunks with 1 data
+2025-01-03 03:34:08,819 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 5 nodes, 5 edges
+2025-01-03 03:34:47,883 - lightrag - INFO - kw_prompt result:
+2025-01-03 03:34:50,422 - lightrag - INFO - Local query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:34:52,662 - lightrag - INFO - Global query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:36:39,648 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 03:36:39,649 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 03:36:39,649 - lightrag - INFO - Load KV full_docs with 1 data
+2025-01-03 03:36:39,650 - lightrag - INFO - Load KV text_chunks with 1 data
+2025-01-03 03:36:39,651 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 5 nodes, 5 edges
+2025-01-03 03:36:53,035 - lightrag - INFO - kw_prompt result:
+2025-01-03 03:36:55,562 - lightrag - INFO - Local query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:36:57,823 - lightrag - INFO - Global query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:43:48,231 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 03:43:48,232 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 03:43:48,232 - lightrag - INFO - Load KV full_docs with 1 data
+2025-01-03 03:43:48,233 - lightrag - INFO - Load KV text_chunks with 1 data
+2025-01-03 03:43:48,235 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 5 nodes, 5 edges
+2025-01-03 03:43:56,556 - lightrag - INFO - kw_prompt result:
+2025-01-03 03:43:59,813 - lightrag - INFO - Local query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:44:02,075 - lightrag - INFO - Global query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:48:10,711 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 03:48:10,712 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 03:48:10,712 - lightrag - INFO - Load KV full_docs with 1 data
+2025-01-03 03:48:10,713 - lightrag - INFO - Load KV text_chunks with 1 data
+2025-01-03 03:48:10,714 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 5 nodes, 5 edges
+2025-01-03 03:48:38,750 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 03:48:38,751 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 03:48:38,751 - lightrag - INFO - Load KV full_docs with 1 data
+2025-01-03 03:48:38,752 - lightrag - INFO - Load KV text_chunks with 1 data
+2025-01-03 03:48:38,753 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 5 nodes, 5 edges
+2025-01-03 03:48:54,802 - lightrag - INFO - kw_prompt result:
+2025-01-03 03:48:57,433 - lightrag - INFO - Local query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:48:59,746 - lightrag - INFO - Global query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:50:09,000 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 03:50:09,001 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 03:50:09,001 - lightrag - INFO - Load KV full_docs with 1 data
+2025-01-03 03:50:09,003 - lightrag - INFO - Load KV text_chunks with 1 data
+2025-01-03 03:50:09,005 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 5 nodes, 5 edges
+2025-01-03 03:50:26,659 - lightrag - INFO - kw_prompt result:
+2025-01-03 03:50:29,193 - lightrag - INFO - Local query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:50:31,463 - lightrag - INFO - Global query uses 5 entites, 5 relations, 1 text units

@@ -14,73 +14,100 @@ logger = logging.getLogger(__name__)
 
 async def process_tool_stream(
     request_id: str,
-    chunk: Union[Dict[str, Any], str],
-    function_service: Optional[FunctionService],
+    chunk: Union[str, Dict[str, Any]],
+    function_service: Optional[FunctionService] = None,
     current_tool_call: Optional[Dict[str, Any]] = None
-) -> Tuple[Optional[ChatStreamEvent], Dict[str, Any], bool]:
-    """Process a streaming chunk for tool calls.
+) -> Tuple[Optional[ChatStreamEvent], Optional[Dict[str, Any]], bool]:
+    """Process streaming tool calls from model response.
 
     Args:
-        request_id: Request identifier
+        request_id: Request ID for logging
         chunk: Response chunk from model
-        function_service: Function service for executing tools
-        current_tool_call: Current tool call being processed
+        function_service: Optional function service for executing tools
+        current_tool_call: Current accumulated tool call
 
     Returns:
-        Tuple of (event to yield, updated tool call state, whether tool call is complete)
+        Tuple of (event to yield, updated tool call state, is_complete flag)
     """
-    if not isinstance(chunk, dict) or "function_call" not in chunk:
+    if not isinstance(chunk, dict) or "tool_calls" not in chunk:
         return None, current_tool_call, False
 
-    try:
-        tool_call = chunk["function_call"]
-        logger.debug(f"[{request_id}] Processing tool call chunk")
+    tool_calls = chunk["tool_calls"]
+    if not tool_calls:
+        return None, current_tool_call, False
 
-        # Initialize or update tool call
-        if not current_tool_call:
-            current_tool_call = {
-                'id': tool_call.get('id'),
-                'type': 'function',
-                'function': {
-                    'name': tool_call.get('name'),
-                    'arguments': tool_call.get('arguments', '')
-                }
+    tool_call = tool_calls[0]  # Handle one tool call at a time
+
+    # Initialize current tool call if needed
+    if not current_tool_call:
+        current_tool_call = {
+            "id": tool_call.get("id"),
+            "type": "function",
+            "function": {
+                "name": tool_call["function"].get("name"),
+                "arguments": ""
             }
-        else:
-            # Accumulate function arguments
-            if 'arguments' in tool_call:
-                current_tool_call['function']['arguments'] += tool_call['arguments']
-            if 'name' in tool_call:
-                current_tool_call['function']['name'] = tool_call['name']
+        }
 
-        # Check if tool call is complete
-        if current_tool_call['function'].get('name') and current_tool_call['function']['arguments'].endswith('}'):
-            logger.info(
-                f"[{request_id}] Executing tool: {current_tool_call['function']['name']}")
+    # Accumulate arguments if present
+    if tool_call["function"].get("arguments"):
+        current_tool_call["function"]["arguments"] += tool_call["function"]["arguments"]
 
-            if function_service:
-                events = await handle_tool_calls(
-                    request_id,
-                    {'tool_calls': [current_tool_call]},
-                    function_service
-                )
+    # Check if tool call is complete
+    is_complete = False
+    try:
+        if current_tool_call["function"]["arguments"]:
+            # Try to parse accumulated arguments as JSON
+            json.loads(current_tool_call["function"]["arguments"])
+            is_complete = True
+    except json.JSONDecodeError:
+        pass
 
-                # Process tool response
-                for event in events:
-                    if isinstance(event, ChatStreamEvent):
-                        return event, None, True  # Tool call complete
+    # If complete, execute the tool and return all events
+    if is_complete and function_service:
+        try:
+            # Execute complete tool call
+            result = await function_service.execute_function(
+                current_tool_call["function"]["name"],
+                json.loads(current_tool_call["function"]["arguments"])
+            )
 
-            return None, None, True  # Tool call complete but no event to yield
+            # Handle ToolResponse object
+            if hasattr(result, 'to_dict'):
+                result_dict = result.to_dict()
+            else:
+                result_dict = {
+                    "success": getattr(result, "success", True),
+                    "result": getattr(result, "result", str(result)),
+                    "error": getattr(result, "error", None),
+                    "metadata": getattr(result, "metadata", {})
+                }
 
-        return None, current_tool_call, False  # Tool call still in progress
+            return ChatStreamEvent(
+                event="message",
+                data=json.dumps({
+                    "role": "tool",
+                    "name": current_tool_call["function"]["name"],
+                    "content": json.dumps(result_dict),
+                    "tool_call_id": current_tool_call["id"]
+                })
+            ), None, True
+        except Exception as e:
+            logger.error(f"[{request_id}] Error executing tool: {str(e)}")
+            return ChatStreamEvent(
+                event="error",
+                data=json.dumps({"error": f"Tool execution failed: {str(e)}"})
+            ), None, True
 
-    except Exception as e:
-        logger.error(
-            f"[{request_id}] Error processing tool call: {e}", exc_info=True)
-        return ChatStreamEvent(
-            event="error",
-            data=json.dumps({"error": f"Tool processing error: {str(e)}"})
-        ), None, True
+    # Return accumulated state for incomplete tool calls
+    return ChatStreamEvent(
+        event="message",
+        data=json.dumps({
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [current_tool_call]
+        })
+    ), current_tool_call, is_complete
 
 
 async def handle_tool_response(
@@ -130,35 +157,62 @@ async def handle_tool_calls(
     response: Dict[str, Any],
     function_service: FunctionService
 ) -> List[ChatStreamEvent]:
-    """Handle tool calls from the model response."""
-    logger.info(f"[{request_id}] Processing tool calls")
+    """Handle tool calls from assistant.
 
-    if not response.get('tool_calls'):
-        logger.warning(f"[{request_id}] No tool calls found in response")
-        return []
+    Args:
+        request_id: ID of the current request
+        response: Assistant response containing tool calls
+        function_service: Service for handling function calls
+
+    Returns:
+        List of events to send
+    """
+    logger.info(
+        f"[{request_id}] Tool calls detected: {json.dumps(response['tool_calls'], indent=2)}")
+    events = []
+
+    # Send raw tool call message first
+    events.append(ChatStreamEvent(
+        event="message",
+        data=json.dumps({
+            "role": "assistant",
+            "content": "",
+            "tool_calls": response["tool_calls"]
+        })
+    ))
 
     try:
-        # Execute tool calls
-        events = await function_service.handle_tool_calls(response['tool_calls'])
+        tool_responses = await function_service.handle_tool_calls(response["tool_calls"])
+        for tool_response in tool_responses:
+            if hasattr(tool_response, 'to_dict'):
+                result_dict = tool_response.to_dict()
+            else:
+                result_dict = {
+                    "success": getattr(tool_response, "success", True),
+                    "result": getattr(tool_response, "result", str(tool_response)),
+                    "error": getattr(tool_response, "error", None),
+                    "metadata": getattr(tool_response, "metadata", {})
+                }
 
-        # Process and validate responses
-        processed_events = []
-        for event in events:
-            if isinstance(event, ChatStreamEvent):
-                try:
-                    result = json.loads(event.data)
-                    if result.get('content'):  # Only include non-empty responses
-                        processed_events.append(event)
-                except json.JSONDecodeError as e:
-                    logger.error(
-                        f"[{request_id}] Error decoding tool response: {e}")
-
-        return processed_events
+            # Send tool response
+            events.append(ChatStreamEvent(
+                event="message",
+                data=json.dumps({
+                    "role": "tool",
+                    "name": tool_response.tool_name if hasattr(tool_response, 'tool_name') else response["tool_calls"][0]["function"]["name"],
+                    "content": json.dumps(result_dict),
+                    "tool_call_id": response["tool_calls"][0]["id"]
+                })
+            ))
 
     except Exception as e:
-        logger.error(
-            f"[{request_id}] Error handling tool calls: {e}", exc_info=True)
-        raise
+        logger.error(f"[{request_id}] Error executing tool calls: {e}")
+        events.append(ChatStreamEvent(
+            event="error",
+            data=json.dumps({"error": f"Tool execution failed: {str(e)}"})
+        ))
+
+    return events
 
 
 async def process_streaming_tool_calls(
