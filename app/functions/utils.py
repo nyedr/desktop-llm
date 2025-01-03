@@ -259,15 +259,15 @@ def create_error_response(
 
 # Constants from config
 APP_CONSTANTS = {
-    "DEFAULT_MODEL": config.DEFAULT_MODEL,
-    "MODEL_TEMPERATURE": config.MODEL_TEMPERATURE,
-    "MAX_TOKENS": config.MAX_TOKENS,
-    "FUNCTION_CALLS_ENABLED": config.FUNCTION_CALLS_ENABLED,
-    "ENABLE_MODEL_FILTER": config.ENABLE_MODEL_FILTER,
-    "MODEL_FILTER_LIST": config.MODEL_FILTER_LIST,
-    "OLLAMA_BASE_URLS": config.OLLAMA_BASE_URLS,
-    "MODEL_REQUEST_TIMEOUT": config.MODEL_REQUEST_TIMEOUT,
-    "GENERATION_REQUEST_TIMEOUT": config.GENERATION_REQUEST_TIMEOUT
+    "DEFAULT_MODEL": config.llm.model,
+    "MODEL_TEMPERATURE": config.llm.temperature,
+    "MAX_TOKENS": config.llm.max_tokens,
+    "FUNCTION_CALLS_ENABLED": config.llm.enable_tools,
+    "ENABLE_MODEL_FILTER": config.functions.enable_model_filter,
+    "MODEL_FILTER_LIST": config.functions.model_filter_list,
+    "BASE_URL": config.llm.base_url,
+    "MODEL_REQUEST_TIMEOUT": config.llm.timeout,
+    "GENERATION_REQUEST_TIMEOUT": config.llm.timeout
 }
 
 __all__ = [

@@ -1,7 +1,6 @@
 """Health check endpoints."""
 
 import logging
-import psutil
 from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, Request, Depends
 from pydantic import BaseModel, Field
@@ -31,8 +30,8 @@ class SystemMetrics(BaseModel):
         description="Disk metrics including total, free, and percent usage")
 
 
-class OllamaStatus(BaseModel):
-    """Ollama status model."""
+class EndpointStatus(BaseModel):
+    """Endpoint status model."""
     connected: bool
     message: str
     base_url: str
@@ -43,7 +42,7 @@ class ModelsComponent(BaseModel):
     status: str
     count: int
     available: List[str]
-    ollama_status: OllamaStatus
+    endpoints_status: Dict[str, EndpointStatus]
 
 
 class FunctionComponent(BaseModel):
@@ -64,30 +63,26 @@ class Components(BaseModel):
 
 class HealthResponse(BaseModel):
     """Health check response model."""
-    status: str
-    system: SystemMetrics
-    components: Components
-    error: Optional[str] = None
+    status: str = Field(description="Overall health status")
+    components: Dict[str, Any] = Field(
+        description="Status of system components")
 
 
 @router.get("/health", response_model=HealthResponse)
 async def health_check(
     request: Request,
+    request_id: Optional[str] = None,
     model_service: ModelService = Depends(Providers.get_model_service),
-    function_service: FunctionService = Depends(Providers.get_function_service)
+    function_service: FunctionService = Depends(
+        Providers.get_function_service)
 ) -> Dict[str, Any]:
-    """Check the health of the API and its components."""
-    request_id = str(id(request))
+    """Check system health."""
     try:
-        # Get system metrics
-        memory = psutil.virtual_memory()
-        disk = psutil.disk_usage('/')
+        # Check endpoints health
+        endpoints_health = await model_service.check_health(request_id)
 
-        # Check Ollama health first
-        ollama_healthy, ollama_status = await model_service.check_ollama_health(request_id)
-
-        # Get available models if Ollama is healthy
-        models = await model_service.get_all_models(request_id) if ollama_healthy else {}
+        # Get available models if OpenAI endpoint is healthy
+        models = await model_service.get_models() if endpoints_health.get("openai", (False, ""))[0] else []
 
         # Get registered functions
         functions = function_service.list_functions()
@@ -114,33 +109,24 @@ async def health_check(
             services_status[service_name] = service_info
 
             # Update overall status if any critical service is down
-            if service_name in ['mcp', 'chroma'] and state.status.name in ['FAILED', 'OFFLINE']:
+            if service_name in ['mcp', 'lightrag'] and state.status.name in ['FAILED', 'OFFLINE']:
                 overall_status = "degraded"
 
         return {
             "status": overall_status,
-            "system": {
-                "memory": {
-                    "total": memory.total,
-                    "available": memory.available,
-                    "percent": memory.percent
-                },
-                "disk": {
-                    "total": disk.total,
-                    "free": disk.free,
-                    "percent": disk.percent
-                }
-            },
             "components": {
                 "services": services_status,
                 "models": {
-                    "status": "healthy" if ollama_healthy else "unhealthy",
+                    "status": "healthy" if endpoints_health.get("openai", (False, ""))[0] else "unhealthy",
                     "count": len(models),
-                    "available": list(models.keys()) if models else [],
-                    "ollama_status": {
-                        "connected": ollama_healthy,
-                        "message": ollama_status,
-                        "base_url": model_service.base_url
+                    "available": models,
+                    "endpoints_status": {
+                        endpoint: {
+                            "connected": status[0],
+                            "message": status[1],
+                            "base_url": model_service.base_url if endpoint == "ollama" else str(model_service.client.base_url)
+                        }
+                        for endpoint, status in endpoints_health.items()
                     }
                 },
                 "tools": {
@@ -160,9 +146,21 @@ async def health_check(
                 }
             }
         }
+
     except Exception as e:
         logger.error(f"Health check failed: {e}", exc_info=True)
         return {
             "status": "unhealthy",
-            "error": str(e)
+            "components": {
+                "services": {},
+                "models": {
+                    "status": "unhealthy",
+                    "count": 0,
+                    "available": [],
+                    "endpoints_status": {}
+                },
+                "tools": {"status": "unknown", "count": 0, "registered": []},
+                "filters": {"status": "unknown", "count": 0, "registered": []},
+                "pipelines": {"status": "unknown", "count": 0, "registered": []}
+            }
         }

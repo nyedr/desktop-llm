@@ -12,9 +12,16 @@
 - [x] Update the types of the function files
 - [ ] Revamp all tests
 - [x] Review datastore and manager memory files
-- [ ] Update the memory retrieval pipeline: Prompt -> Query -> Embed -> Retrieve -> (Store memory as side process) -> Context
-- [ ] No llm memory cache
-- [ ] Only one messages is being stored in a conversation
+- [x] Update the memory retrieval pipeline: Prompt -> Query -> Embed -> Retrieve -> (Store memory as side process) -> Context
+- [x] No llm memory cache
+- [x] Only one messages is being stored in a conversation
+- [x] Fix filters
+- [ ] Make a storage server that will embed and store the messages in the background, right now subsequent messages can cause delays due to the embedding process
+- [ ] Model has to be used via the rag query call to use memory, redesign agent to use rag query call
+- [ ] Test function calls with memory
+- [ ] Allow ollama to use memory, change agent to allow for memory
+- [ ] Do we need utils/memory_utils.py?
+- [ ] File (file storage as well) and image processing logic
 
 ### Streaming and Tool Execution
 

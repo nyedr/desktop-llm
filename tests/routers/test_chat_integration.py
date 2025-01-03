@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 
 from app.main import app
 from app.models.chat import ChatRequest
-from app.memory.lightrag.manager import EnhancedLightRAGManager
+from app.memory.manager import LightRAGManager
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ def test_client():
 def mock_lightrag_manager():
     """Create a mock LightRAG manager."""
     with patch("app.dependencies.providers.Providers.get_lightrag_manager") as mock:
-        manager = AsyncMock(spec=EnhancedLightRAGManager)
+        manager = AsyncMock(spec=LightRAGManager)
         manager.query_memories.return_value = [
             {
                 "document": "Previous conversation about Python: User likes type hints",

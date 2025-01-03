@@ -1,19 +1,18 @@
 """Model service module."""
 
 import logging
-import json
 from typing import List, Dict, Any, Optional, Union, AsyncGenerator, Tuple
 import uuid
+from openai import AsyncOpenAI
+import openai
 import asyncio
-import httpx
 
-from ollama import AsyncClient
 from app.core.config import config
-from app.models.function import ToolResponse
 from app.models.chat import StrictChatMessage
 from app.models.model import Model
-from app.models.completion import CompletionResponse
-from app.services.function_service import FunctionService
+from lightrag.llm import ollama_embedding
+
+from app.utils.chat_tools import format_tools_for_chat
 
 logger = logging.getLogger(__name__)
 
@@ -23,51 +22,294 @@ class ModelServiceError(Exception):
     pass
 
 
-class OllamaConnectionError(ModelServiceError):
-    """Raised when connection to Ollama server fails."""
+class EmbeddingProviderError(ModelServiceError):
+    """Raised when embedding provider fails."""
+    pass
+
+
+class CompletionProviderError(ModelServiceError):
+    """Raised when completion provider fails."""
     pass
 
 
 class ModelService:
-    """Service for interacting with language models."""
+    """Service for interacting with language models through OpenAI-compatible endpoints."""
 
-    def __init__(self, base_url: str = None):
-        self.base_url = base_url or config.OLLAMA_BASE_URLS[0]
-        self.request_timeout = config.MODEL_REQUEST_TIMEOUT
-        self.generation_timeout = config.GENERATION_REQUEST_TIMEOUT
-        self.default_model = config.DEFAULT_MODEL
-        self.default_temperature = config.DEFAULT_TEMPERATURE
-        self.max_tokens = config.MAX_TOKENS
-        self.function_calls_enabled = config.FUNCTION_CALLS_ENABLED
-        self.enable_model_filter = config.ENABLE_MODEL_FILTER
-        self.model_filter_list = config.MODEL_FILTER_LIST
-        self.ollama_health_checked = False
-        self.ollama_available = False
-        self.ollama_client = AsyncClient(host=self.base_url)
-        logger.info("Initialized ModelService")
-        logger.debug(f"Using Ollama base URL: {self.base_url}")
+    def __init__(self):
+        """Initialize model service with configuration."""
+        try:
+            self._init_config()
+            if not config.llm.api_key:
+                logger.warning(
+                    "No API key provided - some features may be limited")
+            self._init_client()
+            self._init_embeddings()
+            if config.llm.api_key:
+                self._verify_connection()
+            logger.info("Initialized ModelService")
+        except Exception as e:
+            logger.error(f"Failed to initialize ModelService: {e}")
+            raise
 
-    def _get_request_id(self) -> Optional[str]:
-        """Get the current request ID from context vars."""
+    def _verify_connection(self):
+        """Verify connection to OpenAI endpoint works."""
+        try:
+            # Try to make a simple request to verify connection
+            response = self.client.models.list()
+            if not response:
+                raise CompletionProviderError(
+                    "No models available from provider")
+        except Exception as e:
+            raise CompletionProviderError(
+                f"Failed to connect to OpenAI endpoint: {str(e)}")
+
+    def _prepare_messages(self, messages: List[Union[Dict[str, Any], StrictChatMessage]]) -> List[Dict[str, Any]]:
+        """Prepare messages for API request.
+
+        Args:
+            messages: List of messages to prepare
+
+        Returns:
+            List of formatted message dictionaries
+        """
+        formatted = []
+        for msg in messages:
+            if hasattr(msg, 'model_dump'):
+                # Handle Pydantic models
+                msg_dict = msg.model_dump()
+            elif isinstance(msg, dict):
+                # Handle dictionaries
+                msg_dict = msg
+            else:
+                # Handle unexpected types
+                logger.warning(f"Unexpected message type: {type(msg)}")
+                msg_dict = {"role": "user", "content": str(msg)}
+
+            # Ensure required fields are present and properly formatted
+            formatted_msg = {
+                "role": msg_dict.get("role", "user"),
+                "content": str(msg_dict.get("content", "")).strip()
+            }
+
+            # Only add optional fields if they exist and are not None
+            if msg_dict.get("name"):
+                formatted_msg["name"] = msg_dict["name"]
+            if msg_dict.get("function_call"):
+                formatted_msg["function_call"] = msg_dict["function_call"]
+            if msg_dict.get("tool_calls"):
+                formatted_msg["tool_calls"] = msg_dict["tool_calls"]
+
+            formatted.append(formatted_msg)
+
+        return formatted
+
+    def _init_config(self):
+        """Initialize configuration parameters."""
+        self.request_timeout = config.llm.timeout
+        self.generation_timeout = config.llm.timeout
+        self.default_model = "deepseek/deepseek-chat"  # Set default model
+        self.temperature = config.llm.temperature
+        self.max_tokens = config.llm.max_tokens
+        self.function_calls_enabled = config.llm.enable_tools
+        self.enable_model_filter = config.functions.enable_model_filter
+        self.model_filter_list = config.functions.model_filter_list
+
+        # Log embedding configuration
+        logger.info("Initializing model service with configuration:")
+        logger.info(f"Default model: {self.default_model}")
+        logger.info(
+            f"Default embedding model (Ollama): {config.memory.default_embedding_model}")
+
+    def _init_client(self):
+        """Initialize OpenAI client."""
+        try:
+            if not config.llm.api_key:
+                logger.warning("Initializing OpenAI client without API key")
+            self.client = AsyncOpenAI(
+                # OpenAI client requires non-empty string
+                api_key=config.llm.api_key,
+                base_url=str(config.llm.base_url),
+                default_headers={
+                    "HTTP-Referer": "http://localhost:8001",
+                    "X-Title": "Desktop LLM"
+                }
+            )
+        except Exception as e:
+            raise CompletionProviderError(
+                f"Failed to initialize OpenAI client: {e}")
+
+    def _init_embeddings(self):
+        """Initialize embeddings configuration."""
+        try:
+            logger.info("Using Ollama nomic-embed-text model for embeddings")
+        except Exception as e:
+            raise EmbeddingProviderError(
+                f"Failed to initialize embedding configuration: {e}")
+
+    def _get_request_id(self) -> str:
+        """Get a unique request ID."""
         return str(uuid.uuid4())
 
-    async def fetch_models(self) -> List[Model]:
-        """Fetch available models from Ollama."""
-        request_id = self._get_request_id()
-        logger.info(f"[{request_id}] Fetching models from Ollama")
+    async def get_embeddings(
+        self,
+        texts: Union[str, List[str]],
+    ) -> List[List[float]]:
+        """Get embeddings using Ollama with nomic-embed-text model."""
+        try:
+            if isinstance(texts, str):
+                texts = [texts]
+
+            embeddings = await ollama_embedding(
+                texts,
+                embed_model="nomic-embed-text",
+                host="http://localhost:11434"
+            )
+            logger.debug(f"Generated {len(embeddings)} embeddings")
+            return embeddings
+
+        except Exception as e:
+            logger.error(f"Error getting embeddings: {e}")
+            raise EmbeddingProviderError(f"Failed to get embeddings: {e}")
+
+    async def chat(
+        self,
+        messages: List[Union[Dict[str, Any], StrictChatMessage]],
+        model: Optional[str] = None,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        stream: bool = True,
+        tools: Optional[List[Dict[str, Any]]] = None,
+        enable_tools: bool = True,
+    ) -> AsyncGenerator[Union[str, Dict[str, Any]], None]:
+        """Generate chat completions with optional tool execution.
+
+        Args:
+            messages: List of chat messages
+            model: Optional override for model
+            temperature: Optional override for temperature
+            max_tokens: Optional override for max_tokens
+            stream: Whether to stream the response
+            tools: Optional list of tools to enable
+            enable_tools: Whether to enable tool execution
+
+        Yields:
+            Response chunks from the model and tool execution
+        """
+        request_id = str(uuid.uuid4())
+        logger.info(f"[{request_id}] Chat request started")
 
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(f"{self.base_url}/api/tags")
-                response.raise_for_status()
-                models = [Model(**model)
-                          for model in response.json()["models"]]
-                logger.info(f"[{request_id}] Found {len(models)} models")
-                return models
+            # Format messages for API
+            formatted_messages = self._prepare_messages(messages)
+
+            # Prepare request parameters
+            params = {
+                "model": model or self.default_model,
+                "messages": formatted_messages,
+                "temperature": temperature or self.temperature,
+                "max_tokens": max_tokens or self.max_tokens,
+                "stream": stream
+            }
+
+            # Add tools if enabled
+            if enable_tools and tools:
+                formatted_tools = format_tools_for_chat(tools, request_id)
+                if formatted_tools:
+                    params["tools"] = formatted_tools
+                    params["tool_choice"] = "auto"
+
+            # Get response from API
+            try:
+                response = await asyncio.wait_for(
+                    self.client.chat.completions.create(**params),
+                    timeout=self.request_timeout
+                )
+            except asyncio.TimeoutError:
+                logger.error(
+                    f"[{request_id}] Request timed out after {self.request_timeout}s")
+                raise CompletionProviderError("Request timed out")
+            except openai.APIError as e:
+                logger.error(f"[{request_id}] OpenRouter API error: {str(e)}")
+                raise
+
+            if stream:
+                chunk_count = 0
+                try:
+                    async for chunk in response:
+                        try:
+                            chunk_count += 1
+                            if not chunk or not chunk.choices:
+                                continue
+
+                            delta = chunk.choices[0].delta
+                            if hasattr(delta, 'content') and delta.content:
+                                yield delta.content
+                            elif hasattr(delta, 'tool_calls') and delta.tool_calls:
+                                yield {"tool_calls": [
+                                    {
+                                        "id": tool_call.id,
+                                        "type": "function",
+                                        "function": {
+                                            "name": tool_call.function.name,
+                                            "arguments": tool_call.function.arguments
+                                        }
+                                    } for tool_call in delta.tool_calls
+                                ]}
+
+                        except Exception as e:
+                            logger.error(
+                                f"[{request_id}] Error processing chunk: {str(e)}")
+                            continue
+
+                except Exception as e:
+                    logger.error(
+                        f"[{request_id}] Error in stream processing: {str(e)}")
+                    raise
+
+            else:
+                if not response or not response.choices:
+                    raise CompletionProviderError(
+                        "Empty response from provider")
+
+                message = response.choices[0].message
+                if message.content:
+                    yield message.content
+                elif hasattr(message, 'tool_calls') and message.tool_calls:
+                    yield {"tool_calls": message.tool_calls}
+
+        except Exception as e:
+            logger.error(f"[{request_id}] Chat error: {str(e)}")
+            raise CompletionProviderError(f"Chat failed: {e}")
+
+    async def fetch_models(self) -> List[Model]:
+        """Fetch available models from the OpenAI-compatible endpoint."""
+        request_id = self._get_request_id()
+        logger.info(f"[{request_id}] Fetching models")
+
+        try:
+            response = await self.client.models.list()
+            models = []
+            for model_data in response.data:
+                models.append(Model(
+                    model=model_data.id,
+                    modified_at=str(model_data.created),
+                    size=0,
+                    details={
+                        "parent_model": model_data.id,
+                        "format": "openai",
+                        "family": "openai",
+                        "families": ["openai"],
+                        "parameter_size": "unknown",
+                        "quantization_level": "unknown"
+                    }
+                ))
+
+            logger.info(f"[{request_id}] Found {len(models)} total models")
+            return models
 
         except Exception as e:
             logger.error(f"[{request_id}] Error fetching models: {e}")
-            raise
+            raise CompletionProviderError(f"Failed to fetch models: {e}")
 
     async def get_models(self) -> List[str]:
         """Get list of available model names."""
@@ -78,7 +320,7 @@ class ModelService:
             return model_names
         except Exception as e:
             logger.error(f"[{request_id}] Error getting models: {e}")
-            raise
+            raise CompletionProviderError(f"Failed to get model list: {e}")
 
     async def get_model_info(self, model_name: str) -> Optional[Model]:
         """Get detailed information about a specific model."""
@@ -91,370 +333,23 @@ class ModelService:
             return None
         except Exception as e:
             logger.error(f"[{request_id}] Error getting model info: {e}")
-            raise
+            raise CompletionProviderError(f"Failed to get model info: {e}")
 
-    async def generate(
-        self,
-        prompt: str,
-        model: Optional[str] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
-        stream: bool = False,
-        tools: Optional[List[Dict[str, Any]]] = None,
-        tool_choice: Optional[str] = None,
-    ) -> AsyncGenerator[CompletionResponse, None]:
-        """Generate text from a prompt."""
-        request_id = self._get_request_id()
-        logger.info(
-            f"[{request_id}] Starting generation with model: {model or self.default_model}")
-
-        try:
-            # Prepare request data
-            data = {
-                "model": model or self.default_model,
-                "prompt": prompt,
-                "stream": stream,
-                "options": {
-                    "temperature": temperature or self.default_temperature,
-                }
-            }
-
-            if max_tokens:
-                data["options"]["num_predict"] = max_tokens
-
-            if tools and self.function_calls_enabled:
-                data["tools"] = tools
-                if tool_choice:
-                    data["tool_choice"] = tool_choice
-
-            async with httpx.AsyncClient() as client:
-                async with client.stream(
-                    "POST",
-                    f"{self.base_url}/api/generate",
-                    json=data,
-                    timeout=self.generation_timeout
-                ) as response:
-                    response.raise_for_status()
-                    async for line in response.aiter_lines():
-                        if not line:
-                            continue
-                        try:
-                            completion = CompletionResponse.model_validate_json(
-                                line)
-                            yield completion
-                        except Exception as e:
-                            logger.error(
-                                f"[{request_id}] Error parsing completion response: {e}")
-                            continue
-
-        except Exception as e:
-            logger.error(f"[{request_id}] Error during generation: {e}")
-            raise
-
-    async def handle_tool_call(
-        self,
-        tool_call: Dict[str, Any],
-        function_service: FunctionService
-    ) -> str:
-        """Handle a tool/function call.
-
-        Args:
-            tool_call: The tool call data from the assistant
-            function_service: Service for executing functions
+    async def check_health(self, request_id: str) -> Dict[str, Tuple[bool, str]]:
+        """Check health of all configured endpoints.
 
         Returns:
-            JSON string of function result
+            Dict[str, Tuple[bool, str]]: Health status for each endpoint
         """
-        function_name = tool_call['function']['name']
-        function_args = tool_call['function']['arguments']
+        health_status = {}
 
-        logger.info(
-            f"Calling function: {function_name} with arguments: {function_args}")
+        # Check OpenAI-compatible endpoint
         try:
-            function_response = await function_service.execute_function(function_name, function_args)
-
-            # Convert ToolResponse to dict for JSON serialization
-            if isinstance(function_response, ToolResponse):
-                response_dict = {
-                    "content": function_response.result if function_response.success else function_response.error,
-                    "name": function_response.tool_name,
-                    "tool_call_id": function_response.metadata.get("tool_call_id") if function_response.metadata else None
-                }
-                return json.dumps(response_dict)
-
-            # Handle string or dict responses
-            return json.dumps(function_response) if not isinstance(function_response, str) else function_response
-
+            await self.client.models.list()
+            health_status["openai"] = (
+                True, "OpenAI-compatible endpoint is available")
         except Exception as e:
-            logger.error(f"Error executing function {function_name}: {e}")
-            return json.dumps({"error": str(e)})
+            health_status["openai"] = (
+                False, f"Failed to connect to OpenAI endpoint: {str(e)}")
 
-    async def chat(
-        self,
-        messages: List[Union[Dict[str, Any], StrictChatMessage]],
-        model: str = config.DEFAULT_MODEL,
-        temperature: float = config.MODEL_TEMPERATURE,
-        max_tokens: int = config.MAX_TOKENS,
-        stream: bool = False,
-        tools: Optional[List[Dict[str, Any]]] = None,
-        enable_tools: bool = False,
-        function_service=None
-    ) -> AsyncGenerator[Union[str, Dict[str, Any]], None]:
-        """Generate a chat response."""
-        request_id = self._get_request_id()
-        logger.info(f"[{request_id}] Generating chat response")
-
-        try:
-            # Format messages for Ollama
-            formatted_messages = []
-            for msg in messages:
-                if isinstance(msg, dict):
-                    formatted_messages.append(msg)
-                else:
-                    formatted_messages.append(msg.dict())
-
-            # Add system prompt for entity extraction if needed
-            if any("extract_entities" in str(msg.get("content", "")) for msg in formatted_messages):
-                system_prompt = {
-                    "role": "system",
-                    "content": """You are a helpful assistant that extracts entities from text. 
-                    When extracting entities, return a JSON object with the following structure:
-                    {
-                        "entities": [
-                            {
-                                "text": "entity text",
-                                "label": "entity type",
-                                "start": start_position,
-                                "end": end_position,
-                                "context": "surrounding text"
-                            }
-                        ]
-                    }
-                    Entity types can be: PERSON, ORG, GPE, LOC, DATE, CARDINAL, etc."""
-                }
-                formatted_messages.insert(0, system_prompt)
-
-            if stream:
-                stream_response = await self.ollama_client.chat(
-                    model=model,
-                    messages=formatted_messages,
-                    tools=tools if enable_tools and tools else None,
-                    stream=True,
-                    options={
-                        'temperature': temperature,
-                        'num_predict': max_tokens
-                    }
-                )
-
-                async for chunk in stream_response:
-                    if 'message' in chunk:
-                        message = chunk['message']
-
-                        # Handle tool calls
-                        if 'tool_calls' in message:
-                            logger.info(f"Tool call detected: {message}")
-                            yield message  # Yield tool call first
-
-                            if function_service:
-                                tool_calls = message.get('tool_calls', [])
-
-                                for tool_call in tool_calls:
-                                    # Execute function
-                                    tool_response = await self.handle_tool_call(tool_call, function_service)
-
-                                    # Generate tool call ID
-                                    tool_call_id = str(uuid.uuid4())
-
-                                    # Add tool call to conversation
-                                    formatted_messages.append({
-                                        'role': 'assistant',
-                                        'content': '',
-                                        'tool_calls': [{
-                                            'id': tool_call_id,
-                                            'function': tool_call['function']
-                                        }]
-                                    })
-
-                                    # Add tool response to conversation
-                                    tool_response_msg = {
-                                        'role': 'tool',
-                                        'content': tool_response,
-                                        'name': tool_call['function']['name'],
-                                        'tool_call_id': tool_call_id
-                                    }
-                                    formatted_messages.append(
-                                        tool_response_msg)
-                                    yield tool_response_msg
-
-                                # Continue conversation with updated context
-                                continuation_stream = await self.ollama_client.chat(
-                                    model=model,
-                                    messages=formatted_messages,
-                                    stream=True,
-                                    options={
-                                        'temperature': temperature,
-                                        'num_predict': max_tokens
-                                    }
-                                )
-
-                                async for continuation in continuation_stream:
-                                    if 'message' in continuation:
-                                        cont_message = continuation['message']
-                                        if 'content' in cont_message:
-                                            content = cont_message.get(
-                                                'content', '')
-                                            if content:
-                                                # Try to parse as JSON if it's an entity extraction response
-                                                if any("extract_entities" in str(msg.get("content", "")) for msg in formatted_messages):
-                                                    try:
-                                                        json_content = json.loads(
-                                                            content)
-                                                        yield {
-                                                            'role': 'assistant',
-                                                            'content': json.dumps(json_content, indent=2)
-                                                        }
-                                                    except json.JSONDecodeError:
-                                                        # If not valid JSON, stream as normal text
-                                                        words = content.split()
-                                                        for word in words:
-                                                            yield {
-                                                                'role': 'assistant',
-                                                                'content': word + " "
-                                                            }
-                                                            await asyncio.sleep(0.05)
-                                                else:
-                                                    # Normal text streaming
-                                                    words = content.split()
-                                                    for word in words:
-                                                        yield {
-                                                            'role': 'assistant',
-                                                            'content': word + " "
-                                                        }
-                                                        await asyncio.sleep(0.05)
-
-                        # Handle content
-                        elif 'content' in message:
-                            content = message.get('content', '')
-                            if content:
-                                # Try to parse as JSON if it's an entity extraction response
-                                if any("extract_entities" in str(msg.get("content", "")) for msg in formatted_messages):
-                                    try:
-                                        json_content = json.loads(content)
-                                        yield {
-                                            'role': 'assistant',
-                                            'content': json.dumps(json_content, indent=2)
-                                        }
-                                    except json.JSONDecodeError:
-                                        # If not valid JSON, stream as normal text
-                                        words = content.split()
-                                        for word in words:
-                                            yield {
-                                                'role': 'assistant',
-                                                'content': word + " "
-                                            }
-                                            await asyncio.sleep(0.05)
-                                else:
-                                    # Normal text streaming
-                                    words = content.split()
-                                    for word in words:
-                                        yield {
-                                            'role': 'assistant',
-                                            'content': word + " "
-                                        }
-                                        await asyncio.sleep(0.05)
-            else:
-                # Non-streaming mode
-                response = await self.ollama_client.chat(
-                    model=model,
-                    messages=formatted_messages,
-                    tools=tools if enable_tools and tools else None,
-                    stream=False,
-                    options={
-                        'temperature': temperature,
-                        'num_predict': max_tokens
-                    }
-                )
-                if 'message' in response:
-                    message = response['message']
-                    if 'content' in message:
-                        content = message.get('content', '')
-                        # Try to parse as JSON if it's an entity extraction response
-                        if any("extract_entities" in str(msg.get("content", "")) for msg in formatted_messages):
-                            try:
-                                json_content = json.loads(content)
-                                yield {
-                                    'role': 'assistant',
-                                    'content': json.dumps(json_content, indent=2)
-                                }
-                            except json.JSONDecodeError:
-                                yield message
-                        else:
-                            yield message
-                    else:
-                        yield message
-                else:
-                    logger.warning(f"Unexpected response format: {response}")
-
-        except Exception as e:
-            logger.error(f"Error in chat: {e}", exc_info=True)
-            raise
-
-    async def check_ollama_health(self, request_id: str) -> Tuple[bool, str]:
-        """Check if Ollama server is available and responding.
-
-        Returns:
-            Tuple[bool, str]: (is_healthy, status_message)
-        """
-        try:
-            # Try to connect to Ollama server
-            async with httpx.AsyncClient() as client:
-                response = await client.get(f"{self.base_url}/api/version")
-                if response.status_code == 200:
-                    version_info = response.json()
-                    logger.info(
-                        f"[{request_id}] Connected to Ollama server version: {version_info.get('version')}")
-                    self.ollama_health_checked = True
-                    self.ollama_available = True
-                    return True, "Ollama server is available"
-                else:
-                    error_text = response.text
-                    logger.error(
-                        f"[{request_id}] Ollama server returned error: {error_text}")
-                    return False, f"Ollama server returned status {response.status_code}"
-
-        except Exception as e:
-            logger.error(
-                f"[{request_id}] Failed to connect to Ollama server at {self.base_url}: {str(e)}")
-            return False, f"Failed to connect to Ollama server: {str(e)}"
-
-    async def get_all_models(self, request_id: str) -> Dict[str, Any]:
-        """Fetch and cache available models from multiple providers."""
-        try:
-            models = await self.fetch_models()
-            result = {}
-
-            # Process models
-            for model in models:
-                result[model.model] = {
-                    'model': model.model,
-                    'provider': 'ollama',
-                    'size': model.size,
-                    'modified_at': model.modified_at,
-                    'details': {
-                        'parent_model': model.details.parent_model,
-                        'format': model.details.format,
-                        'family': model.details.family,
-                        'families': model.details.families,
-                        'parameter_size': model.details.parameter_size,
-                        'quantization_level': model.details.quantization_level
-                    }
-                }
-
-            logger.info(f"[{request_id}] Successfully fetched all models")
-            logger.debug(
-                f"[{request_id}] Available models: {list(result.keys())}")
-            return result
-
-        except Exception as e:
-            logger.error(f"[{request_id}] Error fetching models: {e}")
-            return {}
+        return health_status

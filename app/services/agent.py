@@ -1,67 +1,42 @@
-"""Agent service for managing model interactions and function execution."""
-from typing import List, Dict, Any, Optional, AsyncGenerator, Union
-import logging
-from pydantic import BaseModel
+"""Agent service module."""
 
-from app.services.function_service import FunctionService
-from app.services.model_service import ModelService
+import logging
+from typing import AsyncGenerator, Dict, Any, List, Optional, Union
+
 from app.core.config import config
 from app.models.chat import StrictChatMessage
+from app.services.model_service import ModelService
 
 logger = logging.getLogger(__name__)
 
 
-class Message(BaseModel):
-    """Chat message model."""
-    role: str
-    content: str
-    name: Optional[str] = None
-    function_call: Optional[Dict[str, Any]] = None
-
-
 class Agent:
-    """Agent class for handling chat interactions."""
+    """Agent for handling chat interactions."""
 
-    def __init__(
-        self,
-        model_service: Optional[ModelService] = None,
-        function_service: Optional[FunctionService] = None,
-        model: str = config.DEFAULT_MODEL,
-        temperature: float = config.MODEL_TEMPERATURE,
-        max_tokens: int = config.MAX_TOKENS
-    ):
-        """Initialize the agent.
+    def __init__(self):
+        """Initialize agent with default configuration."""
+        self.model = config.llm.model
+        self.temperature = config.llm.temperature
+        self.max_tokens = config.llm.max_tokens
 
-        Args:
-            model_service: Model service for LLM operations
-            function_service: Function service for executing functions
-            model: Model to use for chat
-            temperature: Temperature for model sampling
-            max_tokens: Maximum tokens for model output
-        """
-        if model_service is None or function_service is None:
-            raise ValueError(
-                "model_service and function_service must be provided")
-
-        self.model_service = model_service
-        self.function_service = function_service
-        self.model = model
-        self.temperature = temperature
-        self.max_tokens = max_tokens
+        # Services will be initialized later
+        self.model_service = None
         self._initialized = False
 
-    async def initialize(self):
-        """Initialize the agent."""
+    @classmethod
+    async def create(cls, model_service: ModelService) -> 'Agent':
+        """Create and initialize a new Agent instance."""
+        agent = cls()
+        await agent.initialize(model_service)
+        return agent
+
+    async def initialize(self, model_service: ModelService):
+        """Initialize the agent with required services."""
         if self._initialized:
             return
-        try:
-            logger.info("Initializing Agent...")
-            self._initialized = True
-            logger.info("Agent initialized successfully")
-        except Exception as e:
-            logger.error(
-                f"Failed to initialize Agent: {str(e)}", exc_info=True)
-            raise
+
+        self.model_service = model_service
+        self._initialized = True
 
     async def generate(
         self,
@@ -71,7 +46,21 @@ class Agent:
         max_tokens: Optional[int] = None,
         stream: bool = False
     ) -> AsyncGenerator[str, None]:
-        """Generate a completion for the given prompt."""
+        """Generate a completion for the given prompt.
+
+        Args:
+            prompt: The input prompt
+            model: Optional override for model
+            temperature: Optional override for temperature
+            max_tokens: Optional override for max_tokens
+            stream: Whether to stream the response
+
+        Yields:
+            Generated text chunks
+        """
+        if not self._initialized:
+            raise RuntimeError("Agent not initialized")
+
         try:
             completion_stream = self.model_service.generate(
                 prompt=prompt,
@@ -97,50 +86,49 @@ class Agent:
         max_tokens: Optional[int] = None,
         stream: bool = True,
         tools: Optional[List[Dict[str, Any]]] = None,
-        enable_tools: bool = True
-    ) -> AsyncGenerator[str, None]:
-        """Generate chat completions."""
+        enable_tools: bool = True,
+    ) -> AsyncGenerator[Union[str, Dict[str, Any]], None]:
+        """Generate chat completions with optional tool execution.
+
+        Args:
+            messages: List of chat messages
+            model: Optional override for model
+            temperature: Optional override for temperature
+            max_tokens: Optional override for max_tokens
+            stream: Whether to stream the response
+            tools: Optional list of tools to enable
+            enable_tools: Whether to enable tool execution
+
+        Yields:
+            Response chunks from the model and tool execution
+        """
+        if not self._initialized:
+            raise RuntimeError("Agent not initialized")
+
         try:
-            # Ensure agent is initialized
-            if not self._initialized:
-                await self.initialize()
-
-            if enable_tools and tools:
-                logger.debug(
-                    f"Tools enabled for chat. Available tools: {[t['function']['name'] for t in tools]}")
-            else:
-                logger.debug("No tools enabled for chat")
-
-            # Get response from model service
-            async for response in self.model_service.chat(
+            async for chunk in self.model_service.chat(
                 messages=messages,
                 model=model or self.model,
                 temperature=temperature or self.temperature,
                 max_tokens=max_tokens or self.max_tokens,
                 stream=stream,
                 tools=tools,
-                enable_tools=enable_tools,
-                function_service=self.function_service
+                enable_tools=enable_tools
             ):
-                if response:
-                    yield response
+                if chunk:  # Only yield non-empty responses
+                    yield chunk
 
         except Exception as e:
-            logger.error(f"Error in chat: {e}", exc_info=True)
+            logger.error(f"Error in chat: {e}")
             raise
 
-    async def execute_function(
-        self,
-        function_name: str,
-        arguments: Dict[str, Any]
-    ) -> Any:
-        """Execute a function with the given arguments."""
+    async def cleanup(self):
+        """Cleanup agent resources."""
         try:
-            result = await self.function_service.execute_function(
-                function_name=function_name,
-                arguments=arguments
-            )
-            return result
+            logger.info("Cleaning up Agent...")
+            self._initialized = False
+            self.model_service = None
+            logger.info("Agent cleanup complete")
         except Exception as e:
-            logger.error(f"Error executing function: {e}")
+            logger.error(f"Error during Agent cleanup: {e}")
             raise

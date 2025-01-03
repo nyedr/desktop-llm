@@ -1,21 +1,10 @@
 .env
 
-
-/data
-
 /test_data
 
 .cursorrules
 
-/lightrag
-
 .clinerules
-
-/src/filesystem/dist
-
-/src/filesystem/build
-
-/src/filesystem/package-lock.json
 
 /logs
 
@@ -45,4 +34,4 @@
 
 startup_debug.log
 
-/chroma_data
+/lightrag_data

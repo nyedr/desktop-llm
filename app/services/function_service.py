@@ -89,8 +89,6 @@ class FunctionService:
             try:
                 # Include tools in function schemas
                 if func["type"] == FunctionType.TOOL:
-                    logger.info(
-                        f"[SCHEMAS] Processing tool function: {func['name']}")
                     schema = {
                         "name": func["name"],
                         "description": func["description"],
@@ -104,11 +102,6 @@ class FunctionService:
                         "type": "function",
                         "function": schema
                     })
-                    logger.info(
-                        f"[SCHEMAS] Added schema for tool: {func['name']}")
-                else:
-                    logger.debug(
-                        f"[SCHEMAS] Skipping non-tool function: {func['name']} (type: {func['type']})")
             except Exception as e:
                 logger.error(
                     f"[SCHEMAS] Error processing function schema for {func.get('name', 'unknown')}: {e}", exc_info=True)

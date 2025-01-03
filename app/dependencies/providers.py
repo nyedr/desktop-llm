@@ -9,8 +9,8 @@ from app.services.agent import Agent
 from app.services.model_service import ModelService
 from app.services.function_service import FunctionService
 from app.services.mcp_service import MCPService
-from app.memory.lightrag.manager import EnhancedLightRAGManager
-from app.memory.lightrag.config import LIGHTRAG_DATA_DIR
+from app.memory.manager import LightRAGManager
+from app.core.config import config
 
 logger = logging.getLogger(__name__)
 
@@ -21,31 +21,35 @@ class Providers:
     _model_service: Optional[ModelService] = None
     _function_service: Optional[FunctionService] = None
     _mcp_service: Optional[MCPService] = None
-    _lightrag_manager: Optional[EnhancedLightRAGManager] = None
+    _lightrag_manager: Optional[LightRAGManager] = None
 
     @classmethod
-    def get_agent(cls) -> Agent:
+    async def get_agent(cls) -> Agent:
         """Get or create agent instance."""
         if cls._agent is None:
-            # Get services from service locator
-            service_locator = get_service_locator()
+            try:
+                # Get services from service locator
+                service_locator = get_service_locator()
 
-            # Check if required services are available
-            if not service_locator.has_service("model_service") or not service_locator.has_service("function_service"):
-                raise ValueError(
-                    "Required services (model_service, function_service) must be initialized first")
+                # Check if required services are available
+                if not service_locator.has_service("model_service") or not service_locator.has_service("function_service"):
+                    raise ValueError(
+                        "Required services (model_service, function_service) must be initialized first")
 
-            # Get the services
-            model_service = service_locator.get_service("model_service")
-            function_service = service_locator.get_service("function_service")
+                # Get the services
+                model_service = service_locator.get_service("model_service")
 
-            # Create agent with required services
-            cls._agent = Agent(
-                model_service=model_service,
-                function_service=function_service
-            )
-            # Register with service locator
-            service_locator.register_service("agent", cls._agent)
+                # Create and initialize agent
+                cls._agent = Agent()
+                await cls._agent.initialize(model_service)
+
+                # Register with service locator
+                service_locator.register_service("agent", cls._agent)
+
+            except Exception as e:
+                logger.error(f"Failed to initialize agent: {e}")
+                raise
+
         return cls._agent
 
     @classmethod
@@ -77,34 +81,62 @@ class Providers:
         return cls._mcp_service
 
     @classmethod
-    async def get_lightrag_manager(cls) -> EnhancedLightRAGManager:
-        """Get or create EnhancedLightRAG manager instance."""
+    async def get_lightrag_manager(cls) -> Optional[LightRAGManager]:
+        """Get or create LightRAG manager instance."""
         if cls._lightrag_manager is None:
-            # Create working directory if it doesn't exist
-            working_dir = Path(LIGHTRAG_DATA_DIR)
-            working_dir.mkdir(parents=True, exist_ok=True)
+            try:
+                # Create working directory if it doesn't exist
+                working_dir = Path(config.memory.data_dir)
+                working_dir.mkdir(parents=True, exist_ok=True)
 
-            # Create manager with working directory
-            cls._lightrag_manager = EnhancedLightRAGManager(working_dir)
+                # Create manager with working directory
+                cls._lightrag_manager = LightRAGManager(
+                    working_dir=str(working_dir))
 
-            # Register with service locator
-            get_service_locator().register_service(
-                "lightrag_manager", cls._lightrag_manager)
+                # Register with service locator
+                get_service_locator().register_service(
+                    "lightrag_manager", cls._lightrag_manager)
 
-            # Initialize and start the manager
-            await cls._lightrag_manager.initialize()
-            await cls._lightrag_manager.start()
+                # Initialize and start the manager
+                await cls._lightrag_manager.initialize()
+                await cls._lightrag_manager.start()
+
+                logger.info("LightRAG manager initialized successfully")
+                return cls._lightrag_manager
+
+            except Exception as e:
+                logger.error(
+                    f"Failed to initialize lightrag manager: {e}", exc_info=True)
+                cls._lightrag_manager = None
+                return None
 
         return cls._lightrag_manager
 
     @classmethod
     async def cleanup(cls):
         """Clean up all service instances."""
-        if cls._lightrag_manager:
-            await cls._lightrag_manager.stop()
-        cls._agent = None
-        cls._model_service = None
-        cls._function_service = None
-        cls._mcp_service = None
-        cls._lightrag_manager = None
-        get_service_locator().clear()
+        try:
+            logger.info("Starting service cleanup...")
+
+            # Stop memory manager first
+            if cls._lightrag_manager:
+                try:
+                    await cls._lightrag_manager.stop()
+                    logger.info("LightRAG manager stopped")
+                except Exception as e:
+                    logger.error(f"Error stopping lightrag manager: {e}")
+
+            # Clear service instances
+            cls._agent = None
+            cls._model_service = None
+            cls._function_service = None
+            cls._mcp_service = None
+            cls._lightrag_manager = None
+
+            # Clear service locator
+            get_service_locator().clear()
+            logger.info("Service cleanup completed")
+
+        except Exception as e:
+            logger.error(f"Error during service cleanup: {e}", exc_info=True)
+            raise

@@ -157,15 +157,27 @@ class FunctionExecutor:
                             f"Invalid tool call format: expected dict, got {type(tool_call)}")
 
                     # Extract tool call details
-                    function_name = tool_call.get("name")
+                    function_data = tool_call.get("function", {})
+                    if not isinstance(function_data, dict):
+                        raise ValidationError(
+                            f"Invalid function data format: expected dict, got {type(function_data)}")
+
+                    function_name = function_data.get("name")
                     if not function_name:
                         raise ValidationError(
                             "Tool call missing function name")
 
-                    arguments = tool_call.get("arguments", {})
-                    if not isinstance(arguments, dict):
+                    # Parse arguments from string if needed
+                    arguments = function_data.get("arguments", "{}")
+                    if isinstance(arguments, str):
+                        try:
+                            arguments = json.loads(arguments)
+                        except json.JSONDecodeError as e:
+                            raise ValidationError(
+                                f"Invalid JSON in arguments: {e}")
+                    elif not isinstance(arguments, dict):
                         raise ValidationError(
-                            f"Invalid arguments format: expected dict, got {type(arguments)}")
+                            f"Invalid arguments format: expected dict or JSON string, got {type(arguments)}")
 
                     # Execute the function
                     result = await self.execute(function_name, arguments)
@@ -202,7 +214,7 @@ class FunctionExecutor:
                     # Handle known function errors
                     error_result = {
                         "tool_call_id": tool_call.get("id"),
-                        "name": tool_call.get("name"),
+                        "name": function_data.get("name") if "function" in tool_call else None,
                         "error": {
                             "type": e.__class__.__name__,
                             "message": str(e)
@@ -215,7 +227,7 @@ class FunctionExecutor:
                     # Handle unexpected errors
                     error_result = {
                         "tool_call_id": tool_call.get("id"),
-                        "name": tool_call.get("name"),
+                        "name": function_data.get("name") if "function" in tool_call else None,
                         "error": {
                             "type": "UnexpectedError",
                             "message": str(e)

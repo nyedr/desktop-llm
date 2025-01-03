@@ -1,140 +1,67 @@
 """Chat router for handling chat-related endpoints and streaming responses."""
 
-import datetime
 import json
 import logging
-from typing import List, Optional, AsyncGenerator, Any, Dict
-from fastapi import APIRouter, Request, Depends
+import uuid
+from typing import AsyncGenerator, Optional
+
+from fastapi import APIRouter, Request, Depends, BackgroundTasks
 from sse_starlette.sse import EventSourceResponse
 
 from app.core.config import config
-from app.dependencies.providers import Providers
-from app.utils.filters import apply_filters
-from app.memory.lightrag.manager import EnhancedLightRAGManager
+from app.models.chat import ChatRequest, ChatStreamEvent, StrictChatMessage
 from app.services.agent import Agent
 from app.services.model_service import ModelService
 from app.services.function_service import FunctionService
-from app.models.chat import ChatRequest, ChatStreamEvent
-from app.models.function import Filter, FunctionType
+from app.memory.manager import LightRAGManager
 from app.services.context_service import LLMContext
+from app.dependencies.providers import Providers
+from app.utils.chat_setup import verify_model_availability, setup_chat_components
+from app.utils.memory_utils import store_conversation_memory
+from app.utils.filters import apply_filters
 from app.utils.chat_messages import handle_assistant_message, handle_string_chunk
-from app.utils.chat_tools import handle_tool_calls
+from app.utils.chat_tools import process_tool_stream
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-async def verify_model_availability(
+async def process_chat_context(
     request_id: str,
-    model: str,
-    model_service: ModelService
-) -> Optional[ChatStreamEvent]:
-    """Verify model availability.
-
-    Args:
-        request_id: ID of the current request
-        model: Model name to verify
-        model_service: Service for model operations
-
-    Returns:
-        Error event if model not available, None if available
-    """
+    messages: list[StrictChatMessage],
+    model: Optional[str] = None,
+    max_tokens: Optional[int] = None
+) -> list[dict]:
+    """Process chat messages through the context service."""
     try:
-        models = await model_service.get_all_models(request_id)
-    except Exception as model_error:
+        async with LLMContext(
+            request_id=request_id,
+            messages=messages,
+            model=model,
+            max_tokens=max_tokens
+        ) as context:
+            return context.get_context_window()
+    except Exception as e:
         logger.error(
-            f"[{request_id}] Error fetching models: {model_error}", exc_info=True)
-        return ChatStreamEvent(
-            event="error",
-            data=json.dumps({"error": "Failed to fetch available models"})
-        )
-
-    if model not in models:
-        logger.error(f"[{request_id}] Model {model} not available")
-        return ChatStreamEvent(
-            event="error",
-            data=json.dumps({"error": f"Model {model} not available"})
-        )
-
-    return None
-
-
-async def setup_chat_components(
-    request_id: str,
-    chat_request: ChatRequest,
-    function_service: FunctionService
-) -> tuple[Optional[List[Dict]], List[Filter], Optional[Any]]:
-    """Setup function schemas, filters, and pipeline for chat."""
-    # Get available functions
-    function_schemas = None
-    if chat_request.enable_tools:
-        logger.info(
-            f"[{request_id}] Tools are enabled, getting function schemas")
-        function_schemas = function_service.get_function_schemas()
-        if function_schemas:
-            logger.info(
-                f"[{request_id}] Available tools: {[f['function']['name'] for f in function_schemas]}")
-        else:
-            logger.warning(f"[{request_id}] No tool schemas available")
-
-    # Get requested filters
-    filters = []
-    if chat_request.filters:
-        logger.info(f"[{request_id}] Getting filters: {chat_request.filters}")
-        for filter_name in chat_request.filters:
-            filter_class = function_service.get_function(filter_name)
-            if filter_class and filter_class.model_fields['type'].default == FunctionType.FILTER:
-                logger.info(
-                    f"[{request_id}] Instantiating filter: {filter_name}")
-                try:
-                    filter_instance = filter_class()
-                    filters.append(filter_instance)
-                    logger.info(f"[{request_id}] Added filter: {filter_name}")
-                except Exception as e:
-                    logger.error(
-                        f"[{request_id}] Error instantiating filter {filter_name}: {e}")
-            else:
-                logger.warning(
-                    f"[{request_id}] Filter not found or invalid type: {filter_name}")
-
-    # Get requested pipeline
-    pipeline = None
-    if chat_request.pipeline:
-        logger.info(
-            f"[{request_id}] Getting pipeline: {chat_request.pipeline}")
-        pipeline_class = function_service.get_function(chat_request.pipeline)
-        if pipeline_class and pipeline_class.model_fields['type'].default == FunctionType.PIPELINE:
-            logger.info(
-                f"[{request_id}] Instantiating pipeline: {chat_request.pipeline}")
-            try:
-                pipeline = pipeline_class()
-                logger.info(
-                    f"[{request_id}] Added pipeline: {chat_request.pipeline}")
-            except Exception as e:
-                logger.error(
-                    f"[{request_id}] Error instantiating pipeline {chat_request.pipeline}: {e}")
-        else:
-            logger.warning(
-                f"[{request_id}] Pipeline not found or invalid type: {chat_request.pipeline}")
-
-    return function_schemas, filters, pipeline
+            f"[{request_id}] Error processing chat context: {e}", exc_info=True)
+        return messages
 
 
 async def stream_chat_response(
     request: Request,
     chat_request: ChatRequest,
+    background_tasks: BackgroundTasks,
     agent: Agent = Depends(Providers.get_agent),
     model_service: ModelService = Depends(Providers.get_model_service),
     function_service: FunctionService = Depends(
         Providers.get_function_service),
-    lightrag_manager: EnhancedLightRAGManager = Depends(
-        Providers.get_lightrag_manager),
-    is_test: bool = False
+    memory_manager: LightRAGManager = Depends(Providers.get_lightrag_manager)
 ) -> AsyncGenerator[ChatStreamEvent, None]:
     """Generate streaming chat response."""
-    request_id = str(id(request))
+    request_id = str(uuid.uuid4())
     logger.info(f"[{request_id}] Starting chat stream")
     tool_call_in_progress = False
+    messages = chat_request.messages
 
     try:
         # Setup components
@@ -142,188 +69,142 @@ async def stream_chat_response(
             request_id, chat_request, function_service)
 
         # Verify model availability
-        model = chat_request.model or config.DEFAULT_MODEL
+        model = chat_request.model or config.llm.model
         if error_event := await verify_model_availability(request_id, model, model_service):
             yield error_event
             return
 
-        # Apply inlet filters to the entire messages array if filters exist
+        # Apply inlet filters
         if filters:
             data, filter_success = await apply_filters(
                 filters=filters,
-                data={"messages": chat_request.messages},
+                data={"messages": messages},
                 request_id=request_id,
                 direction="inlet",
                 filter_name="inlet_message_filters"
             )
-
             if not filter_success:
                 yield ChatStreamEvent(
                     event="error",
                     data=json.dumps({"error": "Failed to apply inlet filters"})
                 )
                 return
+            messages = data["messages"]
 
-            chat_request.messages = data["messages"]
-
-        # Process messages with LLMContext
-        async with LLMContext(
-            request_id=request_id,
-            messages=chat_request.messages,
-            lightrag_manager=lightrag_manager if chat_request.enable_memory else None,
-            memory_filter=chat_request.memory_filter,
-            top_k_memories=chat_request.top_k_memories,
-            enable_memory=chat_request.enable_memory,
-            conversation_id=chat_request.conversation_id,
-            model=model,
-            max_tokens=chat_request.max_tokens
-        ) as context_service:
-            processed_messages = context_service.get_context_window()
-
-        # Apply pipeline if present
+        # Process pipeline
         if pipeline:
             logger.debug(f"[{request_id}] Applying pipeline: {pipeline.name}")
             try:
-                pipeline_data = await pipeline.pipe({"messages": processed_messages})
-                logger.debug(
-                    f"[{request_id}] Pipeline result: {pipeline_data}")
-
+                pipeline_data = await pipeline.pipe({"messages": messages})
                 if "messages" in pipeline_data and pipeline_data["messages"]:
-                    processed_messages = pipeline_data["messages"]
-                else:
-                    logger.warning(
-                        f"[{request_id}] Pipeline returned empty messages, using original messages")
-
+                    messages = pipeline_data["messages"]
                 if "summary" in pipeline_data:
-                    pipeline_summary = pipeline_data["summary"]
-                    yield ChatStreamEvent(
-                        event="pipeline",
-                        data=json.dumps({
-                            "summary": pipeline_summary,
-                            "status": "processing"
-                        })
-                    )
-
-                    if isinstance(pipeline_summary, dict):
-                        for key, value in pipeline_summary.items():
-                            if isinstance(value, list):
-                                for item in value:
-                                    if item:
-                                        yield ChatStreamEvent(
-                                            event="pipeline",
-                                            data=json.dumps({
-                                                "content_type": key,
-                                                "content": item,
-                                                "status": "processing"
-                                            })
-                                        )
-
                     yield ChatStreamEvent(
                         event="pipeline",
                         data=json.dumps({
                             "status": "complete",
-                            "summary": pipeline_summary
+                            "summary": pipeline_data["summary"]
                         })
                     )
-
             except Exception as e:
-                logger.error(f"[{request_id}] Pipeline error: {e}")
+                logger.error(
+                    f"[{request_id}] Pipeline error: {e}", exc_info=True)
                 yield ChatStreamEvent(
                     event="error",
                     data=json.dumps({"error": f"Pipeline error: {str(e)}"})
                 )
                 return
 
-        # Log the context window before streaming response
-        if processed_messages:
-            print(f"\nContext window for request {request_id}:", flush=True)
-            for msg in processed_messages:
-                role = msg.get("role") if isinstance(msg, dict) else msg.role
-                content = msg.get("content") if isinstance(
-                    msg, dict) else msg.content
-                print(f"{role}: {content[:100]}...", flush=True)
+        # Process context
+        processed_messages = await process_chat_context(
+            request_id=request_id,
+            messages=messages,
+            model=model,
+            max_tokens=chat_request.max_tokens
+        )
 
-        # Stream the response
-        first_response = True
+        # Start streaming
+        current_message = {"role": "assistant", "content": ""}
+        yield ChatStreamEvent(event="start", data=json.dumps({"status": "streaming"}))
+
+        # Stream chat response
+        current_tool_call = None
         async for chunk in agent.chat(
             messages=processed_messages,
             model=model,
-            temperature=chat_request.temperature,
-            max_tokens=chat_request.max_tokens,
-            stream=True,
+            temperature=chat_request.temperature or config.llm.temperature,
+            max_tokens=chat_request.max_tokens or config.llm.max_tokens,
+            stream=chat_request.stream if chat_request.stream is not None else True,
             tools=function_schemas,
-            enable_tools=chat_request.enable_tools
+            enable_tools=chat_request.enable_tools if chat_request.enable_tools is not None else config.llm.enable_tools
         ):
-            if first_response:
-                yield ChatStreamEvent(event="start", data=json.dumps({"status": "streaming"}))
-                first_response = False
-
             if not chunk:
                 continue
 
-            # Handle tool calls
-            if isinstance(chunk, dict) and "function_call" in chunk:
-                tool_call_in_progress = True
-                tool_event = await handle_tool_calls(
-                    chunk=chunk,
-                    function_service=function_service,
-                    request_id=request_id
-                )
-                if tool_event:
-                    yield tool_event
+            # Process tool calls
+            tool_event, current_tool_call, is_complete = await process_tool_stream(
+                request_id=request_id,
+                chunk=chunk,
+                function_service=function_service,
+                current_tool_call=current_tool_call
+            )
+
+            if tool_event:
+                yield tool_event
                 continue
 
-            # Handle end of tool call
-            if tool_call_in_progress and not chunk.get("function_call"):
-                tool_call_in_progress = False
+            if is_complete:
                 yield ChatStreamEvent(
                     event="function_call",
                     data=json.dumps({"status": "complete"})
                 )
+                continue
 
             # Handle assistant messages
             if isinstance(chunk, dict):
-                assistant_event = await handle_assistant_message(
-                    response=chunk,
-                    filters=filters,
-                    request_id=request_id
-                )
-                if assistant_event:
-                    yield assistant_event
+                if assistant_event := await handle_assistant_message(chunk, filters, request_id):
+                    # Convert message to event format
+                    event = ChatStreamEvent(
+                        event="message",
+                        data=json.dumps(assistant_event)
+                    )
+                    yield event.model_dump_json() + "\n"
                 continue
 
             # Handle string chunks
-            string_event = await handle_string_chunk(
-                request_id=request_id,
-                response=chunk,
-                filters=filters
-            )
-
-            if string_event:
+            if string_event := await handle_string_chunk(request_id, chunk, filters):
                 yield string_event
+                if isinstance(chunk, str):
+                    current_message["content"] += chunk
 
-        # Apply outlet filters if they exist
-        if filters and processed_messages:
-            data, filter_success = await apply_filters(
-                filters=filters,
-                data={"messages": processed_messages},
+        # Store memory if needed
+        if current_message["content"] and chat_request.enable_memory and memory_manager:
+            final_messages = messages + [current_message]
+
+            # Apply outlet filters
+            if filters:
+                try:
+                    data, filter_success = await apply_filters(
+                        filters=filters,
+                        data={"messages": final_messages},
+                        request_id=request_id,
+                        direction="outlet",
+                        filter_name="outlet_message_filters"
+                    )
+                    if filter_success:
+                        final_messages = data["messages"]
+                except Exception as e:
+                    logger.error(
+                        f"[{request_id}] Error applying outlet filters: {e}", exc_info=True)
+
+            # Store conversation memory
+            await store_conversation_memory(
                 request_id=request_id,
-                direction="outlet",
-                filter_name="outlet_message_filters"
-            )
-
-            if not filter_success:
-                yield ChatStreamEvent(
-                    event="error",
-                    data=json.dumps(
-                        {"error": "Failed to apply outlet filters"})
-                )
-                return
-
-            # Send filtered messages
-            yield ChatStreamEvent(
-                event="filtered_messages",
-                data=json.dumps({"messages": data["messages"]})
+                messages=final_messages,
+                lightrag_manager=memory_manager,
+                conversation_id=chat_request.conversation_id or str(
+                    uuid.uuid4()),
+                model=model
             )
 
     except Exception as e:
@@ -339,21 +220,22 @@ async def stream_chat_response(
 async def chat_stream(
     request: Request,
     chat_request: ChatRequest,
+    background_tasks: BackgroundTasks,
     agent: Agent = Depends(Providers.get_agent),
     model_service: ModelService = Depends(Providers.get_model_service),
     function_service: FunctionService = Depends(
         Providers.get_function_service),
-    lightrag_manager: EnhancedLightRAGManager = Depends(
-        Providers.get_lightrag_manager)
+    memory_manager: LightRAGManager = Depends(Providers.get_lightrag_manager)
 ) -> EventSourceResponse:
     """Stream chat response."""
     return EventSourceResponse(
         stream_chat_response(
             request=request,
             chat_request=chat_request,
+            background_tasks=background_tasks,
             agent=agent,
             model_service=model_service,
             function_service=function_service,
-            lightrag_manager=lightrag_manager
+            memory_manager=memory_manager
         )
     )

@@ -68,9 +68,7 @@ dependencies:
       - aioboto3>=13.3.0
 
       # File Processing
-      - PyMuPDF>=1.23.8
-      - python-docx>=1.0.1
-      - PyPDF2>=3.0.0
+      - textract==1.5.0
 
       # Memory
       - lightrag-hku>=1.0.8

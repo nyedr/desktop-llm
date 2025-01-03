@@ -6749,3 +6749,2129 @@
 2025-01-01 02:51:09,534 - lightrag - INFO - Inserting 2 vectors to entities
 2025-01-01 02:51:09,845 - lightrag - INFO - Inserting 2 vectors to relationships
 2025-01-01 02:51:10,151 - lightrag - INFO - Writing graph with 3 nodes, 2 edges
+2025-01-01 14:38:39,257 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 14:38:39,258 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 14:38:39,258 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 14:38:39,258 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 14:39:27,879 - lightrag - INFO - kw_prompt result:
+2025-01-01 14:39:28,383 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 14:39:29,463 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 14:39:29,969 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 14:39:29,969 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 14:39:30,186 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 14:39:57,677 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 14:39:57,680 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 14:39:57,681 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 14:39:57,682 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 14:39:57,688 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-01 14:41:05,404 - lightrag - INFO - kw_prompt result:
+2025-01-01 14:41:05,877 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 14:41:08,027 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 14:41:08,029 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 14:41:08,030 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 14:41:08,317 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 14:41:16,659 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 14:41:16,660 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 14:41:16,660 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 14:41:16,660 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-01 14:41:16,926 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 14:41:16,927 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 14:41:16,930 - lightrag - INFO - Writing graph with 2 nodes, 0 edges
+2025-01-01 14:41:43,565 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 14:41:43,566 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 14:41:43,566 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 14:41:43,566 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 14:42:56,851 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 14:42:56,852 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 14:42:56,852 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 14:42:56,852 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 14:43:02,599 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 14:43:02,933 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 14:43:02,934 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 14:43:03,239 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 14:43:13,413 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 14:43:13,416 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 14:43:13,417 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 14:43:13,417 - lightrag - INFO - Inserting 1 vectors to entities
+2025-01-01 14:43:13,737 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 14:43:13,737 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 14:43:13,741 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 14:45:02,841 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 14:45:02,842 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 14:45:02,842 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 14:45:03,036 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 14:45:10,849 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 14:45:10,849 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 14:45:10,850 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 14:45:10,851 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 14:45:10,854 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 14:45:47,870 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 14:45:47,871 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 14:45:47,871 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 14:45:47,873 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 14:45:54,572 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 14:45:54,833 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 14:45:54,834 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 14:45:55,066 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 14:46:02,688 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-01 14:46:30,582 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 14:46:30,583 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 14:46:30,584 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 14:46:30,811 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 14:46:36,465 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-01 14:54:41,453 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 14:54:41,453 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 14:54:41,454 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 14:54:41,454 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 14:54:48,073 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 14:54:48,344 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 14:54:48,344 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 14:54:49,397 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 14:55:16,482 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 14:55:16,483 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 14:55:16,484 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 14:55:16,484 - lightrag - INFO - Inserting 1 vectors to entities
+2025-01-01 14:55:16,747 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 14:55:16,747 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 14:55:16,750 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 15:46:51,043 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 15:46:51,043 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 15:46:51,043 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 15:46:51,044 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 15:46:55,727 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 15:46:55,978 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 15:46:55,978 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 15:46:56,861 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 15:47:06,121 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 15:47:06,122 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 15:47:06,123 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 15:47:06,123 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 15:47:06,128 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-01 15:47:27,930 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 15:47:27,932 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 15:47:27,932 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 15:47:28,184 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 15:47:38,402 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 15:47:38,404 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 15:47:38,404 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 15:47:38,405 - lightrag - INFO - Inserting 1 vectors to entities
+2025-01-01 15:47:38,709 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 15:47:38,709 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 15:47:38,712 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 15:48:27,648 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 15:48:27,649 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 15:48:27,649 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 15:48:27,649 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 15:48:34,139 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 15:48:34,382 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 15:48:34,383 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 15:48:34,602 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 15:48:44,511 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 15:48:44,513 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 15:48:44,514 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 15:48:44,514 - lightrag - INFO - Inserting 1 vectors to entities
+2025-01-01 15:48:44,728 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 15:48:44,728 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 15:48:44,731 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 15:48:53,350 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 15:48:53,353 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 15:48:53,354 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 15:48:53,569 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 15:49:03,002 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 15:49:03,004 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 15:49:03,006 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 15:49:03,007 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 15:49:03,015 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 15:50:00,628 - lightrag - INFO - kw_prompt result:
+2025-01-01 15:50:00,928 - lightrag - INFO - Local query uses 1 entites, 0 relations, 1 text units
+2025-01-01 15:50:01,120 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 15:50:04,067 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 15:50:04,070 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 15:50:04,070 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 15:50:04,292 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 15:50:14,302 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 15:50:14,303 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 15:50:14,304 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 15:50:14,304 - lightrag - INFO - Inserting 1 vectors to entities
+2025-01-01 15:50:14,606 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 15:50:14,607 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 15:50:14,609 - lightrag - INFO - Writing graph with 2 nodes, 0 edges
+2025-01-01 15:52:26,923 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 15:52:26,923 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 15:52:26,924 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 15:52:26,924 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 15:52:32,892 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 15:52:33,215 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 15:52:33,216 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 15:52:34,318 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 15:52:43,710 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 15:52:43,714 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 15:52:43,716 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 15:52:43,717 - lightrag - INFO - Inserting 1 vectors to entities
+2025-01-01 15:52:44,056 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 15:52:44,057 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 15:52:44,060 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 15:53:18,348 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 15:53:18,349 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 15:53:18,349 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 15:53:18,545 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 15:53:27,659 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 15:53:27,661 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 15:53:27,663 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 15:53:27,663 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 15:53:27,671 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 15:55:34,814 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 15:55:34,815 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 15:55:34,815 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 15:55:34,815 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 15:55:40,997 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 15:55:41,253 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 15:55:41,254 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 15:55:41,611 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 15:55:54,028 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 15:55:54,033 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 15:55:54,035 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 15:55:54,035 - lightrag - INFO - Inserting 1 vectors to entities
+2025-01-01 15:55:54,300 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 15:55:54,300 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 15:55:54,303 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 15:56:07,052 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 15:56:07,054 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 15:56:07,054 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 15:56:07,349 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 15:56:16,816 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 15:56:16,818 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 15:56:16,820 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 15:56:16,820 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 15:56:16,826 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 15:57:44,658 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 15:57:44,660 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 15:57:44,660 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 15:57:44,660 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 15:57:49,186 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 15:57:49,471 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 15:57:49,471 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 15:57:49,754 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 15:57:58,118 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 15:57:58,123 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 15:57:58,125 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 15:57:58,125 - lightrag - INFO - Inserting 1 vectors to entities
+2025-01-01 15:57:58,380 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 15:57:58,380 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 15:57:58,382 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 15:58:11,621 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 15:58:11,623 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 15:58:11,623 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 15:58:11,890 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 15:58:21,437 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 15:58:21,439 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 15:58:21,441 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 15:58:21,441 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 15:58:21,449 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 16:03:33,207 - lightrag - INFO - kw_prompt result:
+2025-01-01 16:03:33,387 - lightrag - INFO - Local query uses 1 entites, 0 relations, 1 text units
+2025-01-01 16:03:33,570 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 16:03:35,374 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 16:03:35,376 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 16:03:35,376 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 16:03:35,703 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 16:03:44,606 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 16:03:44,608 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 16:03:44,609 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 16:03:44,609 - lightrag - INFO - Inserting 1 vectors to entities
+2025-01-01 16:03:44,967 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 16:03:44,967 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 16:03:44,972 - lightrag - INFO - Writing graph with 2 nodes, 0 edges
+2025-01-01 16:28:14,974 - lightrag - INFO - kw_prompt result:
+2025-01-01 16:28:15,153 - lightrag - INFO - Local query uses 2 entites, 0 relations, 2 text units
+2025-01-01 16:28:15,326 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 16:28:17,623 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 16:28:17,624 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 16:28:17,624 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 16:28:17,828 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 16:28:29,341 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 16:28:29,342 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 16:28:29,343 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 16:28:29,343 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 16:28:29,348 - lightrag - INFO - Writing graph with 2 nodes, 0 edges
+2025-01-01 16:34:08,547 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 16:34:08,547 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 16:34:08,547 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 16:34:08,547 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 16:34:30,320 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 16:34:30,625 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 16:34:30,626 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 16:34:31,606 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 16:34:41,260 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 16:34:41,262 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 16:34:41,263 - lightrag - INFO - Inserting 4 vectors to entities
+2025-01-01 16:34:41,510 - lightrag - INFO - Inserting 2 vectors to relationships
+2025-01-01 16:34:41,779 - lightrag - INFO - Writing graph with 4 nodes, 2 edges
+2025-01-01 16:35:09,834 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 16:35:09,835 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 16:35:09,835 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 16:35:09,835 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 16:35:16,624 - lightrag - INFO - kw_prompt result:
+2025-01-01 16:35:17,160 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 16:35:18,361 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 16:35:18,725 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 16:35:18,726 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 16:35:18,938 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 16:35:26,903 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 16:35:26,906 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 16:35:26,909 - lightrag - INFO - Inserting 1 vectors to entities
+2025-01-01 16:35:27,138 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-01 16:35:27,370 - lightrag - INFO - Writing graph with 3 nodes, 1 edges
+2025-01-01 16:35:49,941 - lightrag - INFO - kw_prompt result:
+2025-01-01 16:35:49,942 - lightrag - WARNING - high_level_keywords is empty
+2025-01-01 16:35:50,065 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 16:35:50,066 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 16:35:50,066 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 16:35:50,457 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 16:35:54,790 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 16:35:54,791 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 16:35:54,793 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 16:35:54,794 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 16:35:54,799 - lightrag - INFO - Writing graph with 3 nodes, 1 edges
+2025-01-01 16:38:19,907 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 16:38:19,908 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 16:38:19,908 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 16:38:19,908 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 17:00:11,286 - lightrag - INFO - kw_prompt result:
+2025-01-01 17:00:11,707 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 17:00:13,109 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 17:00:13,398 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 17:00:13,398 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 17:00:13,669 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 17:00:18,456 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 17:00:18,458 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 17:00:18,460 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 17:00:18,460 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 17:00:18,467 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-01 17:00:26,524 - lightrag - INFO - kw_prompt result:
+2025-01-01 17:00:26,525 - lightrag - ERROR - No JSON-like structure found in the result.
+2025-01-01 17:00:26,623 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 17:00:26,624 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 17:00:26,624 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 17:00:26,868 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 17:00:35,455 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 17:00:35,458 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 17:00:35,458 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 17:00:35,459 - lightrag - INFO - Inserting 4 vectors to entities
+2025-01-01 17:00:35,768 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 17:00:35,768 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 17:00:35,771 - lightrag - INFO - Writing graph with 4 nodes, 0 edges
+2025-01-01 17:01:12,831 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 17:01:12,831 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 17:01:12,832 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 17:01:12,832 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 17:01:21,538 - lightrag - INFO - kw_prompt result:
+2025-01-01 17:01:22,183 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 17:01:25,509 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 17:01:25,893 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 17:01:25,893 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 17:01:26,075 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 17:01:53,102 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 17:01:53,103 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 17:01:53,105 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-01 17:01:53,400 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-01 17:01:53,619 - lightrag - INFO - Writing graph with 2 nodes, 1 edges
+2025-01-01 17:02:08,330 - lightrag - INFO - kw_prompt result:
+2025-01-01 17:02:08,692 - lightrag - INFO - Local query uses 2 entites, 1 relations, 1 text units
+2025-01-01 17:02:08,990 - lightrag - INFO - Global query uses 2 entites, 1 relations, 1 text units
+2025-01-01 17:02:11,839 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 17:02:11,841 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 17:02:11,842 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 17:02:12,231 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 17:02:23,757 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 17:02:23,758 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 17:02:23,760 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 17:02:23,760 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 17:02:23,769 - lightrag - INFO - Writing graph with 2 nodes, 1 edges
+2025-01-01 17:03:30,520 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 17:03:30,520 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 17:03:30,521 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 17:03:30,521 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 17:03:41,559 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 17:03:41,560 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 17:03:41,560 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 17:03:41,560 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 17:03:49,521 - lightrag - INFO - kw_prompt result:
+2025-01-01 17:03:50,025 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 17:05:34,958 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 17:05:34,959 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 17:05:34,959 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 17:05:34,959 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 17:05:41,904 - lightrag - INFO - kw_prompt result:
+2025-01-01 17:05:42,514 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 17:05:45,140 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 17:05:45,458 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 17:05:45,458 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 17:05:45,688 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 17:06:02,486 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-01 17:06:11,842 - lightrag - INFO - kw_prompt result:
+2025-01-01 17:06:12,535 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 17:06:15,034 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 17:06:15,035 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 17:06:15,035 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 17:06:15,267 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 17:06:25,552 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 17:06:25,553 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 17:06:25,555 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 17:06:25,555 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 17:06:25,559 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-01 17:10:05,450 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 17:10:05,451 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 17:10:05,451 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 17:10:05,451 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 17:10:10,608 - lightrag - INFO - kw_prompt result:
+2025-01-01 17:10:10,900 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 17:10:11,164 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 17:10:11,164 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 17:10:11,449 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 17:10:21,670 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 17:10:21,673 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 17:10:21,675 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 17:10:21,676 - lightrag - INFO - Inserting 1 vectors to entities
+2025-01-01 17:10:21,947 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 17:10:21,947 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 17:10:21,950 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 17:10:33,031 - lightrag - INFO - kw_prompt result:
+2025-01-01 17:10:33,218 - lightrag - INFO - Local query uses 1 entites, 0 relations, 1 text units
+2025-01-01 17:10:33,319 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 17:10:33,320 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 17:10:33,320 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 17:10:33,573 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 17:10:42,776 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 17:10:42,777 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 17:10:42,777 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 17:10:42,777 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 17:10:42,779 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 17:26:42,734 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 17:26:42,734 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 17:26:42,735 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 17:26:42,735 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 17:28:50,912 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 17:28:50,912 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 17:28:50,913 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 17:28:50,913 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 17:29:06,006 - lightrag - INFO - kw_prompt result:
+2025-01-01 17:29:06,378 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 17:29:09,214 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 17:29:09,530 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 17:29:09,531 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 17:29:09,720 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 17:30:32,492 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 17:30:32,493 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 17:30:32,493 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 17:30:32,493 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 17:32:39,678 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 17:32:39,678 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 17:32:39,679 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 17:32:39,679 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 17:32:48,876 - lightrag - INFO - kw_prompt result:
+2025-01-01 17:32:49,293 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 17:32:51,898 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 17:32:52,226 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 17:32:52,227 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 17:32:52,440 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 17:33:01,697 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 17:33:01,699 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 17:33:01,700 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 17:33:01,700 - lightrag - INFO - Inserting 1 vectors to entities
+2025-01-01 17:33:01,892 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 17:33:01,892 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 17:33:01,896 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 17:33:37,095 - lightrag - INFO - kw_prompt result:
+2025-01-01 17:33:37,337 - lightrag - INFO - Local query uses 1 entites, 0 relations, 1 text units
+2025-01-01 17:33:37,668 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 17:33:40,235 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 17:33:40,237 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 17:33:40,237 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 17:33:40,498 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 17:33:52,485 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 17:33:52,488 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 17:33:52,490 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 17:33:52,490 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 17:33:52,497 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 18:44:13,180 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 18:44:13,181 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 18:44:13,181 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 18:44:13,181 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 18:44:22,380 - lightrag - INFO - kw_prompt result:
+2025-01-01 18:44:22,956 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 18:44:25,138 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 18:44:25,439 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 18:44:25,440 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 18:44:25,802 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 18:44:33,556 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 18:44:33,557 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 18:44:33,558 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 18:44:33,558 - lightrag - INFO - Inserting 1 vectors to entities
+2025-01-01 18:44:33,853 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 18:44:33,854 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 18:44:33,859 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 18:44:58,246 - lightrag - INFO - kw_prompt result:
+2025-01-01 18:44:58,620 - lightrag - INFO - Local query uses 1 entites, 0 relations, 1 text units
+2025-01-01 18:44:58,880 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 18:45:01,925 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 18:45:01,929 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 18:45:01,930 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 18:45:02,220 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 18:45:39,775 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 18:45:39,777 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 18:45:39,779 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 18:45:39,779 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 18:45:39,786 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 18:49:02,959 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 18:49:02,960 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 18:49:02,960 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 18:49:02,960 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 18:49:07,919 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 18:49:08,205 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 18:49:08,206 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 18:49:08,473 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 18:49:15,822 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 18:49:15,826 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 18:49:15,827 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 18:49:15,829 - lightrag - INFO - Inserting 1 vectors to entities
+2025-01-01 18:49:16,047 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 18:49:16,047 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 18:49:16,050 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 18:49:29,577 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 18:49:29,578 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 18:49:29,578 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 18:49:29,578 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 18:49:49,452 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 18:49:49,452 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 18:49:49,452 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 18:49:49,452 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 18:49:54,289 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 18:49:54,585 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 18:49:54,585 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 18:49:54,776 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 18:50:44,830 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 18:50:44,830 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 18:50:44,830 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 18:50:44,830 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 18:52:36,219 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 18:52:36,497 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 18:52:36,497 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 18:52:36,743 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 18:52:43,913 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 18:52:43,917 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 18:52:43,918 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 18:52:43,918 - lightrag - INFO - Inserting 1 vectors to entities
+2025-01-01 18:52:44,157 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 18:52:44,157 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 18:52:44,160 - lightrag - INFO - Writing graph with 1 nodes, 0 edges
+2025-01-01 19:14:46,430 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 19:14:46,430 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 19:14:46,430 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 19:14:46,431 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 19:14:51,224 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 19:14:51,518 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 19:14:51,518 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 19:14:52,500 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 19:15:02,223 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 19:15:02,226 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 19:15:02,229 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-01 19:15:02,641 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-01 19:15:02,925 - lightrag - INFO - Writing graph with 2 nodes, 1 edges
+2025-01-01 19:16:45,978 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 19:16:45,979 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 19:16:45,979 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 19:16:45,979 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 19:16:51,859 - lightrag - INFO - kw_prompt result:
+2025-01-01 19:16:52,331 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 19:16:57,114 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 19:16:57,521 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 19:16:57,521 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 19:16:57,823 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 19:19:09,858 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 19:19:09,859 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 19:19:09,859 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 19:19:09,859 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 19:19:15,401 - lightrag - INFO - kw_prompt result:
+2025-01-01 19:19:15,804 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 19:19:19,584 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 19:19:19,858 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 19:19:19,858 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 19:19:20,067 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 19:24:39,560 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 19:24:39,560 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 19:24:39,561 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 19:24:39,561 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 19:24:45,695 - lightrag - INFO - kw_prompt result:
+2025-01-01 19:24:46,275 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 19:24:50,860 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 19:24:51,136 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 19:24:51,137 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 19:24:51,383 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 19:24:59,041 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 19:24:59,042 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 19:24:59,043 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 19:24:59,043 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-01 19:24:59,515 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 19:24:59,516 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 19:24:59,523 - lightrag - INFO - Writing graph with 2 nodes, 0 edges
+2025-01-01 19:26:15,338 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 19:26:15,339 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 19:26:15,339 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 19:26:15,339 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 19:26:22,222 - lightrag - INFO - kw_prompt result:
+2025-01-01 19:26:22,931 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 19:26:26,483 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 19:26:26,825 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 19:26:26,825 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 19:26:27,030 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 19:26:34,855 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 19:26:34,857 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 19:26:34,859 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-01 19:26:35,392 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-01 19:26:35,628 - lightrag - INFO - Writing graph with 2 nodes, 1 edges
+2025-01-01 19:27:48,251 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 19:27:48,251 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 19:27:48,251 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 19:27:48,252 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 19:27:54,406 - lightrag - INFO - kw_prompt result:
+2025-01-01 19:27:54,977 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 19:28:04,713 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 19:28:05,022 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 19:28:05,022 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 19:28:05,211 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 19:33:02,915 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 19:33:02,917 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 19:33:02,918 - lightrag - INFO - Inserting 3 vectors to entities
+2025-01-01 19:33:03,579 - lightrag - INFO - Inserting 2 vectors to relationships
+2025-01-01 19:33:03,809 - lightrag - INFO - Writing graph with 3 nodes, 2 edges
+2025-01-01 19:48:32,409 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 19:48:32,409 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 19:48:32,409 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 19:48:32,409 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 19:48:38,506 - lightrag - INFO - kw_prompt result:
+2025-01-01 19:48:39,683 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 19:48:44,430 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 19:48:44,690 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 19:48:44,690 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 19:48:44,885 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 19:48:58,257 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 19:48:58,260 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 19:48:58,262 - lightrag - WARNING - Didn't extract any relationships
+2025-01-01 19:48:58,262 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-01 19:48:58,500 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-01 19:48:58,500 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-01 19:48:58,504 - lightrag - INFO - Writing graph with 2 nodes, 0 edges
+2025-01-01 20:14:39,769 - lightrag - INFO - kw_prompt result:
+2025-01-01 20:14:42,319 - lightrag - INFO - Local query uses 2 entites, 0 relations, 1 text units
+2025-01-01 20:14:42,481 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 20:14:50,637 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 20:14:50,638 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 20:14:50,638 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 20:14:50,802 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 20:15:00,060 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 20:15:00,060 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 20:15:00,060 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 20:15:00,060 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 20:15:00,062 - lightrag - INFO - Writing graph with 2 nodes, 0 edges
+2025-01-01 22:17:27,283 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 22:17:27,283 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 22:17:27,283 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 22:17:27,284 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 22:17:41,077 - lightrag - INFO - kw_prompt result:
+2025-01-01 22:17:42,784 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 22:17:48,197 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 22:17:48,570 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 22:17:48,570 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 22:17:48,846 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 22:18:00,376 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 22:18:00,379 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 22:18:00,383 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-01 22:18:00,638 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-01 22:18:00,897 - lightrag - INFO - Writing graph with 2 nodes, 1 edges
+2025-01-01 22:24:41,626 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 22:24:41,626 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 22:24:41,626 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 22:24:41,627 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 22:24:48,358 - lightrag - INFO - kw_prompt result:
+2025-01-01 22:24:49,724 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-01 22:26:59,689 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 22:26:59,690 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 22:26:59,690 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 22:26:59,690 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 22:27:06,686 - lightrag - INFO - kw_prompt result:
+2025-01-01 22:27:20,876 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 22:27:21,138 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 22:27:21,138 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 22:27:21,335 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 22:27:31,779 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 22:27:31,781 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 22:27:31,783 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-01 22:27:32,069 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-01 22:27:32,257 - lightrag - INFO - Writing graph with 2 nodes, 1 edges
+2025-01-01 22:31:18,209 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 22:31:18,209 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 22:31:18,209 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 22:31:18,209 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 22:31:27,350 - lightrag - INFO - kw_prompt result:
+2025-01-01 22:31:32,588 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 22:31:32,864 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 22:31:32,864 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 22:31:33,056 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 22:33:49,041 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 22:33:49,041 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 22:33:49,042 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 22:33:49,042 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 22:34:22,055 - lightrag - INFO - kw_prompt result:
+2025-01-01 22:34:24,205 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 22:34:24,453 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 22:34:24,453 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 22:34:24,638 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 22:35:57,144 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 22:35:57,147 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 22:35:57,150 - lightrag - INFO - Inserting 33 vectors to entities
+2025-01-01 22:35:58,147 - lightrag - INFO - Inserting 15 vectors to relationships
+2025-01-01 22:35:58,669 - lightrag - INFO - Writing graph with 34 nodes, 15 edges
+2025-01-01 22:36:28,223 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 22:36:28,223 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 22:36:28,223 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 22:36:28,224 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 22:36:57,539 - lightrag - INFO - kw_prompt result:
+2025-01-01 22:37:05,516 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 22:37:05,803 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 22:37:05,803 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 22:37:06,028 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 22:37:14,776 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 22:37:14,777 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 22:37:14,778 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-01 22:37:15,078 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-01 22:37:15,300 - lightrag - INFO - Writing graph with 2 nodes, 1 edges
+2025-01-01 22:37:25,333 - lightrag - INFO - kw_prompt result:
+2025-01-01 22:37:25,626 - lightrag - INFO - Local query uses 2 entites, 1 relations, 1 text units
+2025-01-01 22:37:29,836 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 22:37:29,838 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 22:37:29,839 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 22:37:30,093 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 22:37:40,533 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 22:37:40,534 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 22:37:40,535 - lightrag - INFO - Inserting 3 vectors to entities
+2025-01-01 22:37:40,759 - lightrag - INFO - Inserting 2 vectors to relationships
+2025-01-01 22:37:41,038 - lightrag - INFO - Writing graph with 4 nodes, 3 edges
+2025-01-01 22:41:30,850 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 22:41:30,851 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 22:41:30,851 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 22:41:30,852 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 22:41:40,458 - lightrag - INFO - kw_prompt result:
+2025-01-01 22:41:45,138 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 22:41:45,605 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 22:41:45,605 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 22:41:45,938 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 22:41:54,921 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 22:41:54,922 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 22:41:54,923 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-01 22:41:55,233 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-01 22:41:55,459 - lightrag - INFO - Writing graph with 2 nodes, 1 edges
+2025-01-01 22:42:04,306 - lightrag - INFO - kw_prompt result:
+2025-01-01 22:42:04,500 - lightrag - INFO - Local query uses 2 entites, 1 relations, 1 text units
+2025-01-01 22:42:07,517 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 22:42:07,519 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 22:42:07,521 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 22:42:07,754 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 22:42:19,495 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 22:42:19,499 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 22:42:19,501 - lightrag - INFO - Inserting 3 vectors to entities
+2025-01-01 22:42:19,946 - lightrag - INFO - Inserting 2 vectors to relationships
+2025-01-01 22:42:20,252 - lightrag - INFO - Writing graph with 4 nodes, 3 edges
+2025-01-01 22:44:01,274 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 22:44:01,274 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 22:44:01,274 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 22:44:01,275 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 22:46:23,163 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 22:46:23,164 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 22:46:23,164 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 22:46:23,165 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 22:47:27,292 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 22:47:27,293 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 22:47:27,293 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 22:47:27,293 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 22:47:32,459 - lightrag - INFO - kw_prompt result:
+2025-01-01 22:47:36,973 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 22:47:37,260 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 22:47:37,261 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 22:47:37,501 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 22:47:46,809 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 22:47:46,810 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 22:47:46,812 - lightrag - INFO - Inserting 3 vectors to entities
+2025-01-01 22:47:47,097 - lightrag - INFO - Inserting 2 vectors to relationships
+2025-01-01 22:47:47,316 - lightrag - INFO - Writing graph with 3 nodes, 2 edges
+2025-01-01 22:48:51,318 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 22:48:51,318 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 22:48:51,318 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 22:48:51,318 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 22:49:07,006 - lightrag - INFO - kw_prompt result:
+2025-01-01 22:49:10,357 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 22:49:10,673 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 22:49:10,673 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 22:49:10,920 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 22:49:21,584 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 22:49:21,587 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 22:49:21,591 - lightrag - INFO - Inserting 3 vectors to entities
+2025-01-01 22:49:21,965 - lightrag - INFO - Inserting 3 vectors to relationships
+2025-01-01 22:49:22,286 - lightrag - INFO - Writing graph with 3 nodes, 3 edges
+2025-01-01 22:52:25,631 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 22:52:25,631 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 22:52:25,631 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 22:52:25,632 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 22:52:39,683 - lightrag - INFO - kw_prompt result:
+2025-01-01 22:52:43,070 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 22:52:43,350 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 22:52:43,350 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 22:52:43,585 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 22:55:55,613 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 22:55:55,614 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 22:55:55,614 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 22:55:55,614 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 23:00:08,600 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 23:00:08,600 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 23:00:08,600 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 23:00:08,600 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 23:00:16,344 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:00:30,326 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:00:30,588 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:00:30,588 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:00:30,798 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:00:40,264 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:00:40,265 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:00:40,268 - lightrag - INFO - Inserting 3 vectors to entities
+2025-01-01 23:00:40,498 - lightrag - INFO - Inserting 2 vectors to relationships
+2025-01-01 23:00:40,716 - lightrag - INFO - Writing graph with 3 nodes, 2 edges
+2025-01-01 23:03:45,703 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 23:03:45,704 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 23:03:45,704 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 23:03:45,704 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 23:03:59,490 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:04:09,420 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:04:09,677 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:04:09,677 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:04:09,941 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:04:18,701 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:04:18,703 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:04:18,704 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-01 23:04:18,995 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-01 23:04:19,236 - lightrag - INFO - Writing graph with 2 nodes, 1 edges
+2025-01-01 23:06:54,372 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:06:54,577 - lightrag - INFO - Local query uses 2 entites, 1 relations, 1 text units
+2025-01-01 23:07:33,183 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:07:33,456 - lightrag - INFO - Local query uses 2 entites, 1 relations, 1 text units
+2025-01-01 23:07:57,411 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:07:57,412 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:07:57,412 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:07:57,589 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:08:08,429 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:08:08,430 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:08:08,431 - lightrag - INFO - Inserting 3 vectors to entities
+2025-01-01 23:08:08,681 - lightrag - INFO - Inserting 2 vectors to relationships
+2025-01-01 23:08:08,936 - lightrag - INFO - Writing graph with 3 nodes, 2 edges
+2025-01-01 23:08:18,212 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:08:18,213 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:08:18,213 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:08:18,388 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:08:28,674 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:08:28,676 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:08:28,678 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-01 23:08:28,885 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-01 23:08:29,165 - lightrag - INFO - Writing graph with 3 nodes, 2 edges
+2025-01-01 23:08:32,123 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:08:32,338 - lightrag - INFO - Local query uses 3 entites, 2 relations, 3 text units
+2025-01-01 23:08:41,933 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:08:41,934 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:08:41,935 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:08:42,116 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:08:50,096 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:08:50,098 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:08:50,100 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-01 23:08:50,101 - lightrag - WARNING - No new entities and relationships found
+2025-01-01 23:08:50,109 - lightrag - INFO - Writing graph with 3 nodes, 2 edges
+2025-01-01 23:10:36,469 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:10:36,662 - lightrag - INFO - Local query uses 3 entites, 2 relations, 3 text units
+2025-01-01 23:12:25,575 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 23:12:25,575 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 23:12:25,575 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 23:12:25,575 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 23:12:33,382 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:12:45,785 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:12:46,046 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:12:46,047 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:12:46,293 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:13:00,999 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:13:01,001 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:13:01,003 - lightrag - INFO - Inserting 5 vectors to entities
+2025-01-01 23:13:01,331 - lightrag - INFO - Inserting 6 vectors to relationships
+2025-01-01 23:13:02,120 - lightrag - INFO - Writing graph with 5 nodes, 6 edges
+2025-01-01 23:14:28,749 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 23:14:28,749 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 23:14:28,749 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 23:14:28,750 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 23:14:36,147 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:14:43,570 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:14:43,830 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:14:43,830 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:14:44,129 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:14:56,638 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:14:56,639 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:14:56,641 - lightrag - INFO - Inserting 4 vectors to entities
+2025-01-01 23:14:56,903 - lightrag - INFO - Inserting 5 vectors to relationships
+2025-01-01 23:14:57,176 - lightrag - INFO - Writing graph with 4 nodes, 5 edges
+2025-01-01 23:17:58,463 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 23:17:58,463 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 23:17:58,463 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 23:17:58,463 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 23:18:11,758 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:18:17,268 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:18:17,537 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:18:17,538 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:18:17,733 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:18:33,108 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:18:33,112 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:18:33,113 - lightrag - INFO - Inserting 5 vectors to entities
+2025-01-01 23:18:33,426 - lightrag - INFO - Inserting 4 vectors to relationships
+2025-01-01 23:18:33,762 - lightrag - INFO - Writing graph with 5 nodes, 4 edges
+2025-01-01 23:21:07,443 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 23:21:07,444 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 23:21:07,444 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 23:21:07,444 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 23:21:11,855 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:21:20,214 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:21:20,455 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:21:20,455 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:21:20,648 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:21:31,494 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:21:31,496 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:21:31,497 - lightrag - INFO - Inserting 4 vectors to entities
+2025-01-01 23:21:31,723 - lightrag - INFO - Inserting 4 vectors to relationships
+2025-01-01 23:21:32,021 - lightrag - INFO - Writing graph with 4 nodes, 4 edges
+2025-01-01 23:21:35,089 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:21:35,295 - lightrag - INFO - Local query uses 4 entites, 4 relations, 1 text units
+2025-01-01 23:21:45,353 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:21:45,356 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:21:45,357 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:21:45,628 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:21:58,903 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:21:58,906 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:21:58,908 - lightrag - INFO - Inserting 4 vectors to entities
+2025-01-01 23:21:59,198 - lightrag - INFO - Inserting 3 vectors to relationships
+2025-01-01 23:21:59,419 - lightrag - INFO - Writing graph with 5 nodes, 5 edges
+2025-01-01 23:23:32,570 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:23:32,798 - lightrag - INFO - Local query uses 5 entites, 5 relations, 2 text units
+2025-01-01 23:27:22,512 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 23:27:22,513 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 23:27:22,513 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 23:27:22,513 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 23:27:29,652 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:27:33,951 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:27:34,207 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:27:34,207 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:27:34,445 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:27:41,703 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:27:41,705 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:27:41,706 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-01 23:27:41,959 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-01 23:27:42,179 - lightrag - INFO - Writing graph with 2 nodes, 1 edges
+2025-01-01 23:30:51,655 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 23:30:51,655 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 23:30:51,655 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 23:30:51,655 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 23:30:57,142 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:31:04,181 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:31:04,422 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:31:04,422 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:31:04,623 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:31:19,299 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:31:19,302 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:31:19,305 - lightrag - INFO - Inserting 5 vectors to entities
+2025-01-01 23:31:19,642 - lightrag - INFO - Inserting 4 vectors to relationships
+2025-01-01 23:31:19,992 - lightrag - INFO - Writing graph with 5 nodes, 4 edges
+2025-01-01 23:31:30,199 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:31:30,439 - lightrag - INFO - Local query uses 5 entites, 4 relations, 1 text units
+2025-01-01 23:31:38,111 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:31:38,112 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:31:38,112 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:31:38,314 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:31:51,587 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:31:51,588 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:31:51,588 - lightrag - INFO - Inserting 3 vectors to entities
+2025-01-01 23:31:51,803 - lightrag - INFO - Inserting 2 vectors to relationships
+2025-01-01 23:31:52,012 - lightrag - INFO - Writing graph with 5 nodes, 4 edges
+2025-01-01 23:33:05,279 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 23:33:05,280 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 23:33:05,280 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 23:33:05,280 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 23:33:15,213 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:33:22,518 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:33:22,789 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:33:22,790 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:33:22,995 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:33:32,798 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:33:32,800 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:33:32,802 - lightrag - INFO - Inserting 3 vectors to entities
+2025-01-01 23:33:33,051 - lightrag - INFO - Inserting 2 vectors to relationships
+2025-01-01 23:33:33,289 - lightrag - INFO - Writing graph with 3 nodes, 2 edges
+2025-01-01 23:36:58,187 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 23:36:58,187 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 23:36:58,188 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 23:36:58,188 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 23:37:04,649 - lightrag - INFO - kw_prompt result:
+2025-01-01 23:37:12,941 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:37:13,176 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:37:13,176 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:37:13,434 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:37:25,713 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:37:25,716 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:37:25,718 - lightrag - INFO - Inserting 6 vectors to entities
+2025-01-01 23:37:26,111 - lightrag - INFO - Inserting 4 vectors to relationships
+2025-01-01 23:37:26,358 - lightrag - INFO - Writing graph with 6 nodes, 4 edges
+2025-01-01 23:43:20,303 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-01 23:43:20,303 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-01 23:43:20,303 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-01 23:43:20,303 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-01 23:43:31,376 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:43:31,647 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:43:31,647 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:43:32,415 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:43:47,251 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:43:47,253 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:43:47,255 - lightrag - INFO - Inserting 6 vectors to entities
+2025-01-01 23:43:47,529 - lightrag - INFO - Inserting 5 vectors to relationships
+2025-01-01 23:43:47,773 - lightrag - INFO - Writing graph with 6 nodes, 5 edges
+2025-01-01 23:44:45,983 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:44:45,984 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:44:45,985 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:44:46,860 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:45:10,026 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:45:10,030 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:45:10,032 - lightrag - INFO - Inserting 5 vectors to entities
+2025-01-01 23:45:10,348 - lightrag - INFO - Inserting 4 vectors to relationships
+2025-01-01 23:45:10,574 - lightrag - INFO - Writing graph with 8 nodes, 8 edges
+2025-01-01 23:45:14,715 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-01 23:45:14,716 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-01 23:45:14,716 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-01 23:45:14,886 - lightrag - INFO - [Entity Extraction]...
+2025-01-01 23:45:24,139 - lightrag - INFO - Inserting entities into storage...
+2025-01-01 23:45:24,140 - lightrag - INFO - Inserting relationships into storage...
+2025-01-01 23:45:24,141 - lightrag - INFO - Inserting 3 vectors to entities
+2025-01-01 23:45:24,368 - lightrag - INFO - Inserting 2 vectors to relationships
+2025-01-01 23:45:24,566 - lightrag - INFO - Writing graph with 8 nodes, 8 edges
+2025-01-02 00:19:25,259 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-02 00:19:25,259 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 00:19:25,259 - lightrag - INFO - Load KV full_docs with 3 data
+2025-01-02 00:19:25,260 - lightrag - INFO - Load KV text_chunks with 3 data
+2025-01-02 00:19:25,262 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag\graph_chunk_entity_relation.graphml with 8 nodes, 8 edges
+2025-01-02 00:21:38,387 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-02 00:21:38,388 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 00:21:38,388 - lightrag - INFO - Load KV full_docs with 3 data
+2025-01-02 00:21:38,389 - lightrag - INFO - Load KV text_chunks with 3 data
+2025-01-02 00:21:38,390 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag\graph_chunk_entity_relation.graphml with 8 nodes, 8 edges
+2025-01-02 00:22:26,266 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag
+2025-01-02 00:22:26,267 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 00:22:26,267 - lightrag - INFO - Load KV full_docs with 3 data
+2025-01-02 00:22:26,267 - lightrag - INFO - Load KV text_chunks with 3 data
+2025-01-02 00:22:26,269 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag\graph_chunk_entity_relation.graphml with 8 nodes, 8 edges
+2025-01-02 00:23:01,358 - lightrag - INFO - kw_prompt result:
+2025-01-02 00:23:02,495 - lightrag - INFO - Local query uses 8 entites, 8 relations, 3 text units
+2025-01-02 00:23:23,331 - lightrag - INFO - kw_prompt result:
+2025-01-02 00:23:23,561 - lightrag - INFO - Local query uses 8 entites, 8 relations, 3 text units
+2025-01-02 01:58:25,354 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 01:58:25,355 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 01:58:25,355 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 01:58:25,355 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 01:59:17,360 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 01:59:17,360 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 01:59:17,361 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 01:59:17,361 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:07:51,486 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:07:51,486 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:07:51,487 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:07:51,487 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:10:34,566 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:10:34,567 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:10:34,568 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:10:34,568 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:14:35,708 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:14:35,708 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:14:35,709 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:14:35,709 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:17:37,196 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:17:37,197 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:17:37,198 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:17:37,199 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:22:48,947 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:22:48,947 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:22:48,947 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:22:48,948 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:24:46,488 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:24:46,488 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:24:46,488 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:24:46,488 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:27:31,986 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:27:31,987 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:27:31,987 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:27:31,987 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:28:42,396 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:28:42,396 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:28:42,396 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:28:42,397 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:30:26,960 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:30:26,961 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:30:26,961 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:30:26,961 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:31:59,039 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:31:59,040 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:31:59,040 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:31:59,040 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:33:56,760 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:33:56,761 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:33:56,762 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:33:56,763 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:35:06,253 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:35:06,254 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:35:06,254 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:35:06,254 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:36:48,056 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:36:48,057 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:36:48,058 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:36:48,059 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:41:03,002 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:41:03,004 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:41:03,004 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:41:03,005 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:42:42,455 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:42:42,456 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:42:42,457 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:42:42,457 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:45:44,728 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:45:44,729 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:45:44,729 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:45:44,729 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:46:00,605 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 02:46:00,897 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 02:46:00,898 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 02:46:03,826 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 02:46:03,833 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 02:46:04,854 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 02:46:04,855 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 02:46:04,855 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 02:46:07,092 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 02:46:07,095 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 02:46:08,123 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 02:46:08,126 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 02:46:08,127 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 02:46:10,419 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 02:46:10,425 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 02:47:19,575 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:47:19,576 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:47:19,577 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:47:19,577 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:47:19,580 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 02:47:24,518 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 02:47:24,767 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 02:47:24,768 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 02:47:27,066 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 02:47:27,069 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 02:47:28,092 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 02:47:28,093 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 02:47:28,093 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 02:47:30,336 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 02:47:30,339 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 02:47:31,316 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 02:47:31,317 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 02:47:31,318 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 02:47:33,566 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 02:47:33,569 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 02:48:52,142 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:48:52,143 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:48:52,143 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:48:52,144 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:48:52,146 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 02:50:43,328 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:50:43,329 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:50:43,329 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:50:43,330 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:50:43,332 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 02:52:13,127 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:52:13,128 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:52:13,129 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:52:13,130 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:52:13,132 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 02:52:20,986 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 02:52:21,433 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 02:52:21,433 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 02:52:23,762 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 02:52:23,766 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 02:52:24,768 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 02:52:24,769 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 02:52:24,769 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 02:52:26,973 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 02:52:26,975 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 02:52:27,984 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 02:52:27,985 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 02:52:27,986 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 02:52:30,260 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 02:52:30,263 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 02:57:31,330 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:57:31,331 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:57:31,331 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:57:31,331 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:57:31,333 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 02:58:03,379 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 02:58:03,380 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 02:58:03,380 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 02:58:03,380 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 02:58:03,381 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 12:46:29,274 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 12:46:29,275 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 12:46:29,276 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 12:46:29,276 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 12:46:29,279 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 12:49:52,278 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 12:49:52,280 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 12:49:52,281 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 12:49:52,282 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 12:49:52,285 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 12:49:58,509 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 12:49:58,861 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 12:49:58,862 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 12:50:02,274 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 12:50:02,278 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 12:50:03,291 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 12:50:03,294 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 12:50:03,294 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 12:50:05,529 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 12:50:05,532 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 12:50:06,545 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 12:50:06,546 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 12:50:06,546 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 12:50:08,826 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 12:50:08,830 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 12:53:15,190 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 12:53:15,192 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 12:53:15,193 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 12:53:15,194 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 12:53:15,207 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 12:53:23,599 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 12:53:23,834 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 12:53:23,834 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 12:53:26,110 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 12:53:26,114 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 12:53:27,114 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 12:53:27,116 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 12:53:27,116 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 12:53:29,398 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 12:53:29,403 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 12:53:30,396 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 12:53:30,398 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 12:53:30,398 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 12:53:32,680 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 12:53:32,684 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:04:11,760 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 13:04:11,761 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 13:04:11,761 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 13:04:11,761 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 13:04:11,762 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 13:04:34,485 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:04:34,850 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:04:34,850 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:04:38,135 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:04:38,140 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:04:39,164 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:04:39,166 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:04:39,167 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:04:41,394 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:04:41,397 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:04:42,417 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:04:42,420 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:04:42,420 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:04:44,758 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:04:44,762 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:08:40,279 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 13:08:40,280 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 13:08:40,280 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 13:08:40,280 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 13:08:40,282 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 13:09:33,514 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 13:09:33,517 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 13:09:33,517 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 13:09:33,518 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 13:09:33,520 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 13:09:40,809 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:09:41,075 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:09:41,075 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:09:43,431 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:09:43,441 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:09:44,446 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:09:44,448 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:09:44,449 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:09:46,876 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:09:46,881 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:09:47,905 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:09:47,905 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:09:47,905 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:09:50,172 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:09:50,181 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:10:01,878 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:10:01,879 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:10:01,879 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:10:04,099 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:10:04,102 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:10:05,088 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:10:05,091 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:10:05,091 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:10:07,536 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:10:07,539 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:10:08,552 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:10:08,553 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:10:08,553 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:10:10,900 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:10:10,902 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:11:36,596 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 13:11:36,596 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 13:11:36,597 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 13:11:36,597 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 13:11:36,599 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 13:18:33,393 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 13:18:33,394 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 13:18:33,394 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 13:18:33,395 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 13:18:33,397 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 13:19:47,165 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:19:47,417 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:19:47,418 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:19:50,425 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:19:50,431 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:19:51,413 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:19:51,415 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:19:51,417 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:19:53,681 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:19:53,684 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:19:54,661 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:19:54,665 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:19:54,665 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:19:56,948 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:19:56,954 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:24:23,931 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 13:24:23,931 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 13:24:23,931 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 13:24:23,932 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 13:24:23,939 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 13:27:25,747 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 13:27:25,748 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 13:27:25,749 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 13:27:25,750 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 13:27:25,752 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 13:27:31,802 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:27:32,070 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:27:32,071 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:27:35,120 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:27:35,125 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:27:36,135 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:27:36,137 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:27:36,138 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:27:38,367 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:27:38,372 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:27:39,362 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:27:39,365 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:27:39,365 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:27:41,680 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:27:41,686 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:29:11,162 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 13:29:11,163 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 13:29:11,164 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 13:29:11,165 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 13:29:11,170 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 13:29:57,316 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 13:29:57,318 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 13:29:57,319 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 13:29:57,319 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 13:29:57,321 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 13:30:02,503 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:30:02,753 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:30:02,753 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:30:04,985 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:30:04,989 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:30:06,008 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:30:06,009 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:30:06,009 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:30:08,289 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:30:08,293 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 13:30:09,299 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 13:30:09,301 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 13:30:09,302 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 13:30:11,596 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 13:30:11,601 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 15:22:34,215 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 15:22:34,216 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 15:22:34,217 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 15:22:34,218 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 15:22:34,222 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 15:25:26,755 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 15:25:26,756 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 15:25:26,757 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 15:25:26,757 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 15:25:26,758 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 15:26:10,023 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 15:26:10,024 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 15:26:10,024 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 15:26:10,024 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 15:26:10,025 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 15:29:34,995 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 15:29:34,995 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 15:29:34,995 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 15:29:34,996 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 15:29:34,996 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 15:30:57,193 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 15:30:57,194 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 15:30:57,194 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 15:30:57,194 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 15:30:57,195 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 15:31:26,836 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 15:31:26,837 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 15:31:26,838 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 15:31:26,838 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 15:31:26,840 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 15:31:54,125 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 15:31:54,126 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 15:31:54,127 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 15:31:54,128 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 15:31:54,129 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 15:33:25,599 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 15:33:25,600 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 15:33:25,601 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 15:33:25,601 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 15:33:25,603 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 15:34:12,651 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 15:34:12,651 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 15:34:12,652 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 15:34:12,652 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 15:34:12,653 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 15:35:30,511 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 15:35:30,820 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 15:35:30,821 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 15:35:33,977 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 15:35:33,983 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 15:35:35,013 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 15:35:35,016 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 15:35:35,017 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 15:35:37,423 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 15:35:37,428 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 15:35:38,416 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 15:35:38,417 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 15:35:38,417 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 15:35:40,690 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 15:35:40,694 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 15:43:04,913 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 15:43:04,913 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 15:43:04,913 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 15:43:04,914 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 15:43:04,916 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 15:43:19,216 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 15:43:19,510 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 15:43:19,511 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 15:43:22,798 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 15:43:22,803 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 15:43:23,786 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 15:43:23,787 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 15:43:23,788 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 15:43:26,031 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 15:43:26,035 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 15:43:27,056 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 15:43:27,057 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 15:43:27,057 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 15:43:29,423 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 15:43:29,429 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 15:51:13,740 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 15:51:13,740 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 15:51:13,742 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 15:51:13,743 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 15:51:13,746 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 15:51:25,417 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 15:51:25,664 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 15:51:25,665 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 15:51:28,379 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 15:51:28,382 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 15:51:29,363 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 15:51:29,366 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 15:51:29,366 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 15:51:31,642 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 15:51:31,649 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 15:51:32,652 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 15:51:32,654 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 15:51:32,655 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 15:51:34,936 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 15:51:34,940 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 16:00:09,585 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 16:00:09,587 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 16:00:09,587 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 16:00:09,588 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 16:00:09,589 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 16:04:38,976 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 16:04:38,978 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 16:04:38,979 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 16:04:38,980 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 16:04:38,982 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 16:04:57,077 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 16:04:57,312 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 16:04:57,312 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 16:05:00,373 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 16:05:00,378 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 16:05:01,398 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 16:05:01,400 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 16:05:01,400 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 16:05:03,658 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 16:05:03,665 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 16:05:04,666 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 16:05:04,668 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 16:05:04,668 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 16:05:06,934 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 16:05:06,939 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 17:29:41,911 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 17:29:41,913 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 17:29:41,913 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 17:29:41,915 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 17:29:41,915 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 17:29:51,408 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 17:29:51,677 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 17:29:51,677 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 17:29:54,371 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 17:29:54,375 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 17:29:55,401 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 17:29:55,403 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 17:29:55,404 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 17:29:57,664 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 17:29:57,668 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 17:29:58,674 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 17:29:58,675 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 17:29:58,676 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 17:30:01,052 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 17:30:01,058 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 17:36:45,465 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 17:36:45,466 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 17:36:45,467 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 17:36:45,468 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 17:36:45,470 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 17:37:23,918 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 17:37:24,156 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 17:37:24,156 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 17:37:27,222 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 17:37:27,228 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 17:37:28,219 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 17:37:28,219 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 17:37:28,220 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 17:37:30,444 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 17:37:30,447 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 17:37:31,455 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 17:37:31,457 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 17:37:31,457 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 17:37:33,741 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 17:37:33,746 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 17:38:21,525 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 17:38:21,526 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 17:38:21,526 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 17:38:21,527 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 17:38:21,528 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 17:38:28,542 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 17:38:28,842 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 17:38:28,842 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 17:38:31,130 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 17:38:31,134 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 17:38:32,123 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 17:38:32,125 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 17:38:32,125 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 17:38:34,418 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 17:38:34,421 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 17:38:35,444 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 17:38:35,448 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 17:38:35,448 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 17:38:37,788 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 17:38:37,795 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 17:40:04,144 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 17:40:04,144 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 17:40:04,145 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 17:40:04,145 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 17:40:04,146 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 17:40:10,769 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 17:40:11,025 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 17:40:11,026 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 17:40:13,312 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 17:40:13,316 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 17:40:14,315 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 17:40:14,317 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 17:40:14,318 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 17:40:16,617 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 17:40:16,622 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 17:40:17,617 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 17:40:17,618 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 17:40:17,619 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 17:40:19,831 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 17:40:19,835 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 17:42:07,098 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 17:42:07,098 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 17:42:07,099 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 17:42:07,099 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 17:42:07,100 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 17:51:00,130 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 17:51:00,131 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 17:51:00,132 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 17:51:00,133 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 17:51:00,136 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 17:52:01,510 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 17:52:01,511 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 17:52:01,513 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 17:52:01,514 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 17:52:01,517 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 17:52:19,609 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 17:52:19,609 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 17:52:19,610 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 17:52:19,610 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 17:52:19,611 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 17:53:04,770 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 17:53:04,771 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 17:53:04,771 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 17:53:04,771 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 17:53:04,773 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 17:55:42,426 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 17:55:42,427 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 17:55:42,427 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 17:55:42,428 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 17:55:42,431 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 18:00:33,077 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 18:00:33,078 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 18:00:33,078 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 18:00:33,078 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 18:00:33,080 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 18:01:46,772 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 18:01:46,773 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 18:01:46,773 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 18:01:46,774 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 18:01:46,776 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 18:01:59,507 - lightrag - INFO - kw_prompt result:
+2025-01-02 18:01:59,508 - lightrag - ERROR - No JSON-like structure found in the result.
+2025-01-02 18:03:27,648 - lightrag - INFO - Logger initialized for working directory: lightrag_data
+2025-01-02 18:03:27,649 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 18:03:27,650 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 18:03:27,650 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 18:03:27,651 - lightrag - INFO - Loaded graph from lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 18:03:42,120 - lightrag - INFO - kw_prompt result:
+2025-01-02 18:03:42,121 - lightrag - ERROR - No JSON-like structure found in the result.
+2025-01-02 18:14:25,998 - lightrag - INFO - Logger initialized for working directory: lightrag_data
+2025-01-02 18:14:25,999 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 18:14:25,999 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 18:14:25,999 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 18:14:26,001 - lightrag - INFO - Loaded graph from lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 18:17:10,258 - lightrag - INFO - Logger initialized for working directory: lightrag_data
+2025-01-02 18:17:10,258 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 18:17:10,259 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 18:17:10,259 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 18:17:10,260 - lightrag - INFO - Loaded graph from lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 18:29:40,137 - lightrag - INFO - Logger initialized for working directory: lightrag_data
+2025-01-02 18:29:40,137 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 18:29:40,138 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 18:29:40,138 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 18:29:40,139 - lightrag - INFO - Loaded graph from lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 18:29:45,092 - lightrag - INFO - kw_prompt result:
+2025-01-02 18:35:39,945 - lightrag - INFO - Logger initialized for working directory: lightrag_data
+2025-01-02 18:35:39,945 - lightrag - INFO - Load KV llm_response_cache with 1 data
+2025-01-02 18:35:39,946 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 18:35:39,946 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 18:35:39,949 - lightrag - INFO - Loaded graph from lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 18:38:10,703 - lightrag - INFO - Logger initialized for working directory: lightrag_data
+2025-01-02 18:38:10,703 - lightrag - INFO - Load KV llm_response_cache with 1 data
+2025-01-02 18:38:10,704 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 18:38:10,704 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 18:38:10,705 - lightrag - INFO - Loaded graph from lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 18:39:09,037 - lightrag - INFO - Logger initialized for working directory: lightrag_data
+2025-01-02 18:39:09,038 - lightrag - INFO - Load KV llm_response_cache with 1 data
+2025-01-02 18:39:09,038 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 18:39:09,038 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 18:39:09,041 - lightrag - INFO - Loaded graph from lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 18:39:12,175 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 18:39:12,443 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 18:39:12,444 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 18:39:15,396 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 18:39:33,650 - lightrag - INFO - Inserting entities into storage...
+2025-01-02 18:39:33,651 - lightrag - INFO - Inserting relationships into storage...
+2025-01-02 18:39:33,653 - lightrag - INFO - Inserting 4 vectors to entities
+2025-01-02 18:39:35,929 - lightrag - INFO - Inserting 4 vectors to relationships
+2025-01-02 18:39:38,275 - lightrag - INFO - Writing graph with 4 nodes, 4 edges
+2025-01-02 18:40:26,268 - lightrag - INFO - kw_prompt result:
+2025-01-02 18:40:28,541 - lightrag - INFO - Local query uses 4 entites, 4 relations, 1 text units
+2025-01-02 18:40:30,346 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 18:40:30,347 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 18:40:30,347 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 18:40:32,562 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 18:40:40,060 - lightrag - INFO - Inserting entities into storage...
+2025-01-02 18:40:40,061 - lightrag - INFO - Inserting relationships into storage...
+2025-01-02 18:40:40,062 - lightrag - INFO - Inserting 4 vectors to entities
+2025-01-02 18:40:42,359 - lightrag - INFO - Inserting 3 vectors to relationships
+2025-01-02 18:40:44,648 - lightrag - INFO - Writing graph with 4 nodes, 6 edges
+2025-01-02 18:40:44,756 - lightrag - WARNING - All docs are already in the storage
+2025-01-02 18:41:51,639 - lightrag - INFO - kw_prompt result:
+2025-01-02 18:41:53,862 - lightrag - INFO - Local query uses 4 entites, 6 relations, 2 text units
+2025-01-02 18:41:56,542 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 18:41:56,543 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 18:41:56,543 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 18:41:58,773 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 18:42:15,104 - lightrag - INFO - Inserting entities into storage...
+2025-01-02 18:42:15,108 - lightrag - INFO - Inserting relationships into storage...
+2025-01-02 18:42:15,111 - lightrag - INFO - Inserting 11 vectors to entities
+2025-01-02 18:42:17,646 - lightrag - INFO - Inserting 10 vectors to relationships
+2025-01-02 18:42:20,016 - lightrag - INFO - Writing graph with 13 nodes, 16 edges
+2025-01-02 19:21:06,373 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 19:21:06,374 - lightrag - INFO - Load KV llm_response_cache with 1 data
+2025-01-02 19:21:06,374 - lightrag - INFO - Load KV full_docs with 3 data
+2025-01-02 19:21:06,376 - lightrag - INFO - Load KV text_chunks with 3 data
+2025-01-02 19:21:06,377 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 13 nodes, 16 edges
+2025-01-02 19:25:27,919 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 19:25:27,919 - lightrag - INFO - Load KV llm_response_cache with 1 data
+2025-01-02 19:25:27,920 - lightrag - INFO - Load KV full_docs with 3 data
+2025-01-02 19:25:27,920 - lightrag - INFO - Load KV text_chunks with 3 data
+2025-01-02 19:25:27,923 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 13 nodes, 16 edges
+2025-01-02 19:27:32,799 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 19:27:32,800 - lightrag - INFO - Load KV llm_response_cache with 1 data
+2025-01-02 19:27:32,801 - lightrag - INFO - Load KV full_docs with 3 data
+2025-01-02 19:27:32,802 - lightrag - INFO - Load KV text_chunks with 3 data
+2025-01-02 19:27:32,803 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 13 nodes, 16 edges
+2025-01-02 19:29:38,796 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 19:29:38,797 - lightrag - INFO - Load KV llm_response_cache with 1 data
+2025-01-02 19:29:38,798 - lightrag - INFO - Load KV full_docs with 3 data
+2025-01-02 19:29:38,799 - lightrag - INFO - Load KV text_chunks with 3 data
+2025-01-02 19:29:38,802 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 13 nodes, 16 edges
+2025-01-02 19:31:30,332 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 19:31:30,332 - lightrag - INFO - Load KV llm_response_cache with 1 data
+2025-01-02 19:31:30,333 - lightrag - INFO - Load KV full_docs with 3 data
+2025-01-02 19:31:30,335 - lightrag - INFO - Load KV text_chunks with 3 data
+2025-01-02 19:31:30,339 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 13 nodes, 16 edges
+2025-01-02 19:33:59,562 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 19:33:59,563 - lightrag - INFO - Load KV llm_response_cache with 1 data
+2025-01-02 19:33:59,564 - lightrag - INFO - Load KV full_docs with 3 data
+2025-01-02 19:33:59,565 - lightrag - INFO - Load KV text_chunks with 3 data
+2025-01-02 19:33:59,569 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 13 nodes, 16 edges
+2025-01-02 19:34:21,857 - lightrag - WARNING - All docs are already in the storage
+2025-01-02 19:34:30,166 - lightrag - WARNING - All docs are already in the storage
+2025-01-02 19:34:36,400 - lightrag - WARNING - All docs are already in the storage
+2025-01-02 19:34:58,188 - lightrag - WARNING - All docs are already in the storage
+2025-01-02 19:36:51,241 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 19:36:51,242 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 19:36:51,243 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 19:36:51,243 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 19:39:45,269 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 19:39:45,270 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 19:39:45,271 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 19:39:45,271 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 19:51:25,974 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 19:51:25,975 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 19:51:25,976 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 19:51:25,976 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 19:51:42,708 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 19:51:42,963 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 19:51:42,963 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 19:51:43,044 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 19:51:44,046 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 19:51:44,046 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 19:51:44,046 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 19:51:44,081 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 19:51:45,100 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 19:51:45,102 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 19:51:45,102 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 19:51:45,146 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 19:52:04,277 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 19:52:04,278 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 19:52:04,279 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 19:52:04,310 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 19:52:05,323 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 19:52:05,324 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 19:52:05,324 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 19:52:05,350 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 19:52:06,345 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 19:52:06,345 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 19:52:06,345 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 19:52:06,364 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 19:54:28,478 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 19:54:28,478 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 19:54:28,479 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 19:54:28,479 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 19:54:28,479 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 19:54:38,550 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 19:54:38,793 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 19:54:38,793 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 19:54:38,820 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 19:54:39,815 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 19:54:39,817 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 19:54:39,817 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 19:54:39,834 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 19:54:40,853 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 19:54:40,855 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 19:54:40,855 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 19:54:40,876 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 19:54:50,508 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 19:54:50,509 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 19:54:50,509 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 19:54:50,535 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 19:54:51,546 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 19:54:51,548 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 19:54:51,548 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 19:54:51,588 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 19:54:52,586 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 19:54:52,587 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 19:54:52,587 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 19:54:52,615 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 20:07:44,782 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 20:07:44,783 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 20:07:44,784 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 20:07:44,784 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 20:07:44,786 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 20:08:26,650 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 20:08:26,650 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 20:08:26,650 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 20:08:26,650 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 20:08:26,651 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 20:09:16,495 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 20:09:16,496 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 20:09:16,496 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 20:09:16,496 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 20:09:16,497 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 20:15:53,318 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 20:15:53,319 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 20:15:53,319 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 20:15:53,320 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 20:15:53,320 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 20:18:01,312 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 20:18:01,312 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 20:18:01,312 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 20:18:01,312 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 20:18:01,314 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 20:18:46,503 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 20:18:46,503 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 20:18:46,503 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 20:18:46,504 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 20:20:31,464 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 20:20:31,701 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 20:20:31,701 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 20:20:31,735 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 20:20:31,739 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 20:20:32,734 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 20:20:32,735 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 20:20:32,735 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 20:20:32,756 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 20:20:32,759 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 20:20:33,754 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 20:20:33,754 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 20:20:33,755 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 20:20:33,773 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 20:20:33,776 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 20:20:49,980 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 20:20:49,981 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 20:20:49,982 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 20:20:49,983 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 20:20:49,994 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 20:20:56,967 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 20:20:57,251 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 20:20:57,251 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 20:20:57,318 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 20:20:57,320 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 20:20:58,340 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 20:20:58,341 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 20:20:58,341 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 20:20:58,362 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 20:20:58,364 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 20:20:59,388 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 20:20:59,390 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 20:20:59,390 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 20:20:59,405 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 20:20:59,407 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 20:49:10,031 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 20:49:10,032 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 20:49:10,033 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 20:49:10,033 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 20:49:10,035 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 20:49:18,643 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 20:49:18,888 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 20:49:18,889 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 20:49:18,939 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 20:49:18,943 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 20:49:19,960 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 20:49:19,960 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 20:49:19,960 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 20:49:19,978 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 20:49:19,981 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 20:49:20,975 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 20:49:20,977 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 20:49:20,977 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 20:49:21,039 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 20:49:21,041 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 20:55:01,826 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 20:55:01,827 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 20:55:01,827 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 20:55:01,828 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 20:55:01,831 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 20:56:46,083 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 20:56:46,085 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 20:56:46,086 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 20:56:46,086 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 20:56:46,088 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 20:57:09,704 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 20:57:09,950 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 20:57:09,950 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 20:57:09,998 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 20:57:10,000 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 20:57:11,005 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 20:57:11,008 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 20:57:11,008 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 20:57:11,055 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 20:57:11,058 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 20:57:12,057 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 20:57:12,059 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 20:57:12,059 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 20:57:12,080 - lightrag - INFO - [Entity Extraction]...
+2025-01-02 20:57:12,082 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 21:03:53,759 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 21:03:53,759 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 21:03:53,759 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 21:03:53,760 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 21:03:53,761 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 21:05:56,818 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 21:05:56,820 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 21:05:56,820 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 21:05:56,820 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 21:05:56,821 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 21:12:00,116 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 21:12:00,117 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 21:12:00,117 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 21:12:00,119 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 21:12:00,119 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 21:14:18,340 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 21:14:18,341 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 21:14:18,343 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 21:14:18,344 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 21:14:18,347 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 21:17:55,150 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 21:17:55,151 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 21:17:55,151 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 21:17:55,151 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 21:17:55,153 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 21:18:04,101 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 21:18:04,469 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 21:18:04,469 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 21:18:08,376 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 21:18:10,377 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 21:18:10,378 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 21:18:10,378 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 21:18:10,633 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 21:18:13,630 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-02 21:18:13,631 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-02 21:18:13,631 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-02 21:18:13,922 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-02 22:24:50,003 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 22:24:50,004 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 22:24:50,005 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 22:24:50,005 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 22:24:50,006 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 22:29:28,846 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 22:29:28,847 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 22:29:28,847 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 22:29:28,848 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 22:29:28,849 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 22:30:06,014 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 22:30:06,015 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 22:30:06,015 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 22:30:06,016 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 22:30:06,017 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-02 22:30:21,038 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 22:30:21,038 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 22:30:21,039 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 22:30:21,039 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 22:31:54,352 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 22:31:54,353 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 22:31:54,353 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 22:31:54,353 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 22:43:09,519 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 22:43:35,229 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 22:44:23,437 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 22:44:23,437 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 22:44:23,438 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 22:44:23,438 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-02 22:53:01,041 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-02 22:53:01,041 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-02 22:53:01,042 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-02 22:53:01,042 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 01:12:43,616 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 01:12:43,616 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 01:12:43,616 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 01:12:43,617 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 01:14:34,153 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 01:14:34,154 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 01:14:34,154 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 01:14:34,154 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 01:23:04,816 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 01:23:04,816 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 01:23:04,817 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 01:23:04,817 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 01:26:18,143 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 01:26:18,144 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 01:26:18,144 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 01:26:18,144 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 01:29:49,661 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 01:29:49,663 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 01:29:49,663 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 01:29:49,664 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 01:31:50,367 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 01:31:50,368 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 01:31:50,368 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 01:31:50,369 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 01:34:21,380 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 01:34:21,381 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 01:34:21,381 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 01:34:21,381 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 01:35:01,873 - lightrag - INFO - kw_prompt result:
+2025-01-03 01:36:06,940 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 01:36:06,940 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 01:36:06,940 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 01:36:06,940 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 01:36:39,212 - lightrag - INFO - kw_prompt result:
+2025-01-03 01:39:02,726 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 01:39:02,726 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 01:39:02,726 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 01:39:02,727 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 01:42:15,203 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 01:42:15,204 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 01:42:15,204 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 01:42:15,204 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 01:48:27,269 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 01:48:27,270 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 01:48:27,270 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 01:48:27,270 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 01:51:13,133 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 01:51:13,134 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 01:51:13,134 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 01:51:13,134 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 01:54:00,586 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 01:54:00,587 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 01:54:00,587 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 01:54:00,587 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 02:00:53,102 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 02:00:53,102 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 02:00:53,103 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 02:00:53,103 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 02:03:57,174 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 02:03:57,175 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 02:03:57,176 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 02:03:57,176 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 02:05:20,197 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 02:05:20,198 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 02:05:20,198 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 02:05:20,199 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 02:30:35,701 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 02:30:35,702 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 02:30:35,702 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 02:30:35,703 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 02:30:55,207 - lightrag - INFO - kw_prompt result:
+2025-01-03 02:31:35,829 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 02:31:35,830 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 02:31:35,830 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 02:31:35,831 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 02:32:09,804 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 02:32:09,804 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 02:32:09,805 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 02:32:09,805 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 02:32:34,575 - lightrag - INFO - kw_prompt result:
+2025-01-03 02:35:42,332 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 02:35:42,332 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 02:35:42,333 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 02:35:42,333 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 02:36:15,376 - lightrag - INFO - kw_prompt result:
+2025-01-03 02:36:19,948 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-03 02:39:04,851 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 02:39:04,852 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 02:39:04,852 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 02:39:04,852 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 02:39:32,428 - lightrag - INFO - kw_prompt result:
+2025-01-03 02:39:36,938 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-03 02:41:59,220 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 02:41:59,221 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 02:41:59,221 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 02:41:59,222 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 02:43:37,486 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 02:43:37,487 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 02:43:37,487 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 02:43:37,488 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 02:44:56,387 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 02:44:56,387 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 02:44:56,388 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 02:44:56,388 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 02:45:19,115 - lightrag - INFO - kw_prompt result:
+2025-01-03 02:45:24,334 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-03 02:53:49,699 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 02:53:49,699 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 02:53:49,700 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 02:53:49,700 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 02:54:22,095 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 02:54:22,096 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 02:54:22,096 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 02:54:22,096 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 02:54:45,201 - lightrag - INFO - kw_prompt result:
+2025-01-03 02:54:50,529 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-03 02:55:07,681 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-03 02:55:07,940 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-03 02:55:07,940 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-03 02:55:10,220 - lightrag - INFO - [Entity Extraction]...
+2025-01-03 02:56:01,097 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-03 02:56:02,191 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-03 02:56:02,193 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-03 02:56:02,193 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-03 02:56:04,451 - lightrag - INFO - [Entity Extraction]...
+2025-01-03 02:56:24,859 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-03 02:56:26,991 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-03 02:56:26,994 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-03 02:56:26,995 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-03 02:56:29,270 - lightrag - INFO - [Entity Extraction]...
+2025-01-03 02:57:07,145 - lightrag - INFO - Writing graph with 0 nodes, 0 edges
+2025-01-03 03:00:50,249 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 03:00:50,249 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 03:00:50,250 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 03:00:50,250 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 03:00:50,251 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-03 03:00:57,204 - lightrag - INFO - kw_prompt result:
+2025-01-03 03:01:01,765 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-03 03:03:17,820 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 03:03:17,821 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 03:03:17,822 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 03:03:17,822 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 03:03:17,824 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-03 03:03:30,912 - lightrag - INFO - kw_prompt result:
+2025-01-03 03:03:35,464 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-03 03:06:25,506 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 03:06:25,508 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 03:06:25,509 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 03:06:25,509 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 03:06:25,512 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 0 nodes, 0 edges
+2025-01-03 03:06:39,660 - lightrag - INFO - kw_prompt result:
+2025-01-03 03:06:44,228 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-03 03:06:47,248 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-03 03:06:47,504 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-03 03:06:47,504 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-03 03:06:49,788 - lightrag - INFO - [Entity Extraction]...
+2025-01-03 03:07:03,710 - lightrag - INFO - Inserting entities into storage...
+2025-01-03 03:07:03,713 - lightrag - INFO - Inserting relationships into storage...
+2025-01-03 03:07:03,717 - lightrag - INFO - Inserting 5 vectors to entities
+2025-01-03 03:07:06,144 - lightrag - INFO - Inserting 5 vectors to relationships
+2025-01-03 03:07:08,525 - lightrag - INFO - Writing graph with 5 nodes, 5 edges
+2025-01-03 03:09:45,359 - lightrag - INFO - Logger initialized for working directory: C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data
+2025-01-03 03:09:45,360 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 03:09:45,362 - lightrag - INFO - Load KV full_docs with 1 data
+2025-01-03 03:09:45,363 - lightrag - INFO - Load KV text_chunks with 1 data
+2025-01-03 03:09:45,364 - lightrag - INFO - Loaded graph from C:\Users\Eidan Garcia\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 5 nodes, 5 edges
+2025-01-03 03:10:53,789 - lightrag - INFO - kw_prompt result:
+2025-01-03 03:10:56,303 - lightrag - INFO - Local query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:10:58,511 - lightrag - INFO - Global query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:11:01,706 - lightrag - WARNING - All docs are already in the storage
+2025-01-03 03:11:25,320 - lightrag - INFO - kw_prompt result:
+2025-01-03 03:11:27,560 - lightrag - INFO - Local query uses 5 entites, 5 relations, 1 text units
+2025-01-03 03:11:29,840 - lightrag - INFO - Global query uses 5 entites, 5 relations, 1 text units

@@ -2,12 +2,28 @@
 
 import json
 import logging
-from typing import Dict, Any, List, Tuple, Union
+from typing import Dict, Any, List, Tuple, Union, Optional
 from app.models.function import Filter, FilterResponse
 from app.functions.utils import validate_filter_response, create_error_response
 from app.models.chat import ChatStreamEvent
 
 logger = logging.getLogger(__name__)
+
+
+def get_filter(filter_config: Dict[str, Any]) -> Optional[Filter]:
+    """Create a filter instance from a filter configuration.
+
+    Args:
+        filter_config: Dictionary containing filter configuration
+
+    Returns:
+        Filter instance if successful, None if failed
+    """
+    try:
+        return Filter(**filter_config)
+    except Exception as e:
+        logger.error(f"Failed to create filter from config: {e}")
+        return None
 
 
 async def apply_filters(

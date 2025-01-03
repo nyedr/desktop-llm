@@ -2,37 +2,57 @@
 
 import json
 import logging
-from typing import Dict, Any, List, Union
+from typing import Dict, Any, List, Union, Optional
 from app.models.chat import ChatStreamEvent
 from app.models.function import Filter
-from app.utils.filters import apply_filters
+from app.utils.filters import apply_filters, get_filter
 
 logger = logging.getLogger(__name__)
 
 
-async def handle_assistant_message(
-    request_id: str,
-    response: Dict[str, Any],
-    filters: List[Filter]
-) -> ChatStreamEvent:
-    """Handle assistant message with outlet filtering."""
-    assistant_message = {
-        "role": "assistant",
-        "content": response.get("content", "")
-    }
+async def handle_assistant_message(response: Union[str, Dict[str, Any]], filters: List[Dict[str, Any]], request_id: str) -> Optional[Dict[str, Any]]:
+    """Handle assistant message and apply filters."""
+    try:
+        # Handle string responses (direct content)
+        if isinstance(response, str):
+            message = {
+                "role": "assistant",
+                "content": response
+            }
+        # Handle dict responses (tool calls or structured content)
+        elif isinstance(response, dict):
+            message = {
+                "role": "assistant",
+                "content": response.get("content", ""),
+                "tool_calls": response.get("tool_calls", [])
+            }
+        else:
+            logger.error(
+                f"[{request_id}] Invalid response type: {type(response)}")
+            return None
 
-    if not filters:
-        print(assistant_message['content'], end="", flush=True)
-        return ChatStreamEvent(event="message", data=json.dumps(assistant_message))
+        # Apply filters
+        if filters:
+            filtered_message = message
+            for filter_config in filters:
+                filter_instance = get_filter(filter_config)
+                if filter_instance:
+                    try:
+                        filtered_message = await filter_instance.process(filtered_message)
+                    except Exception as e:
+                        logger.error(
+                            f"[{request_id}] Filter processing error: {str(e)}")
+                else:
+                    logger.warning(
+                        f"[{request_id}] Failed to create filter from config: {filter_config}")
+            message = filtered_message
 
-    return await apply_filters(
-        filters=filters,
-        data=assistant_message,
-        request_id=request_id,
-        direction="outlet",
-        as_event=True,
-        filter_name="outlet_message_filters"
-    )
+        return message
+
+    except Exception as e:
+        logger.error(
+            f"[{request_id}] Error handling assistant message: {str(e)}", exc_info=True)
+        return None
 
 
 async def handle_string_chunk(

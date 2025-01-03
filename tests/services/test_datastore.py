@@ -3,7 +3,7 @@
 import pytest
 import sqlite3
 from datetime import datetime, timedelta
-from app.memory.lightrag.datastore import MemoryDatastore
+from app.memory.datastore import MemoryDatastore
 
 
 @pytest.fixture

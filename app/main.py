@@ -85,7 +85,12 @@ async def initialize_service(service_name: str, get_service_fn, state: ServiceSt
                 if not getattr(service, '_initialized', False):
                     raise RuntimeError("LightRAG manager failed to initialize")
             else:
-                await service.initialize()
+                # For Agent, pass required services
+                if service_name == "Agent":
+                    model_service = Providers.get_model_service()
+                    await service.initialize(model_service)
+                else:
+                    await service.initialize()
 
         state.set_status(ServiceStatus.READY)
         logger.info(
@@ -111,13 +116,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     app.state.service_states = service_states
 
     try:
+        await initialize_service("Function", Providers.get_function_service, service_states['function'])
+
         # Initialize base services first
-        await initialize_service("LightRAG", Providers.get_lightrag_manager, service_states['lightrag'])
+        await initialize_service("Memory", Providers.get_lightrag_manager, service_states['lightrag'])
         await initialize_service("MCP", Providers.get_mcp_service, service_states['mcp'])
 
-        # Initialize model and function services
+        # Initialize model
         await initialize_service("Model", Providers.get_model_service, service_states['model'])
-        await initialize_service("Function", Providers.get_function_service, service_states['function'])
 
         # Initialize agent last since it depends on other services
         await initialize_service("Agent", Providers.get_agent, service_states['agent'])

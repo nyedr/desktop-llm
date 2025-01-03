@@ -63,30 +63,60 @@ class TextModifierFilter(Filter):
         """Process outgoing messages.
 
         Args:
-            data: Dictionary containing a single message
+            data: Dictionary containing a single message or messages array
 
         Returns:
             Modified message data
         """
-        # Don't modify tool responses
-        if data["role"] in ["tool", "function"]:
+        try:
+            # Handle messages array
+            if "messages" in data:
+                data["messages"] = [
+                    await self._process_message(msg) for msg in data["messages"]
+                ]
+                return data
+
+            # Handle single message
+            return await self._process_message(data)
+
+        except Exception as e:
+            logger.error(f"Error in outlet filter: {e}")
             return data
 
+    async def _process_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
+        """Process a single message.
+
+        Args:
+            message: Message dictionary to process
+
+        Returns:
+            Processed message
+        """
+        # Skip if message doesn't have required fields
+        if not isinstance(message, dict) or "role" not in message:
+            return message
+
+        # Don't modify tool/function responses
+        if message["role"] in ["tool", "function"]:
+            return message
+
         # Only modify content for assistant messages
-        if data["role"] == "assistant":
-            data = data.copy()
-            if isinstance(data["content"], str):
-                content = data["content"].rstrip()  # Remove trailing spaces
+        if message["role"] == "assistant":
+            message = message.copy()
+            content = message.get("content")
+
+            if isinstance(content, str):
+                content = content.rstrip()  # Remove trailing spaces
                 if content:  # Check if there's actual content after stripping
                     logger.info(f"Modifying content: '{content}'")
-                    data["content"] = self._modify_content(content)
-                    logger.info(f"Modified to: '{data['content']}'")
-            elif isinstance(data["content"], dict) and "content" in data["content"]:
-                content = data["content"].copy()
+                    message["content"] = self._modify_content(content)
+                    logger.info(f"Modified to: '{message['content']}'")
+            elif isinstance(content, dict) and "content" in content:
+                content = content.copy()
                 # Remove trailing spaces
                 stripped_content = content["content"].rstrip()
                 if stripped_content:  # Check if there's actual content after stripping
                     content["content"] = self._modify_content(stripped_content)
-                    data["content"] = content
+                    message["content"] = content
 
-        return data
+        return message

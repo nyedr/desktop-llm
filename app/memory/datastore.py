@@ -6,7 +6,7 @@ import sqlite3
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, TypeVar
 from pathlib import Path
-from .config import LIGHTRAG_DATA_DIR
+from app.core.config import config
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class MemoryDatastore:
         """
         # Set up database path
         self.db_path = Path(db_path) if db_path else Path(
-            LIGHTRAG_DATA_DIR) / "memory.db"
+            config.LIGHTRAG_DATA_DIR) / "memory.db"
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Initialize database
@@ -52,41 +52,52 @@ class MemoryDatastore:
             raise
 
     def _ensure_tables(self):
-        """Create necessary tables if they don't exist."""
-        def operation(cur: sqlite3.Cursor) -> None:
-            # Cache table for storing computed results
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS cache (
-                    key TEXT PRIMARY KEY,
-                    value TEXT NOT NULL,
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    expires_at DATETIME
-                );
+        """Create necessary database tables if they don't exist."""
+        def operation(cursor):
+            # Create entities table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS entities (
+                    id TEXT PRIMARY KEY,
+                    content_hash TEXT,
+                    metadata TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
             """)
 
-            # Metadata table for storing additional information
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS metadata (
-                    entity_id TEXT NOT NULL,
-                    key TEXT NOT NULL,
-                    value TEXT,
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY (entity_id, key)
-                );
+            # Create relationships table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS relationships (
+                    id TEXT PRIMARY KEY,
+                    source_id TEXT,
+                    target_id TEXT,
+                    relationship_type TEXT,
+                    metadata TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (source_id) REFERENCES entities (id),
+                    FOREIGN KEY (target_id) REFERENCES entities (id)
+                )
             """)
 
-            # Create indexes
-            cur.execute(
-                "CREATE INDEX IF NOT EXISTS idx_metadata_entity ON metadata(entity_id);")
-            cur.execute(
-                "CREATE INDEX IF NOT EXISTS idx_metadata_key ON metadata(key);")
-            cur.execute(
-                "CREATE INDEX IF NOT EXISTS idx_metadata_key_value ON metadata(key, value);")
-            cur.execute(
-                "CREATE INDEX IF NOT EXISTS idx_cache_expiry ON cache(expires_at);")
+            # Create embeddings table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS embeddings (
+                    id TEXT PRIMARY KEY,
+                    entity_id TEXT,
+                    embedding BLOB,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (entity_id) REFERENCES entities (id)
+                )
+            """)
+
+            # Create indices
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_content_hash ON entities (content_hash)")
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_relationships ON relationships (source_id, target_id)")
 
         self._execute_with_connection(
-            operation, "Failed to create database tables")
+            operation,
+            "Failed to create database tables")
 
     def get_metadata(self, entity_id: str) -> Dict[str, str]:
         """Get all metadata for an entity."""
@@ -182,44 +193,20 @@ class MemoryDatastore:
             "Failed to cleanup expired cache entries"
         )
 
-    def search_entities(self, content_hash: str, limit: int = 1) -> List[Dict[str, str]]:
-        """Search for entities by content hash.
-
-        Args:
-            content_hash: Hash of the content to search for
-            limit: Maximum number of results to return
-
-        Returns:
-            List of matching entities with their metadata
-        """
-        def operation(cur: sqlite3.Cursor) -> List[Dict[str, str]]:
-            # Get all metadata for entities with matching content hash in a single query
-            cur.execute("""
-                WITH matching_entities AS (
-                    SELECT DISTINCT entity_id
-                    FROM metadata
-                    WHERE key = 'content_hash' AND value = ?
-                    LIMIT ?
-                )
-                SELECT m.entity_id, m.key, m.value, m.created_at
-                FROM metadata m
-                INNER JOIN matching_entities me ON m.entity_id = me.entity_id
-                ORDER BY m.entity_id, m.key
-            """, (content_hash, limit))
-
-            entities = {}
-            for row in cur.fetchall():
-                entity_id = row['entity_id']
-                if entity_id not in entities:
-                    entities[entity_id] = {
-                        "id": entity_id,
-                        "created_at": row['created_at']
-                    }
-                entities[entity_id][row['key']] = row['value']
-
-            return list(entities.values())
+    def search_entities(self, content_hash: str, limit: int = 1) -> List[Dict]:
+        """Search for entities by content hash."""
+        def operation(cursor):
+            cursor.execute(
+                """
+                SELECT * FROM entities 
+                WHERE content_hash = ? 
+                LIMIT ?
+                """,
+                (content_hash, limit)
+            )
+            return [dict(row) for row in cursor.fetchall()]
 
         return self._execute_with_connection(
             operation,
-            f"Failed to search entities with content hash: {content_hash}"
+            f"Failed to search entities with hash {content_hash}"
         )

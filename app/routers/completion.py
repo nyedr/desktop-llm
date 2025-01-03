@@ -80,7 +80,7 @@ async def generate_completion(
 
     try:
         # Get model from form data or use default
-        model = form_data.model or config.DEFAULT_MODEL
+        model = form_data.model or config.llm.model
 
         # Check if model is available
         models = await model_service.get_all_models(request_id)
@@ -92,8 +92,8 @@ async def generate_completion(
         completion = await model_service.generate(
             prompt=form_data.prompt,
             model=model,
-            temperature=form_data.temperature or config.MODEL_TEMPERATURE,
-            max_tokens=form_data.max_tokens or config.MAX_TOKENS,
+            temperature=form_data.temperature or config.llm.temperature,
+            max_tokens=form_data.max_tokens or config.llm.max_tokens,
             images=form_data.images
         )
 
