@@ -208,45 +208,53 @@ class LLMContext:
 
             # Format memory if we got a response
             if memory_response:
-                if isinstance(memory_response, dict) and "metadata" in memory_response:
-                    metadata = memory_response["metadata"]
+                metadata = memory_response["metadata"]
+                content = memory_response.get("content", {})
 
-                    # Parse timestamp with error handling
-                    try:
-                        timestamp = datetime.fromisoformat(
-                            metadata.get("timestamp", ""))
-                    except (ValueError, TypeError):
-                        timestamp = datetime.now()  # Fallback to current time if parsing fails
+                # Parse timestamp with error handling
+                try:
+                    timestamp = datetime.fromisoformat(
+                        metadata.get("timestamp", ""))
+                except (ValueError, TypeError):
+                    timestamp = datetime.now()  # Fallback to current time if parsing fails
 
-                    formatted_time = timestamp.strftime("%Y-%m-%d %H:%M:%S")
-                    time_from_now = datetime.now() - timestamp
-                    time_from_now_str = format_timestamp(time_from_now)
+                formatted_time = timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                time_from_now = datetime.now() - timestamp
+                time_from_now_str = format_timestamp(time_from_now)
 
-                    # Format metadata for LLM, excluding internal fields
-                    internal_fields = {
-                        "memory_id", "timestamp", "request_id", "content_type"}
-                    metadata_str = "\n".join([
-                        f"- {key}: {value}"
-                        for key, value in metadata.items()
-                        if key not in internal_fields and value is not None
-                    ])
+                # Format metadata for LLM, excluding internal fields
+                internal_fields = {
+                    "memory_id", "timestamp", "request_id", "content_type",
+                    "content", "source", "chunk_index", "token_count",
+                    "user_message", "assistant_response", "tool_response"
+                }
+                metadata_str = "\n".join([
+                    f"- {key}: {value}"
+                    for key, value in metadata.items()
+                    if key not in internal_fields and value is not None
+                ])
 
-                    # Create memory message with metadata context
-                    memory_message = {
-                        "role": ChatRole.SYSTEM,
-                        "content": (
-                            f"[Memory from {time_from_now_str} ({formatted_time})]\n"
-                            f"Context:\n{metadata_str}\n\n"
-                            f"Content:\n{memory_response['content']}"
-                        )
-                    }
-                    memories.append(memory_message)
+                # Format conversation content
+                if isinstance(content, dict):
+                    conversation_str = (
+                        f"User: {content.get('user_message', '')}\n"
+                        f"Assistant: {content.get('assistant_response', '')}"
+                    )
+                    if content.get('tool_response'):
+                        conversation_str += f"\nTool Response: {content['tool_response']}"
                 else:
-                    # Handle string responses or responses without metadata
-                    memories.append({
-                        "role": ChatRole.SYSTEM,
-                        "content": f"Relevant memory: {memory_response}"
-                    })
+                    conversation_str = str(content)
+
+                # Create memory message with metadata context
+                memory_message = {
+                    "role": ChatRole.SYSTEM,
+                    "content": (
+                        f"[Memory from {time_from_now_str} ({formatted_time})]\n"
+                        f"Context:\n{metadata_str}\n\n"
+                        f"Conversation:\n{conversation_str}"
+                    )
+                }
+                memories.append(memory_message)
 
             logger.debug(
                 f"[{self.request_id}] Retrieved {len(memories)} relevant memories")

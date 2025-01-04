@@ -81,7 +81,8 @@ class LightRAGManager:
                     async for chunk in self.model_service.chat(
                         messages=messages,
                         stream=True,
-                        model="meta-llama/llama-3.2-3b-instruct",
+                        # model="meta-llama/llama-3.2-3b-instruct",
+                        model="deepseek/deepseek-chat",
                         temperature=llm_params.get(
                             "temperature", config.llm.temperature),
                         max_tokens=llm_params.get(
@@ -172,30 +173,25 @@ class LightRAGManager:
             # Parse the response
             try:
                 if isinstance(memory_response, str):
-                    # Try to parse content and metadata from formatted string
-                    parts = memory_response.split("Metadata:", 1)
-                    if len(parts) == 2:
-                        content = parts[0].replace("Content:", "").strip()
-                        try:
-                            metadata = json.loads(parts[1].strip())
-                        except json.JSONDecodeError:
-                            metadata = {
+                    try:
+                        # Try to parse the JSON response
+                        metadata = json.loads(memory_response)
+                        # Extract content from metadata
+                        content = metadata.pop("content", "")
+                        return {
+                            "content": content,
+                            "metadata": metadata
+                        }
+                    except json.JSONDecodeError:
+                        # If not JSON, treat as raw content
+                        return {
+                            "content": memory_response,
+                            "metadata": {
                                 "timestamp": datetime.now().isoformat(),
                                 "content_type": "text",
-                                "source": "parsed_response"
+                                "source": "raw_response"
                             }
-                    else:
-                        content = memory_response
-                        metadata = {
-                            "timestamp": datetime.now().isoformat(),
-                            "content_type": "text",
-                            "source": "direct_response"
                         }
-
-                    return {
-                        "content": content,
-                        "metadata": metadata
-                    }
                 else:
                     logger.warning(
                         f"Unexpected response type: {type(memory_response)}")
@@ -228,8 +224,19 @@ class LightRAGManager:
         """Store a new memory with metadata.
 
         Args:
-            text: The text content to store
-            metadata: Optional metadata about the memory
+            text: The text content to store (user's message)
+            metadata: Optional metadata about the memory including:
+                - request_id: Unique request identifier
+                - model: The model used
+                - message_count: Number of messages in conversation
+                - has_tool_calls: Whether tool calls were made
+                - enable_tools: Whether tools were enabled
+                - timestamp: ISO format timestamp
+                - temperature: Model temperature
+                - max_tokens: Model max tokens
+                - user_message: Last user message
+                - assistant_response: Assistant's response
+                - tool_response: Tool response if any
 
         Returns:
             str: The unique memory ID
@@ -243,7 +250,7 @@ class LightRAGManager:
             base_metadata = {
                 "memory_id": memory_id,
                 "timestamp": datetime.now().isoformat(),
-                "content_type": "text"
+                "content_type": "chat_memory"
             }
 
             # Merge with provided metadata, ensuring no None values
@@ -255,16 +262,26 @@ class LightRAGManager:
             # Store in datastore for SQL-based querying
             self.datastore.store_entity(
                 entity_id=memory_id,
-                text=text,
+                text=text,  # This is the user's message
                 metadata=full_metadata
             )
 
-            # Format text for LightRAG with metadata as JSON in content
-            memory_text = f"""Content: {text.strip()}
-Metadata: {json.dumps(full_metadata, indent=2)}"""
+            # Format the conversation content
+            conversation_content = {
+                "user_message": full_metadata.get("user_message", text),
+                "assistant_response": full_metadata.get("assistant_response", ""),
+                "tool_response": full_metadata.get("tool_response")
+            }
 
-            # Store in LightRAG - it will handle chunking and embedding
-            await self.rag.ainsert([memory_text])
+            # Store in LightRAG with conversation content and metadata
+            memory_data = {
+                **full_metadata,
+                "content": conversation_content  # Store structured conversation content
+            }
+
+            # Convert to JSON for storage
+            memory_json = json.dumps(memory_data, indent=2)
+            await self.rag.ainsert([memory_json])
 
             logger.info(f"Memory stored with ID: {memory_id} and metadata")
             return memory_id

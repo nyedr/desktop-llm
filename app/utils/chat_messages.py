@@ -1,11 +1,13 @@
 """Message handling operations for chat router."""
 
+from datetime import datetime
 import json
 import logging
 from typing import Dict, Any, List, Union, Optional
-from app.models.chat import ChatStreamEvent
+from app.models.chat import ChatRequest, ChatStreamEvent
 from app.models.function import Filter
 from app.utils.filters import apply_filters, get_filter
+from app.core.config import config
 
 logger = logging.getLogger(__name__)
 
@@ -55,24 +57,28 @@ async def handle_assistant_message(response: Union[str, Dict[str, Any]], filters
         return None
 
 
-def format_conversation_message(messages: List[Dict[str, Any]]) -> str:
-    conversation_parts = []
-
-    for msg in messages:
-        # Handle both dict and message objects
-        if hasattr(msg, 'role'):
-            role = msg.role
-            content = msg.content
-        else:
-            role = msg.get('role')
-            content = msg.get('content')
-
-        if role and role != "system" and content:
-            conversation_parts.append(f"{role}: {content}")
-
-    conversation = "\n".join(conversation_parts)
-
-    return conversation
+def format_conversation_metadata(
+    request_id: str,
+    model: str,
+    final_messages: List[Dict[str, Any]],
+    tool_response: Any,
+    chat_request: ChatRequest,
+    current_message: Dict[str, Any],
+    last_user_message: str
+) -> Dict[str, str]:
+    return {
+        "request_id": request_id,
+        "model": model,
+        "message_count": len(final_messages),
+        "has_tool_calls": bool(tool_response),
+        "enable_tools": chat_request.enable_tools,
+        "timestamp": datetime.now().isoformat(),
+        "temperature": chat_request.temperature or config.llm.temperature,
+        "max_tokens": chat_request.max_tokens or config.llm.max_tokens,
+        "user_message": last_user_message,
+        "assistant_response": current_message.get("content", "") if isinstance(current_message, dict) else getattr(current_message, "content", ""),
+        "tool_response": tool_response.dict() if hasattr(tool_response, "dict") else tool_response
+        }
 
 
 async def handle_string_chunk(
