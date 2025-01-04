@@ -9407,3 +9407,51 @@
 2025-01-03 19:37:25,992 - lightrag - INFO - Inserting 8 vectors to entities
 2025-01-03 19:37:28,312 - lightrag - INFO - Inserting 7 vectors to relationships
 2025-01-03 19:37:30,664 - lightrag - INFO - Writing graph with 11 nodes, 10 edges
+2025-01-03 20:04:38,020 - lightrag - INFO - Logger initialized for working directory: lightrag_data
+2025-01-03 20:04:38,021 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 20:04:38,021 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 20:04:38,022 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 20:04:38,182 - lightrag - INFO - Logger initialized for working directory: lightrag_data
+2025-01-03 20:04:38,183 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 20:04:38,183 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 20:04:38,184 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 20:04:38,617 - lightrag - INFO - Logger initialized for working directory: lightrag_data
+2025-01-03 20:04:38,618 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 20:04:38,619 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 20:04:38,619 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 20:05:27,020 - lightrag - INFO - Logger initialized for working directory: lightrag_data
+2025-01-03 20:05:27,020 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 20:05:27,020 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 20:05:27,021 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 20:05:38,516 - lightrag - INFO - kw_prompt result:
+2025-01-03 20:05:43,937 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-03 20:06:40,166 - lightrag - INFO - Logger initialized for working directory: lightrag_data
+2025-01-03 20:06:40,167 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-03 20:06:40,167 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-03 20:06:40,168 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-03 20:06:44,739 - lightrag - INFO - kw_prompt result:
+2025-01-03 20:06:49,431 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-03 20:06:51,830 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-03 20:06:52,072 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-03 20:06:52,072 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-03 20:06:54,286 - lightrag - INFO - [Entity Extraction]...
+2025-01-03 20:07:12,453 - lightrag - INFO - Inserting entities into storage...
+2025-01-03 20:07:12,454 - lightrag - INFO - Inserting relationships into storage...
+2025-01-03 20:07:12,458 - lightrag - INFO - Inserting 9 vectors to entities
+2025-01-03 20:07:14,836 - lightrag - INFO - Inserting 8 vectors to relationships
+2025-01-03 20:07:17,273 - lightrag - INFO - Writing graph with 9 nodes, 8 edges
+2025-01-03 20:07:32,089 - lightrag - INFO - kw_prompt result:
+2025-01-03 20:07:34,304 - lightrag - INFO - Local query uses 5 entites, 8 relations, 1 text units
+2025-01-03 20:07:36,537 - lightrag - INFO - Global query uses 6 entites, 5 relations, 1 text units
+2025-01-03 20:07:38,818 - lightrag - INFO - kw_prompt result:
+2025-01-03 20:07:41,071 - lightrag - INFO - Local query uses 5 entites, 5 relations, 1 text units
+2025-01-03 20:07:43,290 - lightrag - INFO - Global query uses 6 entites, 5 relations, 1 text units
+2025-01-03 20:07:45,540 - lightrag - INFO - [New Docs] inserting 1 docs
+2025-01-03 20:07:45,541 - lightrag - INFO - [New Chunks] inserting 1 chunks
+2025-01-03 20:07:45,542 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-03 20:07:47,790 - lightrag - INFO - [Entity Extraction]...
+2025-01-03 20:08:16,071 - lightrag - INFO - Inserting entities into storage...
+2025-01-03 20:08:16,073 - lightrag - INFO - Inserting relationships into storage...
+2025-01-03 20:08:16,074 - lightrag - INFO - Inserting 8 vectors to entities
+2025-01-03 20:08:18,434 - lightrag - INFO - Inserting 6 vectors to relationships
+2025-01-03 20:08:20,895 - lightrag - INFO - Writing graph with 14 nodes, 14 edges

@@ -59,8 +59,10 @@ async def stream_chat_response(
     """Generate streaming chat response."""
     request_id = str(uuid.uuid4())
     logger.info(f"[{request_id}] Starting chat stream")
-    tool_call_in_progress = False
     messages = chat_request.messages
+    final_messages = []
+    tool_response = None
+    current_message = {"role": "assistant", "content": ""}
 
     try:
         # Setup components
@@ -126,12 +128,10 @@ async def stream_chat_response(
             f"[{request_id}] Processed messages: {json.dumps(processed_messages, indent=2)}")
 
         # Start streaming
-        current_message = {"role": "assistant", "content": ""}
         yield ChatStreamEvent(event="start", data=json.dumps({"status": "streaming"}))
 
         # Stream chat response
         current_tool_call = None
-        tool_response = None
 
         async for chunk in agent.chat(
             messages=processed_messages,
@@ -171,8 +171,8 @@ async def stream_chat_response(
                     yield string_event
                     current_message["content"] += chunk
 
-        # Store memory if needed
-        if current_message["content"] and chat_request.enable_memory and memory_manager:
+        # After all chunks are processed and before storing memory
+        if current_message["content"]:
             final_messages = messages + [current_message]
 
             # Apply outlet filters
@@ -190,13 +190,15 @@ async def stream_chat_response(
                 except Exception as e:
                     logger.error(
                         f"[{request_id}] Error applying outlet filters: {e}", exc_info=True)
-                    
+
+            # Get last user message safely
             last_user_message = ""
             for msg in reversed(final_messages):
                 if hasattr(msg, "role") and msg.role == "user" and hasattr(msg, "content"):
                     last_user_message = msg.content
                     break
 
+            # Prepare metadata for memory storage
             conversation_metadata = format_conversation_metadata(
                 request_id=request_id,
                 model=model,
@@ -207,19 +209,21 @@ async def stream_chat_response(
                 last_user_message=last_user_message
             )
 
-            if conversation_metadata:
-                try:
-                    # Store memory with metadata
-                    await memory_manager.store_memory(
-                        text=last_user_message,
-                        metadata=conversation_metadata
-                    )
-                    logger.info(
-                        f"[{request_id}] Stored conversation memory with metadata")
-                except Exception as e:
-                    logger.error(
-                        f"[{request_id}] Error storing conversation memory: {str(e)}", exc_info=True)
-                    # Continue execution - memory storage failure shouldn't break the chat response
+            # Add memory storage to background tasks if enabled
+            if chat_request.enable_memory and memory_manager and conversation_metadata:
+                async def store_memory_task():
+                    try:
+                        await memory_manager.store_memory(
+                            text=last_user_message,
+                            metadata=conversation_metadata
+                        )
+                        logger.info(
+                            f"[{request_id}] Stored conversation memory with metadata")
+                    except Exception as e:
+                        logger.error(
+                            f"[{request_id}] Error storing conversation memory: {str(e)}", exc_info=True)
+
+                background_tasks.add_task(store_memory_task)
 
     except Exception as e:
         logger.error(

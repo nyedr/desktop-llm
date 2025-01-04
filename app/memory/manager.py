@@ -4,7 +4,6 @@ import logging
 import asyncio
 from typing import Optional, Dict, Union, Any
 from pathlib import Path
-from collections import deque
 import uuid
 from datetime import datetime
 import json
@@ -27,9 +26,6 @@ class LightRAGManager:
     - query_memory: Query the memory system
     - store_memory: Store new memories
     - store_file: Store file contents as memory
-
-    Internal methods handle LightRAG initialization, memory processing,
-    and background tasks.
     """
 
     def __init__(self, working_dir: Optional[Union[str, Path]] = None):
@@ -40,17 +36,10 @@ class LightRAGManager:
                 If None, uses config.memory.data_dir.
         """
         self.working_dir = Path(working_dir or config.memory.data_dir)
-        self.memory_queue = deque()
-        self.processing = False
-        self._tasks = []
         self._initialized = False
 
     async def initialize(self, datastore: Optional[MemoryDatastore] = None):
-        """Initialize the memory system and all components.
-
-        Args:
-            datastore: Optional datastore for memory persistence
-        """
+        """Initialize the memory system and all components."""
         if self._initialized:
             return
 
@@ -223,6 +212,11 @@ class LightRAGManager:
     async def store_memory(self, text: str, metadata: Optional[Dict] = None) -> str:
         """Store a new memory with metadata.
 
+        This method is designed to be run in the background. It handles:
+        1. Storing in SQL database
+        2. Storing in LightRAG with proper formatting
+        3. Processing and embedding content
+
         Args:
             text: The text content to store (user's message)
             metadata: Optional metadata about the memory including:
@@ -259,7 +253,7 @@ class LightRAGManager:
                 **{k: v for k, v in (metadata or {}).items() if v is not None}
             }
 
-            # Store in datastore for SQL-based querying
+            # Store in datastore for SQL-based querying (sync operation)
             self.datastore.store_entity(
                 entity_id=memory_id,
                 text=text,  # This is the user's message
@@ -279,7 +273,7 @@ class LightRAGManager:
                 "content": conversation_content  # Store structured conversation content
             }
 
-            # Convert to JSON for storage
+            # Convert to JSON for storage and store in LightRAG (async operation)
             memory_json = json.dumps(memory_data, indent=2)
             await self.rag.ainsert([memory_json])
 
@@ -301,68 +295,16 @@ class LightRAGManager:
         """
         return await self.ingestor.ingest_file(file_path)
 
-    # Internal methods
-    async def queue_memory(self, text: str, metadata: Optional[Dict] = None):
-        """Queue memory for processing."""
-        if not text:
-            return
-
-        try:
-            # Add to processing queue
-            self.memory_queue.append({
-                'text': text,
-                'metadata': metadata or {},
-                'retries': 0
-            })
-            logger.debug(f"Queued memory for processing")
-        except Exception as e:
-            logger.error(f"Error queueing memory: {e}")
-            raise
-
-    async def _process_memory_queue(self):
-        """Process queued memory items."""
-        while self.processing:
-            try:
-                if self.memory_queue:
-                    memory = self.memory_queue.popleft()
-                    try:
-                        # Insert into LightRAG asynchronously
-                        logger.info(
-                            f"Processing memory text: {memory['text'][:100]}...")
-                        await self.rag.ainsert(memory['text'])
-                        logger.info(
-                            "Memory processed and embedded successfully")
-
-                    except Exception as e:
-                        logger.error(f"Error processing memory: {e}")
-                        # Retry with backoff
-                        memory['retries'] += 1
-                        if memory['retries'] < 3:
-                            self.memory_queue.append(memory)
-                            await asyncio.sleep(memory['retries'] * config.memory.queue_error_retry_delay)
-
-                await asyncio.sleep(config.memory.queue_process_delay)
-            except Exception as e:
-                logger.error(f"Error processing memory: {e}")
-                await asyncio.sleep(config.memory.queue_error_retry_delay)
-
     async def start(self):
-        """Start the memory system and background tasks."""
+        """Start the memory system.
+        Ensures the system is initialized and ready for use."""
         if not self._initialized:
             await self.initialize()
-
-        if not self.processing:
-            self.processing = True
-            self._tasks = [
-                asyncio.create_task(self._process_memory_queue())
-            ]
-        logger.info("Started memory processing")
+        logger.info("Memory system started")
 
     async def stop(self):
-        """Stop the memory system and background tasks."""
-        if self._initialized and self.processing:
-            logger.info("Stopping memory system")
-            self.processing = False
-            for task in self._tasks:
-                task.cancel()
-            self._tasks = []
+        """Stop the memory system.
+        Performs any necessary cleanup."""
+        if self._initialized:
+            logger.info("Memory system stopped")
+            self._initialized = False
