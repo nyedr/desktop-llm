@@ -4,7 +4,7 @@ import json
 import logging
 import sqlite3
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, TypeVar
+from typing import Dict, List, Optional, TypeVar, Any
 from pathlib import Path
 from app.core.config import config
 
@@ -64,6 +64,18 @@ class MemoryDatastore:
                 )
             """)
 
+            # Create metadata table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS metadata (
+                    entity_id TEXT,
+                    key TEXT,
+                    value TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (entity_id, key),
+                    FOREIGN KEY (entity_id) REFERENCES entities (id)
+                )
+            """)
+
             # Create relationships table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS relationships (
@@ -89,11 +101,23 @@ class MemoryDatastore:
                 )
             """)
 
+            # Create cache table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS cache (
+                    key TEXT PRIMARY KEY,
+                    value TEXT,
+                    expires_at TIMESTAMP,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+
             # Create indices
             cursor.execute(
                 "CREATE INDEX IF NOT EXISTS idx_content_hash ON entities (content_hash)")
             cursor.execute(
                 "CREATE INDEX IF NOT EXISTS idx_relationships ON relationships (source_id, target_id)")
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_metadata ON metadata (key, value)")
 
         self._execute_with_connection(
             operation,
@@ -209,4 +233,81 @@ class MemoryDatastore:
         return self._execute_with_connection(
             operation,
             f"Failed to search entities with hash {content_hash}"
+        )
+
+    def store_entity(self, entity_id: str, text: str, metadata: Optional[Dict] = None) -> None:
+        """Store a memory entity with its metadata.
+
+        Args:
+            entity_id: Unique identifier for the memory
+            text: The text content to store
+            metadata: Optional metadata about the memory
+        """
+        def operation(cursor):
+            # Store the entity
+            cursor.execute(
+                """
+                INSERT INTO entities (id, content_hash, metadata)
+                VALUES (?, ?, ?)
+                """,
+                (entity_id, hash(text), json.dumps(metadata or {}))
+            )
+
+            # Store metadata as individual key-value pairs if provided
+            if metadata:
+                for key, value in metadata.items():
+                    cursor.execute(
+                        """
+                        INSERT INTO metadata (entity_id, key, value)
+                        VALUES (?, ?, ?)
+                        """,
+                        (entity_id, key, str(value))
+                    )
+
+        self._execute_with_connection(
+            operation,
+            f"Failed to store entity {entity_id}"
+        )
+
+    def get_memory_metadata(self, memory_id: str) -> Optional[Dict[str, Any]]:
+        """Get metadata for a memory entity.
+
+        Args:
+            memory_id: ID of the memory entity
+
+        Returns:
+            Dictionary containing memory metadata if found, None otherwise
+        """
+        def operation(cursor):
+            # Get the entity metadata (stored as JSON)
+            cursor.execute("""
+                SELECT metadata FROM entities
+                WHERE id = ?
+            """, (memory_id,))
+            entity_result = cursor.fetchone()
+
+            if not entity_result:
+                return None
+
+            # Parse the JSON metadata
+            try:
+                metadata = json.loads(entity_result['metadata'])
+            except (json.JSONDecodeError, KeyError):
+                metadata = {}
+
+            # Get additional metadata from the metadata table
+            cursor.execute("""
+                SELECT key, value FROM metadata
+                WHERE entity_id = ?
+            """, (memory_id,))
+
+            # Merge metadata from both sources
+            for row in cursor.fetchall():
+                metadata[row['key']] = row['value']
+
+            return {"metadata": metadata} if metadata else None
+
+        return self._execute_with_connection(
+            operation,
+            f"Failed to get metadata for memory: {memory_id}"
         )

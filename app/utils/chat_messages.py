@@ -55,6 +55,26 @@ async def handle_assistant_message(response: Union[str, Dict[str, Any]], filters
         return None
 
 
+def format_conversation_message(messages: List[Dict[str, Any]]) -> str:
+    conversation_parts = []
+
+    for msg in messages:
+        # Handle both dict and message objects
+        if hasattr(msg, 'role'):
+            role = msg.role
+            content = msg.content
+        else:
+            role = msg.get('role')
+            content = msg.get('content')
+
+        if role and role != "system" and content:
+            conversation_parts.append(f"{role}: {content}")
+
+    conversation = "\n".join(conversation_parts)
+
+    return conversation
+
+
 async def handle_string_chunk(
     request_id: str,
     response: str,

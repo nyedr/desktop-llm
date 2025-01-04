@@ -2,10 +2,12 @@
 
 import logging
 import asyncio
-from typing import Optional, Dict, Union, AsyncGenerator
+from typing import Optional, Dict, Union, Any
 from pathlib import Path
 from collections import deque
 import uuid
+from datetime import datetime
+import json
 
 from app.core.config import config
 from .datastore import MemoryDatastore
@@ -79,7 +81,7 @@ class LightRAGManager:
                     async for chunk in self.model_service.chat(
                         messages=messages,
                         stream=True,
-                        model="deepseek/deepseek-chat",
+                        model="meta-llama/llama-3.2-3b-instruct",
                         temperature=llm_params.get(
                             "temperature", config.llm.temperature),
                         max_tokens=llm_params.get(
@@ -135,67 +137,92 @@ class LightRAGManager:
                 f"Failed to initialize LightRAGManager: {str(e)}", exc_info=True)
             raise
 
-    async def query_memory(
-        self,
-        query: str,
-        query_param: Optional[QueryParam] = None
-    ) -> Union[str, AsyncGenerator[str, None]]:
-        """Query the memory system.
+    async def query_memory(self, query: str, only_need_context: bool = True) -> Optional[Dict[str, Any]]:
+        """Query memory for relevant information.
 
         Args:
-            query: The query string
-            query_param: Optional query parameters
+            query: Query string to search memories
+            only_need_context: If True, only return the memory content without LLM processing
 
         Returns:
-            Memory response string or an async generator for streamed responses
+            Dictionary containing memory content and metadata if found, None otherwise
         """
         if not self._initialized:
             await self.initialize()
 
         try:
-            # Use default query params if none provided
-            if not query_param:
-                query_param = QueryParam(
-                    mode="hybrid",
-                    stream=False,
-                    response_type="natural",
-                    top_k=5,
-                    only_need_context=True
-                )
+            logger.debug(f"Querying memory with: {query}")
 
-            # Validate streaming parameters
-            if query_param.stream and query_param.only_need_context:
-                logger.warning(
-                    "Streaming is not supported with only_need_context=True. Setting stream=False.")
-                query_param.stream = False
+            # Create query parameters
+            query_param = QueryParam(
+                mode="hybrid",
+                stream=False,
+                response_type="natural",
+                top_k=5,
+                only_need_context=only_need_context
+            )
 
-            # Get the query response
-            response = await self.rag.aquery(query=query, param=query_param)
+            # Get memory response from RAG
+            memory_response = await self.rag.aquery(query=query, param=query_param)
 
-            if query_param.stream:
-                # For streaming responses, create an async generator
-                async def stream_generator():
-                    try:
-                        async for chunk in response:
-                            if isinstance(chunk, dict):
-                                yield chunk.get("content", "")
-                            elif isinstance(chunk, str):
-                                yield chunk
-                    except Exception as e:
-                        logger.error(
-                            f"Error in stream generator: {str(e)}", exc_info=True)
-                        raise
-                return stream_generator()
-            else:
-                # For non-streaming responses, return directly
-                return response
+            if not memory_response:
+                logger.debug("No memory found")
+                return None
 
-        except asyncio.CancelledError:
-            logger.warning("Query memory operation cancelled")
-            raise
+            # Parse the response
+            try:
+                if isinstance(memory_response, str):
+                    # Try to parse content and metadata from formatted string
+                    parts = memory_response.split("Metadata:", 1)
+                    if len(parts) == 2:
+                        content = parts[0].replace("Content:", "").strip()
+                        try:
+                            metadata = json.loads(parts[1].strip())
+                        except json.JSONDecodeError:
+                            metadata = {
+                                "timestamp": datetime.now().isoformat(),
+                                "content_type": "text",
+                                "source": "parsed_response"
+                            }
+                    else:
+                        content = memory_response
+                        metadata = {
+                            "timestamp": datetime.now().isoformat(),
+                            "content_type": "text",
+                            "source": "direct_response"
+                        }
+
+                    return {
+                        "content": content,
+                        "metadata": metadata
+                    }
+                else:
+                    logger.warning(
+                        f"Unexpected response type: {type(memory_response)}")
+                    return {
+                        "content": str(memory_response),
+                        "metadata": {
+                            "timestamp": datetime.now().isoformat(),
+                            "content_type": "text",
+                            "source": "unknown_format"
+                        }
+                    }
+
+            except Exception as parse_error:
+                logger.error(
+                    f"Error parsing memory response: {parse_error}", exc_info=True)
+                return {
+                    "content": str(memory_response),
+                    "metadata": {
+                        "timestamp": datetime.now().isoformat(),
+                        "content_type": "text",
+                        "source": "parse_error"
+                    }
+                }
+
         except Exception as e:
-            logger.error(f"Error querying memory: {str(e)}", exc_info=True)
-            raise
+            logger.error(f"Error querying memory: {e}", exc_info=True)
+            return None
 
     async def store_memory(self, text: str, metadata: Optional[Dict] = None) -> str:
         """Store a new memory with metadata.
@@ -212,20 +239,38 @@ class LightRAGManager:
 
         memory_id = str(uuid.uuid4())
         try:
-            # Store in datastore first
-            await self.datastore.store_memory(
-                memory_id=memory_id,
+            # Ensure required metadata fields
+            base_metadata = {
+                "memory_id": memory_id,
+                "timestamp": datetime.now().isoformat(),
+                "content_type": "text"
+            }
+
+            # Merge with provided metadata, ensuring no None values
+            full_metadata = {
+                **base_metadata,
+                **{k: v for k, v in (metadata or {}).items() if v is not None}
+            }
+
+            # Store in datastore for SQL-based querying
+            self.datastore.store_entity(
+                entity_id=memory_id,
                 text=text,
-                metadata=metadata or {}
+                metadata=full_metadata
             )
 
-            # Queue for processing instead of direct insertion
-            await self.queue_memory(text, metadata)
+            # Format text for LightRAG with metadata as JSON in content
+            memory_text = f"""Content: {text.strip()}
+Metadata: {json.dumps(full_metadata, indent=2)}"""
 
+            # Store in LightRAG - it will handle chunking and embedding
+            await self.rag.ainsert([memory_text])
+
+            logger.info(f"Memory stored with ID: {memory_id} and metadata")
             return memory_id
 
         except Exception as e:
-            logger.error(f"Error storing memory: {e}")
+            logger.error(f"Error storing memory: {e}", exc_info=True)
             raise
 
     async def store_file(self, file_path: Union[str, Path]) -> bool:

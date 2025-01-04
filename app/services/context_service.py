@@ -4,10 +4,12 @@ import logging
 from typing import Dict, Any, List, Optional, Union
 from transformers import AutoTokenizer
 from collections import defaultdict
+from datetime import datetime
 
 from app.core.config import config
 from app.models.chat import StrictChatMessage, ChatRole
 from app.dependencies.providers import Providers
+from app.utils.utils import format_timestamp
 
 logger = logging.getLogger(__name__)
 
@@ -188,24 +190,66 @@ class LLMContext:
         }
 
     async def _retrieve_relevant_memories(self, query: str) -> List[Dict[str, Any]]:
-        """Retrieve relevant memories based on query."""
+        """Retrieve relevant memories based on query.
+
+        Args:
+            query: Query string to search memories
+
+        Returns:
+            List of formatted memory messages with metadata
+        """
         try:
             logger.debug(
                 f"[{self.request_id}] Retrieving memories for query: {query}")
             memories = []
 
-            # Get memory response (non-streaming)
+            # Get memory response with metadata
             memory_response = await self.memory_manager.query_memory(query)
 
-            # If we got a response, add it as a memory
+            # Format memory if we got a response
             if memory_response:
-                memories.append({
-                    "role": "system",
-                    "content": f"Relevant memory: {memory_response}"
-                })
+                if isinstance(memory_response, dict) and "metadata" in memory_response:
+                    metadata = memory_response["metadata"]
+
+                    # Parse timestamp with error handling
+                    try:
+                        timestamp = datetime.fromisoformat(
+                            metadata.get("timestamp", ""))
+                    except (ValueError, TypeError):
+                        timestamp = datetime.now()  # Fallback to current time if parsing fails
+
+                    formatted_time = timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                    time_from_now = datetime.now() - timestamp
+                    time_from_now_str = format_timestamp(time_from_now)
+
+                    # Format metadata for LLM, excluding internal fields
+                    internal_fields = {
+                        "memory_id", "timestamp", "request_id", "content_type"}
+                    metadata_str = "\n".join([
+                        f"- {key}: {value}"
+                        for key, value in metadata.items()
+                        if key not in internal_fields and value is not None
+                    ])
+
+                    # Create memory message with metadata context
+                    memory_message = {
+                        "role": ChatRole.SYSTEM,
+                        "content": (
+                            f"[Memory from {time_from_now_str} ({formatted_time})]\n"
+                            f"Context:\n{metadata_str}\n\n"
+                            f"Content:\n{memory_response['content']}"
+                        )
+                    }
+                    memories.append(memory_message)
+                else:
+                    # Handle string responses or responses without metadata
+                    memories.append({
+                        "role": ChatRole.SYSTEM,
+                        "content": f"Relevant memory: {memory_response}"
+                    })
 
             logger.debug(
-                f"[{self.request_id}] Retrieved {len(memories)} memories")
+                f"[{self.request_id}] Retrieved {len(memories)} relevant memories")
             return memories
 
         except Exception as e:

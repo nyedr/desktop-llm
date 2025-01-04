@@ -133,6 +133,7 @@ class ModelService:
                     "HTTP-Referer": "http://localhost:8001",
                     "X-Title": "Desktop LLM"
                 }
+                
             )
         except Exception as e:
             raise CompletionProviderError(

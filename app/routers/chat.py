@@ -4,6 +4,7 @@ import json
 import logging
 import uuid
 from typing import AsyncGenerator, Optional
+from datetime import datetime
 
 from fastapi import APIRouter, Request, Depends, BackgroundTasks
 from sse_starlette.sse import EventSourceResponse
@@ -17,9 +18,8 @@ from app.memory.manager import LightRAGManager
 from app.services.context_service import LLMContext
 from app.dependencies.providers import Providers
 from app.utils.chat_setup import verify_model_availability, setup_chat_components
-from app.utils.memory_utils import store_conversation_memory
 from app.utils.filters import apply_filters
-from app.utils.chat_messages import handle_string_chunk
+from app.utils.chat_messages import format_conversation_message, handle_string_chunk
 from app.utils.chat_tools import process_tool_stream
 
 router = APIRouter()
@@ -123,6 +123,9 @@ async def stream_chat_response(
             max_tokens=chat_request.max_tokens
         )
 
+        logger.debug(
+            f"[{request_id}] Processed messages: {json.dumps(processed_messages, indent=2)}")
+
         # Start streaming
         current_message = {"role": "assistant", "content": ""}
         yield ChatStreamEvent(event="start", data=json.dumps({"status": "streaming"}))
@@ -189,15 +192,41 @@ async def stream_chat_response(
                     logger.error(
                         f"[{request_id}] Error applying outlet filters: {e}", exc_info=True)
 
-            # Store conversation memory
-            await store_conversation_memory(
-                request_id=request_id,
-                messages=final_messages,
-                lightrag_manager=memory_manager,
-                conversation_id=chat_request.conversation_id or str(
-                    uuid.uuid4()),
-                model=model
-            )
+            conversation = format_conversation_message(final_messages)
+
+            if conversation:
+                try:
+                    # Get last user message safely
+                    last_user_message = ""
+                    for msg in reversed(final_messages):
+                        if hasattr(msg, "role") and msg.role == "user" and hasattr(msg, "content"):
+                            last_user_message = msg.content
+                            break
+
+                    # Store memory with metadata
+                    await memory_manager.store_memory(
+                        text=conversation,
+                        metadata={
+                            "request_id": request_id,
+                            "model": model,
+                            "message_count": len(final_messages),
+                            "has_tool_calls": bool(tool_response),
+                            "enable_tools": chat_request.enable_tools,
+                            "timestamp": datetime.now().isoformat(),
+                            "conversation_type": "chat",
+                            "temperature": chat_request.temperature or config.llm.temperature,
+                            "max_tokens": chat_request.max_tokens or config.llm.max_tokens,
+                            "last_user_message": last_user_message,
+                            "last_assistant_message": current_message.get("content", "") if isinstance(current_message, dict) else getattr(current_message, "content", ""),
+                            "tool_response": tool_response.dict() if hasattr(tool_response, "dict") else tool_response
+                        }
+                    )
+                    logger.info(
+                        f"[{request_id}] Stored conversation memory with metadata")
+                except Exception as e:
+                    logger.error(
+                        f"[{request_id}] Error storing conversation memory: {str(e)}", exc_info=True)
+                    # Continue execution - memory storage failure shouldn't break the chat response
 
     except Exception as e:
         logger.error(
