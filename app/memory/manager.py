@@ -1,22 +1,63 @@
 """Memory manager for LightRAG integration and memory operations."""
 
+import json
 import logging
-import asyncio
-from typing import Optional, Dict, Union, Any
+from typing import Optional, Dict, Union, List
 from pathlib import Path
 import uuid
 from datetime import datetime
-import json
+import asyncio
+import time
+from contextlib import contextmanager
 
 from app.core.config import config
 from .datastore import MemoryDatastore
 from .ingestion import MemoryIngestor
+from .embeddings import EmbeddingService, MINILM_DIM, NOMIC_DIM, BATCH_SIZE
+from app.models.memory import MemoryResponse
 from app.services.model_service import ModelService
 from lightrag import LightRAG
 from lightrag.utils import EmbeddingFunc
 from lightrag.base import QueryParam
 
 logger = logging.getLogger(__name__)
+
+# Constants for optimization
+EMBEDDING_CACHE_SIZE = 1000
+DEFAULT_MAX_TOKENS = 4096
+REDUCED_TOP_K = 3
+
+# Model configurations
+OLLAMA_EMBED_MODEL = "nomic-embed-text"
+MINILM_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+EXTRACTION_MODEL_NAME = "meta-llama/llama-3.2-3b-instruct"
+# EXTRACTION_MODEL_NAME = "deepseek/deepseek-chat"
+
+
+class ProfilingStats:
+    """Container for profiling statistics."""
+
+    def __init__(self):
+        self.embedding_times = []
+        self.query_times = []
+        self.store_times = []
+        self.total_embedding_calls = 0
+        self.total_query_calls = 0
+        self.total_store_calls = 0
+        self.cache_hits = 0
+        self.cache_misses = 0
+
+
+@contextmanager
+def profile_operation(stats_list: List[float], operation_name: str):
+    """Context manager for profiling operations."""
+    start_time = time.perf_counter()
+    try:
+        yield
+    finally:
+        duration = time.perf_counter() - start_time
+        stats_list.append(duration)
+        logger.debug(f"{operation_name} took {duration:.3f} seconds")
 
 
 class LightRAGManager:
@@ -37,6 +78,15 @@ class LightRAGManager:
         """
         self.working_dir = Path(working_dir or config.memory.data_dir)
         self._initialized = False
+        self.profiling_stats = ProfilingStats()
+
+        # These will be initialized during initialize()
+        self._llm_semaphore = None
+        self.datastore = None
+        self.model_service = None
+        self.embedding_service = None
+        self.rag = None
+        self.ingestor = None
 
     async def initialize(self, datastore: Optional[MemoryDatastore] = None):
         """Initialize the memory system and all components."""
@@ -44,245 +94,417 @@ class LightRAGManager:
             return
 
         try:
-            # Set up datastore and model service
-            self.datastore = datastore or MemoryDatastore(
-                str(self.working_dir / "memory.db"))
+            # Initialize semaphores
+            self._llm_semaphore = asyncio.Semaphore(5)
+
+            # Set up services
+            if datastore:
+                self.datastore = datastore
+            else:
+                self.datastore = await MemoryDatastore(str(self.working_dir / "memory.db")).initialize()
+
+            if not self.datastore:
+                raise ValueError("Failed to initialize datastore")
+
             self.model_service = ModelService()
+            if not self.model_service:
+                raise ValueError("Failed to initialize model service")
+
+            self.embedding_service = EmbeddingService()
+            if not self.embedding_service:
+                raise ValueError("Failed to initialize embedding service")
 
             # Initialize working directory
             self.working_dir.mkdir(parents=True, exist_ok=True)
 
-            # Define async LLM function that uses model service
-            async def llm_model_func(prompt: str, system_prompt: str = None, history_messages: list = None, **kwargs):
-                try:
-                    messages = []
-                    if system_prompt:
-                        messages.append(
-                            {"role": "system", "content": system_prompt})
-                    if history_messages:
-                        messages.extend(history_messages)
-                    messages.append({"role": "user", "content": prompt})
-
-                    llm_params = kwargs.get("llm_params", {})
-                    response_text = ""
-
-                    # Stream response chunks and accumulate
-                    async for chunk in self.model_service.chat(
-                        messages=messages,
-                        stream=True,
-                        # model="meta-llama/llama-3.2-3b-instruct",
-                        model="deepseek/deepseek-chat",
-                        temperature=llm_params.get(
-                            "temperature", config.llm.temperature),
-                        max_tokens=llm_params.get(
-                            "max_tokens", config.llm.max_tokens),
-                        enable_tools=False
-                    ):
-                        if isinstance(chunk, dict):
-                            response_text += chunk.get("content", "")
-                        elif isinstance(chunk, str):
-                            response_text += chunk
-
-                    return response_text
-
-                except Exception as e:
-                    logger.error(
-                        f"Error in LLM function: {str(e)}", exc_info=True)
-                    raise
-
-            # Create a sync wrapper for the async embedding function
-            async def embedding_func(texts):
-                try:
-                    embeddings = await self.model_service.get_embeddings(texts)
-                    return embeddings
-                except Exception as e:
-                    logger.error(
-                        f"Error in embedding function: {str(e)}", exc_info=True)
-                    raise
-
+            # Initialize LightRAG with MiniLM for queries
             self.rag = LightRAG(
                 working_dir=str(self.working_dir),
-                llm_model_func=llm_model_func,
+                llm_model_func=self._get_llm_func(),
+                llm_model_name=EXTRACTION_MODEL_NAME,
                 embedding_func=EmbeddingFunc(
-                    embedding_dim=768,
+                    embedding_dim=MINILM_DIM,
                     max_token_size=config.memory.max_chunk_tokens,
-                    func=embedding_func
+                    func=lambda texts: self.embedding_service.get_embeddings(
+                        texts, force_model="minilm")
                 ),
+                enable_llm_cache=True,
+                embedding_cache_config={
+                    "enabled": True,
+                    "similarity_threshold": 0.95,
+                    "max_size": EMBEDDING_CACHE_SIZE
+                },
+                chunk_token_size=256,
+                chunk_overlap_token_size=32,
                 kv_storage="JsonKVStorage",
                 vector_storage="NanoVectorDBStorage",
                 graph_storage="NetworkXStorage",
+                embedding_batch_num=BATCH_SIZE,
+                embedding_func_max_async=10,
+                llm_model_max_async=5,
                 addon_params={
                     "example_number": 3,
                     "language": "English",
-                    "mode": "hybrid",
+                    "mode": "local",
                 }
             )
 
-            # Initialize memory-specific components
+            # Initialize memory components
             self.ingestor = MemoryIngestor(self, self.datastore)
             self._initialized = True
+            logger.info("LightRAGManager initialized successfully")
 
         except Exception as e:
             logger.error(
                 f"Failed to initialize LightRAGManager: {str(e)}", exc_info=True)
+            # Clean up any partially initialized components
+            self._llm_semaphore = None
+            self.datastore = None
+            self.model_service = None
+            self.embedding_service = None
+            self.rag = None
+            self.ingestor = None
+            self._initialized = False
             raise
 
-    async def query_memory(self, query: str, only_need_context: bool = True) -> Optional[Dict[str, Any]]:
+    async def _wrapped_llm_func(self, prompt: str, system_prompt: Optional[str] = None, history_messages: Optional[List[Dict]] = None, **kwargs) -> str:
+        """Wrapped LLM function with proper error handling and streaming support."""
+        try:
+            messages = []
+            if system_prompt:
+                messages.append(
+                    {"role": "system", "content": system_prompt})
+            if history_messages:
+                messages.extend(history_messages)
+            messages.append({"role": "user", "content": prompt})
+
+            llm_params = kwargs.get("llm_params", {})
+            response_text = ""
+
+            max_tokens = llm_params.get("max_tokens", DEFAULT_MAX_TOKENS)
+            temperature = llm_params.get("temperature", 0.7)
+
+            async for chunk in self.model_service.chat(
+                messages=messages,
+                stream=True,
+                model=EXTRACTION_MODEL_NAME,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                enable_tools=False
+            ):
+                if isinstance(chunk, dict):
+                    response_text += chunk.get("content", "")
+                elif isinstance(chunk, str):
+                    response_text += chunk
+
+            return response_text
+
+        except Exception as e:
+            logger.error(f"Error in LLM function: {str(e)}", exc_info=True)
+            raise
+
+    def _get_llm_func(self):
+        """Get a picklable LLM function for LightRAG."""
+        async def llm_func(prompt: str, system_prompt: Optional[str] = None, history_messages: Optional[List[Dict]] = None, **kwargs) -> str:
+            return await self._wrapped_llm_func(prompt, system_prompt, history_messages, **kwargs)
+        return llm_func
+
+    async def query_memory(self, query: str, only_need_context: bool = True) -> Optional[MemoryResponse]:
         """Query memory for relevant information.
 
         Args:
             query: Query string to search memories
-            only_need_context: If True, only return the memory content without LLM processing
+            only_need_context: Whether to only return context without LLM processing
 
         Returns:
-            Dictionary containing memory content and metadata if found, None otherwise
+            Optional[MemoryResponse]: Structured memory response if found, None otherwise
         """
         if not self._initialized:
             await self.initialize()
 
-        try:
-            logger.debug(f"Querying memory with: {query}")
+        self.profiling_stats.total_query_calls += 1
+        with profile_operation(self.profiling_stats.query_times, "memory_query"):
+            try:
+                logger.info(f"Starting memory query with: {query}")
+                logger.info(f"Current working directory: {self.working_dir}")
 
-            # Create query parameters
-            query_param = QueryParam(
-                mode="hybrid",
-                stream=False,
-                response_type="natural",
-                top_k=5,
-                only_need_context=only_need_context
-            )
+                # Log the state of the memory stores
+                try:
+                    full_docs_count = len(
+                        self.rag.full_docs.client_storage.get("data", []))
+                    text_chunks_count = len(
+                        self.rag.text_chunks.client_storage.get("data", []))
+                    logger.info(
+                        f"Memory store state - Full docs: {full_docs_count}, Text chunks: {text_chunks_count}")
+                except Exception as e:
+                    logger.error(
+                        f"Error checking memory store state: {str(e)}")
 
-            # Get memory response from RAG
-            memory_response = await self.rag.aquery(query=query, param=query_param)
+                # Create query parameters with naive mode for direct vector similarity search
+                query_param = QueryParam(
+                    mode="naive",  # Use naive mode for direct vector similarity
+                    stream=False,
+                    top_k=10,  # Increase top_k for better recall
+                    only_need_context=only_need_context,
+                    max_token_for_local_context=3000,
+                    max_token_for_global_context=3000,
+                    max_token_for_text_unit=3000,
+                )
+                logger.info(f"Query parameters: {query_param}")
 
-            if not memory_response:
-                logger.debug("No memory found")
+                # Temporarily update embedding function for query
+                original_embedding_func = self.rag.embedding_func
+                try:
+                    # Set MiniLM embedding function for queries
+                    logger.info(
+                        "Setting up MiniLM embedding function for query")
+                    self.rag.embedding_func = EmbeddingFunc(
+                        embedding_dim=MINILM_DIM,
+                        max_token_size=config.memory.max_chunk_tokens,
+                        func=lambda texts: self.embedding_service.get_embeddings(
+                            texts,
+                            force_model="minilm"
+                        )
+                    )
+
+                    # Get memory response from RAG with timeout
+                    try:
+                        logger.info("Executing RAG query...")
+                        memory_response = await asyncio.wait_for(
+                            self.rag.aquery(query=query, param=query_param),
+                            timeout=30
+                        )
+
+                        # Log detailed response information
+                        logger.info(
+                            f"Raw memory response type: {type(memory_response)}")
+                        if isinstance(memory_response, str):
+                            logger.info(
+                                f"Raw memory response (str): {memory_response}")
+                            # Try to parse and log the structure
+                            try:
+                                chunks = memory_response.split("--New Chunk--")
+                                logger.info(
+                                    f"Number of chunks in response: {len(chunks)}")
+                                for i, chunk in enumerate(chunks):
+                                    # Log first 200 chars
+                                    logger.info(
+                                        f"Chunk {i} content: {chunk[:200]}...")
+                            except Exception as e:
+                                logger.error(
+                                    f"Error parsing string chunks: {str(e)}")
+                        else:
+                            logger.info(
+                                f"Raw memory response (dict): {json.dumps(memory_response, indent=2)}")
+                            if isinstance(memory_response, dict):
+                                logger.info(
+                                    f"Dict keys: {list(memory_response.keys())}")
+                                if "sources" in memory_response:
+                                    logger.info(
+                                        f"Number of sources: {len(memory_response['sources'])}")
+                                    for i, source in enumerate(memory_response["sources"]):
+                                        logger.info(
+                                            f"Source {i} metadata: {json.dumps(source.get('metadata', {}), indent=2)}")
+                                        logger.info(
+                                            f"Source {i} content preview: {source.get('content', '')[:200]}...")
+
+                    except asyncio.TimeoutError:
+                        logger.error("Memory query timed out after 30 seconds")
+                        return None
+                    except Exception as e:
+                        logger.error(
+                            f"Error during RAG query: {str(e)}", exc_info=True)
+                        return None
+                finally:
+                    # Restore original embedding function
+                    logger.info("Restoring original embedding function")
+                    self.rag.embedding_func = original_embedding_func
+
+                if not memory_response:
+                    logger.warning("No memory response received")
+                    return None
+
+                # Handle naive mode response format
+                if isinstance(memory_response, str):
+                    logger.info("Processing string response format")
+                    # Try to parse the string response
+                    try:
+                        chunks = memory_response.split("--New Chunk--")
+                        logger.info(
+                            f"Processing {len(chunks)} chunks from string response")
+                        for i, chunk in enumerate(chunks):
+                            try:
+                                chunk_data = json.loads(chunk.strip())
+                                logger.info(f"Successfully parsed chunk {i}")
+
+                                # Get content and metadata
+                                content = chunk_data.get("content", "").strip()
+                                metadata = chunk_data.get("metadata", {})
+
+                                # If we have content, create a response
+                                if content:
+                                    logger.info(
+                                        f"Found valid content in chunk {i}: {content}")
+                                    # Add required metadata fields if missing
+                                    if not metadata:
+                                        metadata = {
+                                            "memory_id": str(uuid.uuid4()),
+                                            "timestamp": datetime.now().isoformat(),
+                                            "embedding_model": "minilm"
+                                        }
+                                    else:
+                                        # Ensure required fields exist
+                                        if "memory_id" not in metadata:
+                                            metadata["memory_id"] = str(
+                                                uuid.uuid4())
+                                        if "timestamp" not in metadata:
+                                            metadata["timestamp"] = datetime.now(
+                                            ).isoformat()
+                                        if "embedding_model" not in metadata:
+                                            metadata["embedding_model"] = "minilm"
+
+                                    return MemoryResponse(
+                                        metadata=metadata,
+                                        content={
+                                            "user_message": metadata.get("user_message", content),
+                                            "assistant_response": metadata.get("assistant_response", ""),
+                                            "tool_response": metadata.get("tool_response")
+                                        }
+                                    )
+                                else:
+                                    logger.warning(f"Chunk {i} has no content")
+                            except json.JSONDecodeError as e:
+                                logger.error(
+                                    f"Failed to parse chunk {i}: {str(e)}")
+                                continue
+                    except Exception as e:
+                        logger.error(
+                            f"Error processing string response: {str(e)}", exc_info=True)
+
+                elif isinstance(memory_response, dict):
+                    logger.info("Processing dictionary response format")
+                    # Try to find the most relevant memory from the response
+                    if "sources" in memory_response:
+                        sources = memory_response["sources"]
+                        logger.info(
+                            f"Processing {len(sources)} sources from dict response")
+                        for i, source in enumerate(sources):
+                            content = source.get("content", "").strip()
+                            metadata = source.get("metadata", {})
+
+                            # If we have content, create a response
+                            if content:
+                                logger.info(
+                                    f"Found valid content in source {i}: {content}")
+                                # Add required metadata fields if missing
+                                if not metadata:
+                                    metadata = {
+                                        "memory_id": str(uuid.uuid4()),
+                                        "timestamp": datetime.now().isoformat(),
+                                        "embedding_model": "minilm"
+                                    }
+                                else:
+                                    # Ensure required fields exist
+                                    if "memory_id" not in metadata:
+                                        metadata["memory_id"] = str(
+                                            uuid.uuid4())
+                                    if "timestamp" not in metadata:
+                                        metadata["timestamp"] = datetime.now(
+                                        ).isoformat()
+                                    if "embedding_model" not in metadata:
+                                        metadata["embedding_model"] = "minilm"
+
+                                return MemoryResponse(
+                                    metadata=metadata,
+                                    content={
+                                        "user_message": metadata.get("user_message", content),
+                                        "assistant_response": metadata.get("assistant_response", ""),
+                                        "tool_response": metadata.get("tool_response")
+                                    }
+                                )
+                            else:
+                                logger.warning(f"Source {i} has no content")
+                    else:
+                        logger.warning("Dict response has no 'sources' key")
+
+                logger.warning(
+                    "No valid memory found in response after processing")
                 return None
 
-            # Parse the response
-            try:
-                if isinstance(memory_response, str):
-                    try:
-                        # Try to parse the JSON response
-                        metadata = json.loads(memory_response)
-                        # Extract content from metadata
-                        content = metadata.pop("content", "")
-                        return {
-                            "content": content,
-                            "metadata": metadata
-                        }
-                    except json.JSONDecodeError:
-                        # If not JSON, treat as raw content
-                        return {
-                            "content": memory_response,
-                            "metadata": {
-                                "timestamp": datetime.now().isoformat(),
-                                "content_type": "text",
-                                "source": "raw_response"
-                            }
-                        }
-                else:
-                    logger.warning(
-                        f"Unexpected response type: {type(memory_response)}")
-                    return {
-                        "content": str(memory_response),
-                        "metadata": {
-                            "timestamp": datetime.now().isoformat(),
-                            "content_type": "text",
-                            "source": "unknown_format"
-                        }
-                    }
-
-            except Exception as parse_error:
+            except Exception as e:
                 logger.error(
-                    f"Error parsing memory response: {parse_error}", exc_info=True)
-                return {
-                    "content": str(memory_response),
-                    "metadata": {
-                        "timestamp": datetime.now().isoformat(),
-                        "content_type": "text",
-                        "source": "parse_error"
-                    }
-                }
-
-        except Exception as e:
-            logger.error(f"Error querying memory: {e}", exc_info=True)
-            return None
+                    f"Unexpected error in query_memory: {str(e)}", exc_info=True)
+                return None
 
     async def store_memory(self, text: str, metadata: Optional[Dict] = None) -> str:
         """Store a new memory with metadata.
 
-        This method is designed to be run in the background. It handles:
-        1. Storing in SQL database
-        2. Storing in LightRAG with proper formatting
-        3. Processing and embedding content
-
         Args:
-            text: The text content to store (user's message)
-            metadata: Optional metadata about the memory including:
-                - request_id: Unique request identifier
-                - model: The model used
-                - message_count: Number of messages in conversation
-                - has_tool_calls: Whether tool calls were made
-                - enable_tools: Whether tools were enabled
-                - timestamp: ISO format timestamp
-                - temperature: Model temperature
-                - max_tokens: Model max tokens
-                - user_message: Last user message
-                - assistant_response: Assistant's response
-                - tool_response: Tool response if any
+            text: The user's message or file content to store
+            metadata: Additional metadata for the memory
+            is_file: Whether this is a file memory
 
         Returns:
-            str: The unique memory ID
+            str: The memory ID
         """
         if not self._initialized:
             await self.initialize()
 
-        memory_id = str(uuid.uuid4())
-        try:
-            # Ensure required metadata fields
-            base_metadata = {
-                "memory_id": memory_id,
-                "timestamp": datetime.now().isoformat(),
-                "content_type": "chat_memory"
-            }
+        self.profiling_stats.total_store_calls += 1
+        with profile_operation(self.profiling_stats.store_times, "memory_store"):
+            if not self.datastore:
+                raise ValueError("Datastore not initialized")
 
-            # Merge with provided metadata, ensuring no None values
-            full_metadata = {
-                **base_metadata,
-                **{k: v for k, v in (metadata or {}).items() if v is not None}
-            }
+            memory_id = str(uuid.uuid4())
+            try:
+                # Create metadata dictionary
+                base_metadata = {
+                    "memory_id": memory_id,
+                    "timestamp": datetime.now().isoformat(),
+                    "content_type": "chat_memory",
+                    "chunk_size": 512,
+                    "max_tokens": DEFAULT_MAX_TOKENS,
+                    "temperature": 0.7,
+                    "embedding_model": "minilm"  # Always use minilm
+                }
 
-            # Store in datastore for SQL-based querying (sync operation)
-            self.datastore.store_entity(
-                entity_id=memory_id,
-                text=text,  # This is the user's message
-                metadata=full_metadata
-            )
+                # Merge metadata
+                full_metadata = {
+                    **base_metadata,
+                    **{k: v for k, v in (metadata or {}).items() if v is not None}
+                }
 
-            # Format the conversation content
-            conversation_content = {
-                "user_message": full_metadata.get("user_message", text),
-                "assistant_response": full_metadata.get("assistant_response", ""),
-                "tool_response": full_metadata.get("tool_response")
-            }
+                # Store metadata in SQL database
+                await self.datastore.store_entity(
+                    entity_id=memory_id,
+                    text=text,
+                    metadata=full_metadata
+                )
 
-            # Store in LightRAG with conversation content and metadata
-            memory_data = {
-                **full_metadata,
-                "content": conversation_content  # Store structured conversation content
-            }
+                # Store memory in LightRAG with consistent MiniLM embeddings
+                original_embedding_func = self.rag.embedding_func
+                try:
+                    # Set MiniLM embedding function for storage
+                    self.rag.embedding_func = EmbeddingFunc(
+                        embedding_dim=MINILM_DIM,
+                        max_token_size=config.memory.max_chunk_tokens,
+                        func=lambda texts: self.embedding_service.get_embeddings(
+                            texts,
+                            force_model="minilm"
+                        )
+                    )
+                    # Insert memory
+                    await self.rag.ainsert([text], metadata=[full_metadata])
+                finally:
+                    # Restore original embedding function
+                    self.rag.embedding_func = original_embedding_func
 
-            # Convert to JSON for storage and store in LightRAG (async operation)
-            memory_json = json.dumps(memory_data, indent=2)
-            await self.rag.ainsert([memory_json])
+                logger.info(f"Memory stored with ID: {memory_id}")
+                return memory_id
 
-            logger.info(f"Memory stored with ID: {memory_id} and metadata")
-            return memory_id
-
-        except Exception as e:
-            logger.error(f"Error storing memory: {e}", exc_info=True)
-            raise
+            except Exception as e:
+                logger.error(f"Error storing memory: {e}", exc_info=True)
+                raise
 
     async def store_file(self, file_path: Union[str, Path]) -> bool:
         """Store a file as memory.

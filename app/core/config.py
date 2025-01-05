@@ -62,6 +62,7 @@ class MemoryConfig(BaseModel):
     chunk_size: int = Field(default=512)
     max_chunk_tokens: int = Field(default=1024)
     openai_embedding_model: str = Field(default="text-embedding-ada-002")
+    max_content_length: int = 10000  # Maximum length for memory content
 
 
 class AppConfig(BaseModel):

@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, TypeVar, Any
 from pathlib import Path
 from app.core.config import config
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -27,10 +28,20 @@ class MemoryDatastore:
         self.db_path = Path(db_path) if db_path else Path(
             config.LIGHTRAG_DATA_DIR) / "memory.db"
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self._initialized = False
 
-        # Initialize database
-        self._ensure_tables()
-        logger.debug(f"Memory datastore initialized at {self.db_path}")
+    async def initialize(self) -> 'MemoryDatastore':
+        """Initialize the database asynchronously.
+
+        Returns:
+            self: The initialized datastore instance
+        """
+        if not self._initialized:
+            # Initialize database
+            self._ensure_tables()
+            self._initialized = True
+            logger.debug(f"Memory datastore initialized at {self.db_path}")
+        return self
 
     def _connect(self) -> sqlite3.Connection:
         """Create a database connection with proper configuration."""
@@ -235,7 +246,7 @@ class MemoryDatastore:
             f"Failed to search entities with hash {content_hash}"
         )
 
-    def store_entity(self, entity_id: str, text: str, metadata: Optional[Dict] = None) -> None:
+    async def store_entity(self, entity_id: str, text: str, metadata: Optional[Dict] = None) -> None:
         """Store a memory entity with its metadata.
 
         Args:
@@ -264,50 +275,54 @@ class MemoryDatastore:
                         (entity_id, key, str(value))
                     )
 
-        self._execute_with_connection(
-            operation,
-            f"Failed to store entity {entity_id}"
+        await asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: self._execute_with_connection(
+                operation,
+                f"Failed to store entity {entity_id}"
+            )
         )
 
-    def get_memory_metadata(self, memory_id: str) -> Optional[Dict[str, Any]]:
-        """Get metadata for a memory entity.
+    async def get_memory_metadata(self, memory_id: str) -> Optional[Dict[str, Any]]:
+        """Get metadata and content for a memory entity.
 
         Args:
             memory_id: ID of the memory entity
 
         Returns:
-            Dictionary containing memory metadata if found, None otherwise
+            Dictionary containing memory data if found, None otherwise
         """
         def operation(cursor):
-            # Get the entity metadata (stored as JSON)
+            # Get the entity data and metadata
             cursor.execute("""
-                SELECT metadata FROM entities
-                WHERE id = ?
+                SELECT e.id, e.text, e.content_hash, e.created_at,
+                       json_group_object(m.key, m.value) as metadata
+                FROM entities e
+                LEFT JOIN metadata m ON e.id = m.entity_id
+                WHERE e.id = ?
+                GROUP BY e.id
             """, (memory_id,))
-            entity_result = cursor.fetchone()
 
-            if not entity_result:
+            result = cursor.fetchone()
+            if not result:
                 return None
 
-            # Parse the JSON metadata
+            # Parse the metadata JSON
             try:
-                metadata = json.loads(entity_result['metadata'])
+                metadata = json.loads(
+                    result['metadata']) if result['metadata'] else {}
             except (json.JSONDecodeError, KeyError):
                 metadata = {}
 
-            # Get additional metadata from the metadata table
-            cursor.execute("""
-                SELECT key, value FROM metadata
-                WHERE entity_id = ?
-            """, (memory_id,))
-
-            # Merge metadata from both sources
-            for row in cursor.fetchall():
-                metadata[row['key']] = row['value']
-
-            return {"metadata": metadata} if metadata else None
+            return {
+                "id": result['id'],
+                "text": result['text'],
+                "content_hash": result['content_hash'],
+                "created_at": result['created_at'],
+                "metadata": metadata
+            }
 
         return self._execute_with_connection(
             operation,
-            f"Failed to get metadata for memory: {memory_id}"
+            f"Failed to get memory data for: {memory_id}"
         )

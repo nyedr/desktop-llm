@@ -71,5 +71,5 @@ dependencies:
       - textract==1.5.0
 
       # Memory
-      - lightrag-hku>=1.0.8
+      - git+https://github.com/nyedr/LightRAG.git
       - nano_vectordb>=0.0.4.3

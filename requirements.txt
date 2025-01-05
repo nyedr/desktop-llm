@@ -63,4 +63,4 @@ textract==1.5.0
 
 # Memory
 nano_vectordb>=0.0.4.3
-lightrag-hku>=1.0.8
+git+https://github.com/nyedr/LightRAG.git

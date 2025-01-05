@@ -18,6 +18,12 @@
 - [x] Fix filters
 - [ ] Make a storage server that will embed and store the messages in the background, right now subsequent messages can cause delays due to the embedding process
 - [ ] File (file storage as well) and image processing logic
+- [x] Massively optimize the memory retrieval pipeline
+- [ ] Get memory working with the new lightrag
+- [ ] Fix model function calling (function calls work but the model is not being reprompted with their responses)
+- [ ] Make lightrag more performant?
+- [ ] Make the memory retrieval pipeline more performant?
+- [ ] Ensure pipelines are properly implemented as intended
 
 you ask something the AI thinks it can use a function to answer
 the AI calls the function chart_hits_per_artist(genre, search_years)

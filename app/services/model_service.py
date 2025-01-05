@@ -6,6 +6,7 @@ import uuid
 from openai import AsyncOpenAI
 import openai
 import asyncio
+import numpy as np
 
 from app.core.config import config
 from app.models.chat import StrictChatMessage
@@ -107,7 +108,7 @@ class ModelService:
         """Initialize configuration parameters."""
         self.request_timeout = config.llm.timeout
         self.generation_timeout = config.llm.timeout
-        self.default_model = "deepseek/deepseek-chat"  # Set default model
+        self.default_model = "deepseek/deepseek-chat"
         self.temperature = config.llm.temperature
         self.max_tokens = config.llm.max_tokens
         self.function_calls_enabled = config.llm.enable_tools
@@ -133,7 +134,7 @@ class ModelService:
                     "HTTP-Referer": "http://localhost:8001",
                     "X-Title": "Desktop LLM"
                 }
-                
+
             )
         except Exception as e:
             raise CompletionProviderError(
@@ -142,10 +143,50 @@ class ModelService:
     def _init_embeddings(self):
         """Initialize embeddings configuration."""
         try:
-            logger.info("Using Ollama nomic-embed-text model for embeddings")
+            self.embedding_provider = "ollama"  # Set default provider
+            self.embedding_model = config.memory.default_embedding_model
+            logger.info(
+                f"Using Ollama {self.embedding_model} model for embeddings")
         except Exception as e:
             raise EmbeddingProviderError(
                 f"Failed to initialize embedding configuration: {e}")
+
+    async def _get_ollama_embeddings(
+        self,
+        texts: List[str],
+        batch_size: int = 32,
+        **kwargs
+    ) -> List[List[float]]:
+        """Get embeddings using Ollama.
+
+        Args:
+            texts: List of texts to embed
+            batch_size: Number of texts to process in each batch
+            **kwargs: Additional arguments to pass to the embedding model
+
+        Returns:
+            List of embeddings as numpy arrays
+        """
+        try:
+            all_embeddings = []
+
+            # Process in batches
+            for i in range(0, len(texts), batch_size):
+                batch = texts[i:i + batch_size]
+                batch_embeddings = await ollama_embedding(
+                    batch,
+                    embed_model=self.embedding_model,
+                    host="http://localhost:11434"
+                )
+                # Convert to numpy arrays
+                batch_embeddings = [
+                    np.array(emb, dtype=np.float32) for emb in batch_embeddings]
+                all_embeddings.extend(batch_embeddings)
+
+            return all_embeddings
+        except ImportError:
+            logger.error("numpy is required for embeddings")
+            raise EmbeddingProviderError("numpy is required for embeddings")
 
     def _get_request_id(self) -> str:
         """Get a unique request ID."""
@@ -154,23 +195,52 @@ class ModelService:
     async def get_embeddings(
         self,
         texts: Union[str, List[str]],
-    ) -> List[List[float]]:
-        """Get embeddings using Ollama with nomic-embed-text model."""
-        try:
-            if isinstance(texts, str):
-                texts = [texts]
+        request_timeout: int = 30,
+        **kwargs
+    ) -> Union[List[float], List[List[float]]]:
+        """Get embeddings for text using the configured embedding model.
 
-            embeddings = await ollama_embedding(
-                texts,
-                embed_model="nomic-embed-text",
-                host="http://localhost:11434"
-            )
-            logger.debug(f"Generated {len(embeddings)} embeddings")
-            return embeddings
+        Args:
+            texts: Text or list of texts to get embeddings for
+            request_timeout: Timeout in seconds for the request
+            **kwargs: Additional arguments to pass to the embedding model
+
+        Returns:
+            List of embeddings (list of floats) or single embedding if input was a string
+        """
+        try:
+            # Handle single text input
+            single_input = isinstance(texts, str)
+            texts_list = [texts] if single_input else texts
+
+            # Get embeddings with timeout
+            try:
+                embeddings = await asyncio.wait_for(
+                    self._get_embeddings_impl(texts_list, **kwargs),
+                    timeout=request_timeout
+                )
+                return embeddings[0] if single_input else embeddings
+            except asyncio.TimeoutError:
+                raise EmbeddingProviderError("Embedding request timed out")
+            except Exception as e:
+                raise EmbeddingProviderError(
+                    f"Failed to get embeddings: {str(e)}")
 
         except Exception as e:
-            logger.error(f"Error getting embeddings: {e}")
-            raise EmbeddingProviderError(f"Failed to get embeddings: {e}")
+            logger.error(f"Error getting embeddings: {str(e)}", exc_info=True)
+            raise EmbeddingProviderError(f"Failed to get embeddings: {str(e)}")
+
+    async def _get_embeddings_impl(
+        self,
+        texts: List[str],
+        **kwargs
+    ) -> List[List[float]]:
+        """Implementation of embedding generation."""
+        if self.embedding_provider == "ollama":
+            return await self._get_ollama_embeddings(texts, **kwargs)
+        else:
+            raise ValueError(
+                f"Unsupported embedding provider: {self.embedding_provider}")
 
     async def chat(
         self,

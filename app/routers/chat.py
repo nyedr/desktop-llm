@@ -29,7 +29,8 @@ async def process_chat_context(
     request_id: str,
     messages: list[StrictChatMessage],
     model: Optional[str] = None,
-    max_tokens: Optional[int] = None
+    max_tokens: Optional[int] = None,
+    enable_memory: bool = True
 ) -> list[dict]:
     """Process chat messages through the context service."""
     try:
@@ -37,7 +38,8 @@ async def process_chat_context(
             request_id=request_id,
             messages=messages,
             model=model,
-            max_tokens=max_tokens
+            max_tokens=max_tokens,
+            enable_memory=enable_memory
         ) as context:
             return context.get_context_window()
     except Exception as e:
@@ -121,7 +123,8 @@ async def stream_chat_response(
             request_id=request_id,
             messages=messages,
             model=model,
-            max_tokens=chat_request.max_tokens
+            max_tokens=chat_request.max_tokens,
+            enable_memory=chat_request.enable_memory
         )
 
         logger.debug(

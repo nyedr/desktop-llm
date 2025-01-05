@@ -8,6 +8,7 @@ from datetime import datetime
 
 from app.core.config import config
 from app.models.chat import StrictChatMessage, ChatRole
+from app.models.memory import MemoryResponse
 from app.dependencies.providers import Providers
 from app.utils.utils import format_timestamp
 
@@ -30,7 +31,8 @@ class LLMContext:
         request_id: str,
         messages: List[StrictChatMessage],
         model: Optional[str] = None,
-        max_tokens: Optional[int] = None
+        max_tokens: Optional[int] = None,
+        enable_memory: bool = True,
     ):
         """Initialize LLM context.
 
@@ -39,11 +41,13 @@ class LLMContext:
             messages: List of chat messages
             model: LLM model to use
             max_tokens: Maximum tokens for response
+            enable_memory: Whether to use memory retrieval (default: True)
         """
         self.request_id = request_id
         self.messages = messages
         self.model = model or config.llm.model
         self.max_tokens = max_tokens or config.llm.max_tokens
+        self.enable_memory = enable_memory
 
         # Reserve tokens for system message and memory context
         # Reserve 20% for system and memory
@@ -125,8 +129,15 @@ class LLMContext:
                 total_tokens += system_tokens
                 processed.append(system_msg)
 
-            # Process each message and retrieve relevant memories
-            for msg in self.messages:
+            # Find the most recent user message
+            last_user_msg_index = -1
+            for i, msg in enumerate(reversed(self.messages)):
+                if self._get_message_value(msg, "role") == ChatRole.USER:
+                    last_user_msg_index = len(self.messages) - 1 - i
+                    break
+
+            # Process each message
+            for i, msg in enumerate(self.messages):
                 # Skip if we'd exceed token limit
                 msg_tokens = self.count_message_tokens(msg)
                 if total_tokens + msg_tokens > self.available_tokens:
@@ -142,8 +153,8 @@ class LLMContext:
                 else:
                     processed_msg = await self._process_text_message(msg)
 
-                # Retrieve relevant memories for user messages
-                if self._get_message_value(msg, "role") == ChatRole.USER:
+                # Retrieve relevant memories only for the most recent user message if memory is enabled
+                if self.enable_memory and i == last_user_msg_index:
                     query = self._get_message_value(
                         processed_msg, "content", "")
                     memories = await self._retrieve_relevant_memories(query)
@@ -164,7 +175,8 @@ class LLMContext:
 
             self.processed_messages = processed
             logger.debug(
-                f"[{self.request_id}] Processed {len(processed)} messages with {len(self.context_sources['memory'])} memories")
+                f"[{self.request_id}] Processed {len(processed)} messages with {len(self.context_sources['memory'])} memories"
+                f" (memory {'enabled' if self.enable_memory else 'disabled'})")
 
         except Exception as e:
             logger.error(
@@ -173,19 +185,11 @@ class LLMContext:
 
     def _create_system_message(self) -> Dict[str, Any]:
         """Create the base system message with context awareness."""
+        from app.core.prompts import get_system_prompt
+
         return {
             "role": ChatRole.SYSTEM,
-            "content": (
-                "You are an AI assistant with access to a long-term memory system. "
-                "You will receive context from two main sources:\n\n"
-                "1. Current Conversation - The ongoing chat messages\n"
-                "2. Retrieved Memories - Relevant information from past interactions\n\n"
-                "Guidelines for using context:\n"
-                "- When referencing memories, cite them as [Memory X]\n"
-                "- Use memories to provide more informed and consistent responses\n"
-                "- Maintain continuity with past interactions when relevant\n"
-                "- Be explicit when using information from memories\n"
-            ),
+            "content": get_system_prompt(self.enable_memory),
             "metadata": {"type": "system"}
         }
 
@@ -199,62 +203,76 @@ class LLMContext:
             List of formatted memory messages with metadata
         """
         try:
+            if not self.memory_manager or not self.memory_manager._initialized:
+                logger.warning(
+                    f"[{self.request_id}] Memory manager not available or not initialized")
+                return []
+
             logger.debug(
                 f"[{self.request_id}] Retrieving memories for query: {query}")
             memories = []
 
             # Get memory response with metadata
-            memory_response = await self.memory_manager.query_memory(query)
+            try:
+                memory_response: Optional[MemoryResponse] = await self.memory_manager.query_memory(query)
+            except Exception as e:
+                logger.error(f"[{self.request_id}] Error querying memory: {e}")
+                return []
 
             # Format memory if we got a response
             if memory_response:
-                metadata = memory_response["metadata"]
-                content = memory_response.get("content", {})
-
-                # Parse timestamp with error handling
                 try:
-                    timestamp = datetime.fromisoformat(
-                        metadata.get("timestamp", ""))
-                except (ValueError, TypeError):
-                    timestamp = datetime.now()  # Fallback to current time if parsing fails
+                    # Format timestamp
+                    formatted_time = memory_response.metadata.timestamp.strftime(
+                        "%Y-%m-%d %H:%M:%S")
+                    time_from_now = datetime.now() - memory_response.metadata.timestamp
+                    time_from_now_str = format_timestamp(time_from_now)
 
-                formatted_time = timestamp.strftime("%Y-%m-%d %H:%M:%S")
-                time_from_now = datetime.now() - timestamp
-                time_from_now_str = format_timestamp(time_from_now)
+                    # Format metadata for LLM, excluding internal fields
+                    internal_fields = {
+                        "memory_id", "timestamp", "request_id", "content_type",
+                        "content", "source", "chunk_index", "token_count",
+                        "user_message", "assistant_response", "tool_response"
+                    }
+                    metadata_dict = memory_response.metadata.model_dump()
+                    metadata_str = "\n".join([
+                        f"- {key}: {value}"
+                        for key, value in metadata_dict.items()
+                        if key not in internal_fields and value is not None
+                    ])
 
-                # Format metadata for LLM, excluding internal fields
-                internal_fields = {
-                    "memory_id", "timestamp", "request_id", "content_type",
-                    "content", "source", "chunk_index", "token_count",
-                    "user_message", "assistant_response", "tool_response"
-                }
-                metadata_str = "\n".join([
-                    f"- {key}: {value}"
-                    for key, value in metadata.items()
-                    if key not in internal_fields and value is not None
-                ])
-
-                # Format conversation content
-                if isinstance(content, dict):
+                    # Format conversation content
                     conversation_str = (
-                        f"User: {content.get('user_message', '')}\n"
-                        f"Assistant: {content.get('assistant_response', '')}"
+                        f"User: {memory_response.content.user_message}\n"
+                        f"Assistant: {memory_response.content.assistant_response}"
                     )
-                    if content.get('tool_response'):
-                        conversation_str += f"\nTool Response: {content['tool_response']}"
-                else:
-                    conversation_str = str(content)
+                    if memory_response.content.tool_response:
+                        conversation_str += f"\nTool Response: {memory_response.content.tool_response}"
 
-                # Create memory message with metadata context
-                memory_message = {
-                    "role": ChatRole.SYSTEM,
-                    "content": (
-                        f"[Memory from {time_from_now_str} ({formatted_time})]\n"
-                        f"Context:\n{metadata_str}\n\n"
-                        f"Conversation:\n{conversation_str}"
-                    )
-                }
-                memories.append(memory_message)
+                    # Create memory message with metadata context
+                    memory_message = {
+                        "role": ChatRole.SYSTEM,
+                        "content": (
+                            f"[Memory from {time_from_now_str} ({formatted_time})]\n"
+                            f"Context:\n{metadata_str}\n\n"
+                            f"Conversation:\n{conversation_str}"
+                        ),
+                        "metadata": {"type": "memory"}
+                    }
+                    memories.append(memory_message)
+
+                except Exception as e:
+                    logger.error(
+                        f"[{self.request_id}] Error formatting memory response: {e}", exc_info=True)
+                    # Try to create a simple memory message if formatting fails
+                    try:
+                        memories.append({
+                            "role": ChatRole.SYSTEM,
+                            "content": f"[Memory] User: {memory_response.content.user_message}",
+                            "metadata": {"type": "memory"}
+                        })
+                    except:
+                        pass
 
             logger.debug(
                 f"[{self.request_id}] Retrieved {len(memories)} relevant memories")
