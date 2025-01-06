@@ -13,7 +13,7 @@ from contextlib import contextmanager
 from app.core.config import config
 from .datastore import MemoryDatastore
 from .ingestion import MemoryIngestor
-from .embeddings import EmbeddingService, MINILM_DIM, NOMIC_DIM, BATCH_SIZE
+from .embeddings import EmbeddingService, MINILM_DIM, BATCH_SIZE
 from app.models.memory import MemoryResponse
 from app.services.model_service import ModelService
 from lightrag import LightRAG
@@ -252,73 +252,54 @@ class LightRAGManager:
                 )
                 logger.info(f"Query parameters: {query_param}")
 
-                # Temporarily update embedding function for query
-                original_embedding_func = self.rag.embedding_func
+                # Get memory response from RAG with timeout
                 try:
-                    # Set MiniLM embedding function for queries
-                    logger.info(
-                        "Setting up MiniLM embedding function for query")
-                    self.rag.embedding_func = EmbeddingFunc(
-                        embedding_dim=MINILM_DIM,
-                        max_token_size=config.memory.max_chunk_tokens,
-                        func=lambda texts: self.embedding_service.get_embeddings(
-                            texts,
-                            force_model="minilm"
-                        )
+                    logger.info("Executing RAG query...")
+                    memory_response = await asyncio.wait_for(
+                        self.rag.aquery(query=query, param=query_param),
+                        timeout=30
                     )
 
-                    # Get memory response from RAG with timeout
-                    try:
-                        logger.info("Executing RAG query...")
-                        memory_response = await asyncio.wait_for(
-                            self.rag.aquery(query=query, param=query_param),
-                            timeout=30
-                        )
-
-                        # Log detailed response information
+                    # Log detailed response information
+                    logger.info(
+                        f"Raw memory response type: {type(memory_response)}")
+                    if isinstance(memory_response, str):
                         logger.info(
-                            f"Raw memory response type: {type(memory_response)}")
-                        if isinstance(memory_response, str):
+                            f"Raw memory response (str): {memory_response}")
+                        # Try to parse and log the structure
+                        try:
+                            chunks = memory_response.split("--New Chunk--")
                             logger.info(
-                                f"Raw memory response (str): {memory_response}")
-                            # Try to parse and log the structure
-                            try:
-                                chunks = memory_response.split("--New Chunk--")
+                                f"Number of chunks in response: {len(chunks)}")
+                            for i, chunk in enumerate(chunks):
+                                # Log first 200 chars
                                 logger.info(
-                                    f"Number of chunks in response: {len(chunks)}")
-                                for i, chunk in enumerate(chunks):
-                                    # Log first 200 chars
-                                    logger.info(
-                                        f"Chunk {i} content: {chunk[:200]}...")
-                            except Exception as e:
-                                logger.error(
-                                    f"Error parsing string chunks: {str(e)}")
-                        else:
+                                    f"Chunk {i} content: {chunk[:200]}...")
+                        except Exception as e:
+                            logger.error(
+                                f"Error parsing string chunks: {str(e)}")
+                    else:
+                        logger.info(
+                            f"Raw memory response (dict): {json.dumps(memory_response, indent=2)}")
+                        if isinstance(memory_response, dict):
                             logger.info(
-                                f"Raw memory response (dict): {json.dumps(memory_response, indent=2)}")
-                            if isinstance(memory_response, dict):
+                                f"Dict keys: {list(memory_response.keys())}")
+                            if "sources" in memory_response:
                                 logger.info(
-                                    f"Dict keys: {list(memory_response.keys())}")
-                                if "sources" in memory_response:
+                                    f"Number of sources: {len(memory_response['sources'])}")
+                                for i, source in enumerate(memory_response["sources"]):
                                     logger.info(
-                                        f"Number of sources: {len(memory_response['sources'])}")
-                                    for i, source in enumerate(memory_response["sources"]):
-                                        logger.info(
-                                            f"Source {i} metadata: {json.dumps(source.get('metadata', {}), indent=2)}")
-                                        logger.info(
-                                            f"Source {i} content preview: {source.get('content', '')[:200]}...")
+                                        f"Source {i} metadata: {json.dumps(source.get('metadata', {}), indent=2)}")
+                                    logger.info(
+                                        f"Source {i} content preview: {source.get('content', '')[:200]}...")
 
-                    except asyncio.TimeoutError:
-                        logger.error("Memory query timed out after 30 seconds")
-                        return None
-                    except Exception as e:
-                        logger.error(
-                            f"Error during RAG query: {str(e)}", exc_info=True)
-                        return None
-                finally:
-                    # Restore original embedding function
-                    logger.info("Restoring original embedding function")
-                    self.rag.embedding_func = original_embedding_func
+                except asyncio.TimeoutError:
+                    logger.error("Memory query timed out after 30 seconds")
+                    return None
+                except Exception as e:
+                    logger.error(
+                        f"Error during RAG query: {str(e)}", exc_info=True)
+                    return None
 
                 if not memory_response:
                     logger.warning("No memory response received")
@@ -481,23 +462,8 @@ class LightRAGManager:
                     metadata=full_metadata
                 )
 
-                # Store memory in LightRAG with consistent MiniLM embeddings
-                original_embedding_func = self.rag.embedding_func
-                try:
-                    # Set MiniLM embedding function for storage
-                    self.rag.embedding_func = EmbeddingFunc(
-                        embedding_dim=MINILM_DIM,
-                        max_token_size=config.memory.max_chunk_tokens,
-                        func=lambda texts: self.embedding_service.get_embeddings(
-                            texts,
-                            force_model="minilm"
-                        )
-                    )
-                    # Insert memory
-                    await self.rag.ainsert([text], metadata=[full_metadata])
-                finally:
-                    # Restore original embedding function
-                    self.rag.embedding_func = original_embedding_func
+                # Store memory in LightRAG
+                await self.rag.ainsert([text], metadata=[full_metadata])
 
                 logger.info(f"Memory stored with ID: {memory_id}")
                 return memory_id
