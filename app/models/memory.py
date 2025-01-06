@@ -1,9 +1,10 @@
 """Models for memory operations."""
 from datetime import datetime
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
+import uuid
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class MemoryContent(BaseModel):
@@ -28,9 +29,17 @@ class MemoryMetadata(BaseModel):
     has_tool_calls: bool = Field(default=False)
     enable_tools: bool = Field(default=True)
 
-    @validator('timestamp', pre=True)
-    def parse_timestamp(cls, v):
-        """Parse timestamp from string if needed."""
+    @field_validator('timestamp', mode='before')
+    @classmethod
+    def parse_timestamp(cls, v: Any) -> datetime:
+        """Parse timestamp from string if needed.
+
+        Args:
+            v: The value to parse
+
+        Returns:
+            datetime: Parsed datetime object
+        """
         if isinstance(v, str):
             return datetime.fromisoformat(v)
         return v
@@ -80,3 +89,77 @@ class MemoryResponse(BaseModel):
             except Exception as e:
                 raise ValueError(f"Failed to parse memory response: {e}")
         raise ValueError("Invalid memory response format")
+
+    @classmethod
+    def from_lightrag_response(cls, response: Union[str, Dict[str, Any]], default_metadata: Optional[Dict[str, Any]] = None) -> Optional['MemoryResponse']:
+        """Create a MemoryResponse from a LightRAG response.
+
+        Args:
+            response: Raw response from LightRAG (string or dict format)
+            default_metadata: Default metadata to use if not present in response
+
+        Returns:
+            Optional[MemoryResponse]: Structured memory response if valid, None otherwise
+        """
+        if not response:
+            return None
+
+        try:
+            # Handle string response format (naive mode)
+            if isinstance(response, str):
+                chunks = response.split("--New Chunk--")
+                for chunk in chunks:
+                    try:
+                        chunk_data = json.loads(chunk.strip())
+                        content = chunk_data.get("content", "").strip()
+                        metadata = chunk_data.get("metadata", {})
+
+                        if content:
+                            return cls._create_response(content, metadata, default_metadata)
+                    except json.JSONDecodeError:
+                        continue
+
+            # Handle dictionary response format
+            elif isinstance(response, dict) and "sources" in response:
+                sources = response["sources"]
+                for source in sources:
+                    content = source.get("content", "").strip()
+                    metadata = source.get("metadata", {})
+
+                    if content:
+                        return cls._create_response(content, metadata, default_metadata)
+
+            return None
+
+        except Exception as e:
+            raise ValueError(f"Failed to parse LightRAG response: {e}")
+
+    @classmethod
+    def _create_response(cls, content: str, metadata: Dict[str, Any], default_metadata: Optional[Dict[str, Any]] = None) -> 'MemoryResponse':
+        """Create a standardized MemoryResponse with complete metadata.
+
+        Args:
+            content: Content string
+            metadata: Existing metadata
+            default_metadata: Default metadata to use if not present
+
+        Returns:
+            MemoryResponse: Properly structured memory response
+        """
+        # Ensure required metadata fields exist
+        complete_metadata = {
+            "memory_id": str(uuid.uuid4()),
+            "timestamp": datetime.now().isoformat(),
+            "embedding_model": "minilm",
+            **(default_metadata or {}),
+            **metadata
+        }
+
+        return cls(
+            metadata=MemoryMetadata(**complete_metadata),
+            content=MemoryContent(
+                user_message=metadata.get("user_message", content),
+                assistant_response=metadata.get("assistant_response", ""),
+                tool_response=metadata.get("tool_response")
+            )
+        )

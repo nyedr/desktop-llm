@@ -259,39 +259,8 @@ class LightRAGManager:
                         self.rag.aquery(query=query, param=query_param),
                         timeout=30
                     )
-
-                    # Log detailed response information
                     logger.info(
                         f"Raw memory response type: {type(memory_response)}")
-                    if isinstance(memory_response, str):
-                        logger.info(
-                            f"Raw memory response (str): {memory_response}")
-                        # Try to parse and log the structure
-                        try:
-                            chunks = memory_response.split("--New Chunk--")
-                            logger.info(
-                                f"Number of chunks in response: {len(chunks)}")
-                            for i, chunk in enumerate(chunks):
-                                # Log first 200 chars
-                                logger.info(
-                                    f"Chunk {i} content: {chunk[:200]}...")
-                        except Exception as e:
-                            logger.error(
-                                f"Error parsing string chunks: {str(e)}")
-                    else:
-                        logger.info(
-                            f"Raw memory response (dict): {json.dumps(memory_response, indent=2)}")
-                        if isinstance(memory_response, dict):
-                            logger.info(
-                                f"Dict keys: {list(memory_response.keys())}")
-                            if "sources" in memory_response:
-                                logger.info(
-                                    f"Number of sources: {len(memory_response['sources'])}")
-                                for i, source in enumerate(memory_response["sources"]):
-                                    logger.info(
-                                        f"Source {i} metadata: {json.dumps(source.get('metadata', {}), indent=2)}")
-                                    logger.info(
-                                        f"Source {i} content preview: {source.get('content', '')[:200]}...")
 
                 except asyncio.TimeoutError:
                     logger.error("Memory query timed out after 30 seconds")
@@ -305,112 +274,20 @@ class LightRAGManager:
                     logger.warning("No memory response received")
                     return None
 
-                # Handle naive mode response format
-                if isinstance(memory_response, str):
-                    logger.info("Processing string response format")
-                    # Try to parse the string response
-                    try:
-                        chunks = memory_response.split("--New Chunk--")
-                        logger.info(
-                            f"Processing {len(chunks)} chunks from string response")
-                        for i, chunk in enumerate(chunks):
-                            try:
-                                chunk_data = json.loads(chunk.strip())
-                                logger.info(f"Successfully parsed chunk {i}")
+                # Create default metadata for response
+                default_metadata = {
+                    "content_type": "chat_memory",
+                    "chunk_size": 512,
+                    "max_tokens": DEFAULT_MAX_TOKENS,
+                    "temperature": 0.7,
+                    "embedding_model": "minilm"
+                }
 
-                                # Get content and metadata
-                                content = chunk_data.get("content", "").strip()
-                                metadata = chunk_data.get("metadata", {})
-
-                                # If we have content, create a response
-                                if content:
-                                    logger.info(
-                                        f"Found valid content in chunk {i}: {content}")
-                                    # Add required metadata fields if missing
-                                    if not metadata:
-                                        metadata = {
-                                            "memory_id": str(uuid.uuid4()),
-                                            "timestamp": datetime.now().isoformat(),
-                                            "embedding_model": "minilm"
-                                        }
-                                    else:
-                                        # Ensure required fields exist
-                                        if "memory_id" not in metadata:
-                                            metadata["memory_id"] = str(
-                                                uuid.uuid4())
-                                        if "timestamp" not in metadata:
-                                            metadata["timestamp"] = datetime.now(
-                                            ).isoformat()
-                                        if "embedding_model" not in metadata:
-                                            metadata["embedding_model"] = "minilm"
-
-                                    return MemoryResponse(
-                                        metadata=metadata,
-                                        content={
-                                            "user_message": metadata.get("user_message", content),
-                                            "assistant_response": metadata.get("assistant_response", ""),
-                                            "tool_response": metadata.get("tool_response")
-                                        }
-                                    )
-                                else:
-                                    logger.warning(f"Chunk {i} has no content")
-                            except json.JSONDecodeError as e:
-                                logger.error(
-                                    f"Failed to parse chunk {i}: {str(e)}")
-                                continue
-                    except Exception as e:
-                        logger.error(
-                            f"Error processing string response: {str(e)}", exc_info=True)
-
-                elif isinstance(memory_response, dict):
-                    logger.info("Processing dictionary response format")
-                    # Try to find the most relevant memory from the response
-                    if "sources" in memory_response:
-                        sources = memory_response["sources"]
-                        logger.info(
-                            f"Processing {len(sources)} sources from dict response")
-                        for i, source in enumerate(sources):
-                            content = source.get("content", "").strip()
-                            metadata = source.get("metadata", {})
-
-                            # If we have content, create a response
-                            if content:
-                                logger.info(
-                                    f"Found valid content in source {i}: {content}")
-                                # Add required metadata fields if missing
-                                if not metadata:
-                                    metadata = {
-                                        "memory_id": str(uuid.uuid4()),
-                                        "timestamp": datetime.now().isoformat(),
-                                        "embedding_model": "minilm"
-                                    }
-                                else:
-                                    # Ensure required fields exist
-                                    if "memory_id" not in metadata:
-                                        metadata["memory_id"] = str(
-                                            uuid.uuid4())
-                                    if "timestamp" not in metadata:
-                                        metadata["timestamp"] = datetime.now(
-                                        ).isoformat()
-                                    if "embedding_model" not in metadata:
-                                        metadata["embedding_model"] = "minilm"
-
-                                return MemoryResponse(
-                                    metadata=metadata,
-                                    content={
-                                        "user_message": metadata.get("user_message", content),
-                                        "assistant_response": metadata.get("assistant_response", ""),
-                                        "tool_response": metadata.get("tool_response")
-                                    }
-                                )
-                            else:
-                                logger.warning(f"Source {i} has no content")
-                    else:
-                        logger.warning("Dict response has no 'sources' key")
-
-                logger.warning(
-                    "No valid memory found in response after processing")
-                return None
+                # Use the MemoryResponse factory method to handle the response
+                return MemoryResponse.from_lightrag_response(
+                    response=memory_response,
+                    default_metadata=default_metadata
+                )
 
             except Exception as e:
                 logger.error(
@@ -423,7 +300,6 @@ class LightRAGManager:
         Args:
             text: The user's message or file content to store
             metadata: Additional metadata for the memory
-            is_file: Whether this is a file memory
 
         Returns:
             str: The memory ID
@@ -446,7 +322,7 @@ class LightRAGManager:
                     "chunk_size": 512,
                     "max_tokens": DEFAULT_MAX_TOKENS,
                     "temperature": 0.7,
-                    "embedding_model": "minilm"  # Always use minilm
+                    "embedding_model": "minilm"
                 }
 
                 # Merge metadata
