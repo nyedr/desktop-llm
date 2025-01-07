@@ -20,3 +20,7 @@ def format_timestamp(timestamp: datetime) -> str:
         timestamp_str = "just now"
 
     return timestamp_str
+
+
+def format_timestamp_date(timestamp: datetime) -> str:
+    return f"{timestamp.strftime('%I:%M:%S%p').lower()} on {timestamp.strftime('%B %d, %Y')}"

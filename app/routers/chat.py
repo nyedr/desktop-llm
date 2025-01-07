@@ -165,7 +165,54 @@ async def stream_chat_response(
                         tool_data = json.loads(tool_event.data)
                         if tool_data.get("role") == "tool":
                             tool_response = tool_data
+
+                            # Process tool response to make it more manageable
+                            try:
+                                content = json.loads(
+                                    tool_data.get("content", "{}"))
+                                if isinstance(content, dict) and "result" in content:
+                                    result = content["result"]
+                                    # Ensure proper JSON structure without truncation
+                                    if isinstance(result, dict):
+                                        content["result"] = result
+                                        tool_data["content"] = json.dumps(
+                                            content)
+                            except Exception as e:
+                                logger.warning(
+                                    f"[{request_id}] Error processing tool response: {e}")
+
+                            # Add processed tool response to messages
                             processed_messages.append(tool_data)
+
+                            # Generate final response using the tool results
+                            try:
+                                # Add a system message to guide the response
+                                processed_messages.append({
+                                    "role": "system",
+                                    "content": "Please provide a clear and concise response based on the tool results. Focus on the most important information and summarize it effectively."
+                                })
+
+                                async for final_chunk in agent.chat(
+                                    messages=processed_messages,
+                                    model=model,
+                                    temperature=chat_request.temperature or config.llm.temperature,
+                                    max_tokens=chat_request.max_tokens or config.llm.max_tokens,
+                                    stream=chat_request.stream if chat_request.stream is not None else True,
+                                    tools=None,
+                                    enable_tools=False
+                                ):
+                                    if isinstance(final_chunk, str):
+                                        if string_event := await handle_string_chunk(request_id, final_chunk, filters):
+                                            yield string_event
+                                            current_message["content"] += final_chunk
+                            except Exception as e:
+                                logger.error(
+                                    f"[{request_id}] Error generating final response: {e}")
+                                yield ChatStreamEvent(
+                                    event="error",
+                                    data=json.dumps(
+                                        {"error": f"Error generating response: {str(e)}"})
+                                )
                 continue
 
             # Handle string chunks (assistant's final response)

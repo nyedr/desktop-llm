@@ -19,11 +19,13 @@
 - [ ] File (file storage as well) and image processing logic
 - [x] Massively optimize the memory retrieval pipeline
 - [x] Get memory working with the new lightrag
-- [ ] Fix model function calling (function calls work but the model is not being reprompted with their responses)
+- [x] Fix model function calling (function calls work but the model is not being reprompted with their responses)
 - [ ] Make lightrag more performant?
 - [ ] Make the memory retrieval pipeline more performant?
 - [ ] Ensure pipelines are properly implemented as intended
 - [ ] Make a robust memory storage queue
+- [ ] Make application latency consistent (will randomly run slow)
+- [ ] Make function handling more robust; implement more agentic capabilities. The AI should be able to call itself to achive a goal, this includes using a function to get data and then using that data to call another function. Should be a toggle for this behavior.
 
 you ask something the AI thinks it can use a function to answer
 the AI calls the function chart_hits_per_artist(genre, search_years)
