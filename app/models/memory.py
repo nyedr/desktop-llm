@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 import logging
 from typing import Any, Dict, Optional, Union, List
+from pprint import pformat
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -198,84 +199,120 @@ class MemoryResponse(BaseModel):
             Optional[List[MemoryResponse]]: List of structured memory responses if valid, None otherwise
         """
         if not response:
-            logger.debug("Empty response received")
+            logger.warning("Empty response received from LightRAG")
             return None
 
         try:
             memories = []
-            logger.debug(
+            logger.info(
                 f"Processing LightRAG response of type: {type(response)}")
-            logger.debug(f"Raw response content: {response}")
-
-            # Handle string response format (naive mode)
-            if isinstance(response, str):
-                # Split into chunks and process each one
-                chunks = response.split("--New Chunk--")
-                logger.debug(f"Split response into {len(chunks)} chunks")
-
-                for i, chunk in enumerate(chunks):
-                    chunk = chunk.strip()
-                    if not chunk:
-                        logger.debug(f"Skipping empty chunk {i}")
-                        continue
-
-                    try:
-                        # Parse the chunk as JSON
-                        logger.debug(f"Parsing chunk {i}: {chunk}")
-                        chunk_data = json.loads(chunk)
-                        content = chunk_data.get("content", "").strip()
-                        metadata = chunk_data.get("metadata", {})
-                        logger.debug(f"Chunk {i} content: {content}")
-                        logger.debug(f"Chunk {i} metadata: {metadata}")
-
-                        if content and metadata:
-                            try:
-                                # Create memory response
-                                memory = MemoryResponse(
-                                    metadata=MemoryMetadata(**{
-                                        **(default_metadata or {}),
-                                        **metadata
-                                    }),
-                                    content=MemoryContent(
-                                        user_message=metadata.get(
-                                            "user_message", content),
-                                        assistant_response=metadata.get(
-                                            "assistant_response", ""),
-                                        tool_response=metadata.get(
-                                            "tool_response")
-                                    )
-                                )
-                                logger.debug(
-                                    f"Created memory from chunk {i}: {memory.content.model_dump_json()}")
-                                memories.append(memory)
-                            except Exception as e:
-                                logger.error(
-                                    f"Failed to create MemoryResponse from chunk {i}: {str(e)}", exc_info=True)
-                        else:
-                            logger.warning(
-                                f"Chunk {i} missing content or metadata")
-                    except json.JSONDecodeError as e:
-                        logger.error(
-                            f"Failed to parse chunk {i} as JSON: {str(e)}\nChunk content: {chunk}")
-                        continue
-                    except Exception as e:
-                        logger.error(
-                            f"Error processing chunk {i}: {str(e)}", exc_info=True)
-                        continue
+            logger.info("Full response structure:")
+            logger.info(pformat(response))
 
             # Handle dictionary response format
-            elif isinstance(response, dict):
-                logger.debug("Processing dictionary response")
-                if "sources" in response:
-                    # Process each source
+            if isinstance(response, dict):
+                logger.info("Processing dictionary response")
+                logger.info(f"Available keys: {list(response.keys())}")
+
+                # Handle vector_context if present (new LightRAG format)
+                if "vector_context" in response:
+                    try:
+                        logger.info(
+                            "Found vector_context, attempting to parse")
+                        vector_context = response["vector_context"]
+
+                        # Check if vector_context is a string that needs parsing
+                        if isinstance(vector_context, str):
+                            logger.info("Processing vector_context chunks")
+                            # Split into chunks and process each one
+                            chunks = vector_context.split("--New Chunk--")
+                            logger.info(
+                                f"Found {len(chunks)} chunks in vector_context")
+
+                            for i, chunk in enumerate(chunks):
+                                chunk = chunk.strip()
+                                if not chunk:
+                                    logger.debug(f"Skipping empty chunk {i}")
+                                    continue
+
+                                try:
+                                    logger.info(f"Parsing chunk {i}:")
+                                    logger.info(f"Raw chunk content: {chunk}")
+                                    chunk_data = json.loads(chunk)
+                                    content = chunk_data.get(
+                                        "content", "").strip()
+                                    metadata = chunk_data.get("metadata", {})
+
+                                    logger.info(f"Chunk {i} parsed data:")
+                                    logger.info(f"- Content: {content}")
+                                    logger.info(
+                                        f"- Metadata: {pformat(metadata)}")
+
+                                    if content and metadata:
+                                        try:
+                                            memory = MemoryResponse(
+                                                metadata=MemoryMetadata(**{
+                                                    **(default_metadata or {}),
+                                                    **metadata
+                                                }),
+                                                content=MemoryContent(
+                                                    user_message=metadata.get(
+                                                        "user_message", content),
+                                                    assistant_response=metadata.get(
+                                                        "assistant_response", ""),
+                                                    tool_response=metadata.get(
+                                                        "tool_response")
+                                                )
+                                            )
+                                            logger.info(
+                                                f"Successfully created memory from chunk {i}")
+                                            logger.info(
+                                                f"Memory content: {memory.content.model_dump_json()}")
+                                            memories.append(memory)
+                                        except Exception as e:
+                                            logger.error(
+                                                f"Failed to create memory from chunk {i}")
+                                            logger.error(f"Error: {str(e)}")
+                                            logger.error(
+                                                f"Metadata: {pformat(metadata)}")
+                                            logger.error(f"Content: {content}")
+                                            logger.error(
+                                                "Traceback:", exc_info=True)
+                                    else:
+                                        logger.warning(f"Invalid chunk {i}:")
+                                        logger.warning(
+                                            f"- Has content: {bool(content)} (length: {len(content)})")
+                                        logger.warning(
+                                            f"- Has metadata: {bool(metadata)} (keys: {list(metadata.keys()) if metadata else 'None'})")
+                                except json.JSONDecodeError as e:
+                                    logger.error(
+                                        f"Failed to parse chunk {i} as JSON")
+                                    logger.error(f"Error: {str(e)}")
+                                    logger.error(f"Raw chunk: {chunk}")
+                                    continue
+                                except Exception as e:
+                                    logger.error(f"Error processing chunk {i}")
+                                    logger.error(f"Error: {str(e)}")
+                                    logger.error("Traceback:", exc_info=True)
+                                    continue
+
+                    except Exception as e:
+                        logger.error("Error processing vector_context")
+                        logger.error(f"Error: {str(e)}")
+                        logger.error("Traceback:", exc_info=True)
+
+                # Handle sources if present (old format)
+                elif "sources" in response:
                     sources = response["sources"]
-                    logger.debug(f"Processing {len(sources)} sources")
+                    logger.info(f"Processing {len(sources)} sources")
+                    logger.info(f"Sources structure: {pformat(sources)}")
+
                     for i, source in enumerate(sources):
                         try:
+                            logger.info(f"\nProcessing source {i}:")
+                            logger.info(pformat(source))
                             content = source.get("content", "").strip()
                             metadata = source.get("metadata", {})
-                            logger.debug(f"Source {i} content: {content}")
-                            logger.debug(f"Source {i} metadata: {metadata}")
 
                             if content and metadata:
                                 try:
@@ -293,69 +330,69 @@ class MemoryResponse(BaseModel):
                                                 "tool_response")
                                         )
                                     )
-                                    logger.debug(
-                                        f"Created memory from source {i}: {memory.content.model_dump_json()}")
+                                    logger.info(
+                                        f"Successfully created memory from source {i}")
                                     memories.append(memory)
                                 except Exception as e:
                                     logger.error(
-                                        f"Failed to create MemoryResponse from source {i}: {str(e)}", exc_info=True)
+                                        f"Failed to create memory from source {i}")
+                                    logger.error(f"Error: {str(e)}")
+                                    logger.error(
+                                        f"Metadata: {pformat(metadata)}")
+                                    logger.error(f"Content: {content}")
+                                    logger.error("Traceback:", exc_info=True)
                             else:
+                                logger.warning(f"Invalid source {i}:")
                                 logger.warning(
-                                    f"Source {i} missing content or metadata")
+                                    f"- Has content: {bool(content)} (length: {len(content)})")
+                                logger.warning(
+                                    f"- Has metadata: {bool(metadata)} (keys: {list(metadata.keys()) if metadata else 'None'})")
                         except Exception as e:
-                            logger.error(
-                                f"Error processing source {i}: {str(e)}", exc_info=True)
+                            logger.error(f"Error processing source {i}:")
+                            logger.error(f"Error: {str(e)}")
+                            logger.error("Traceback:", exc_info=True)
                             continue
                 else:
-                    # Single memory case
-                    try:
-                        logger.debug("Processing single memory case")
-                        content = response.get("content", "").strip()
-                        metadata = response.get("metadata", {})
-                        logger.debug(f"Content: {content}")
-                        logger.debug(f"Metadata: {metadata}")
+                    logger.warning(
+                        "No recognized memory format found in response")
+                    logger.warning(f"Available keys: {list(response.keys())}")
 
-                        if content and metadata:
-                            try:
-                                memory = MemoryResponse(
-                                    metadata=MemoryMetadata(**{
-                                        **(default_metadata or {}),
-                                        **metadata
-                                    }),
-                                    content=MemoryContent(
-                                        user_message=metadata.get(
-                                            "user_message", content),
-                                        assistant_response=metadata.get(
-                                            "assistant_response", ""),
-                                        tool_response=metadata.get(
-                                            "tool_response")
-                                    )
-                                )
-                                logger.debug(
-                                    f"Created single memory: {memory.content.model_dump_json()}")
-                                memories.append(memory)
-                            except Exception as e:
-                                logger.error(
-                                    f"Failed to create MemoryResponse: {str(e)}", exc_info=True)
-                        else:
+            # Handle string response format (naive mode)
+            elif isinstance(response, str):
+                logger.info("Processing string response format")
+                try:
+                    # Try to parse as JSON first
+                    data = json.loads(response)
+                    logger.info("Successfully parsed string as JSON")
+                    return cls.from_lightrag_response(data, default_metadata)
+                except json.JSONDecodeError:
+                    # Fall back to chunk processing
+                    logger.info("Falling back to chunk processing")
+                    chunks = response.split("--New Chunk--")
+                    logger.info(f"Found {len(chunks)} chunks")
+
+                    for i, chunk in enumerate(chunks):
+                        if not chunk.strip():
+                            continue
+                        try:
+                            chunk_data = json.loads(chunk)
+                            logger.info(f"Processing chunk {i}:")
+                            logger.info(pformat(chunk_data))
+                            return cls.from_lightrag_response(chunk_data, default_metadata)
+                        except json.JSONDecodeError:
                             logger.warning(
-                                "Single memory case missing content or metadata")
-                    except Exception as e:
-                        logger.error(
-                            f"Error processing single memory: {str(e)}", exc_info=True)
+                                f"Failed to parse chunk {i} as JSON")
+                            continue
 
-            logger.info(f"Successfully created {len(memories)} memories")
-            if memories:
-                # Verify all memories are MemoryResponse objects
-                for i, memory in enumerate(memories):
-                    if not isinstance(memory, MemoryResponse):
-                        logger.error(
-                            f"Memory {i} is not a MemoryResponse object: {type(memory)}")
-                        return None
-                return memories
-            return None
+            logger.info("Memory processing complete:")
+            logger.info(f"- Total memories created: {len(memories)}")
+            return memories if memories else None
 
         except Exception as e:
-            logger.error(
-                f"Failed to parse LightRAG response: {str(e)}", exc_info=True)
+            logger.error("Failed to parse LightRAG response:")
+            logger.error(f"Error: {str(e)}")
+            logger.error("Response type:", type(response))
+            if isinstance(response, dict):
+                logger.error("Response keys:", list(response.keys()))
+            logger.error("Traceback:", exc_info=True)
             return None

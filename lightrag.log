@@ -11377,3 +11377,108 @@ Exception: Failed to extract entities and relationships
 2025-01-06 20:06:46,377 - lightrag - INFO - Inserting 33 vectors to entities
 2025-01-06 20:06:46,827 - lightrag - INFO - Inserting 5 vectors to relationships
 2025-01-06 20:06:46,960 - lightrag - INFO - Writing graph with 40 nodes, 5 edges
+2025-01-06 20:07:46,268 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 20:07:46,269 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 20:07:46,269 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-06 20:07:46,269 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-06 20:07:46,271 - lightrag - INFO - Loaded document status storage with 0 records
+2025-01-06 20:07:59,461 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-06 20:08:01,735 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 20:08:02,778 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 20:08:06,352 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 20:08:06,354 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 20:08:06,355 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 20:08:06,356 - lightrag - INFO - Inserting 9 vectors to entities
+2025-01-06 20:08:06,387 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 20:08:06,387 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 20:08:06,391 - lightrag - INFO - Writing graph with 9 nodes, 0 edges
+2025-01-06 20:08:17,929 - lightrag - INFO - Local query uses 5 entites, 0 relations, 1 text units
+2025-01-06 20:08:17,988 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-06 20:08:20,429 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 20:08:20,431 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 20:08:25,802 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 20:08:25,804 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 20:08:25,805 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 20:08:25,805 - lightrag - INFO - Inserting 17 vectors to entities
+2025-01-06 20:08:26,080 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 20:08:26,081 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 20:08:26,094 - lightrag - INFO - Writing graph with 25 nodes, 0 edges
+2025-01-06 20:13:59,669 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 20:13:59,670 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 20:13:59,671 - lightrag - INFO - Load KV full_docs with 2 data
+2025-01-06 20:13:59,681 - lightrag - INFO - Load KV text_chunks with 2 data
+2025-01-06 20:13:59,692 - lightrag - INFO - Loaded graph from C:\Users\nyedr\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 25 nodes, 0 edges
+2025-01-06 20:13:59,716 - lightrag - INFO - Loaded document status storage with 2 records
+2025-01-06 20:14:08,777 - lightrag - INFO - Local query uses 5 entites, 0 relations, 1 text units
+2025-01-06 20:14:08,834 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-06 20:14:10,810 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 20:16:04,410 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 20:16:04,411 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 20:16:04,411 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-06 20:16:04,411 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-06 20:16:04,414 - lightrag - INFO - Loaded document status storage with 0 records
+2025-01-06 20:16:12,167 - lightrag - WARNING - No high level context found. Switching to local mode.
+2025-01-06 20:16:20,333 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 20:16:21,521 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 20:16:25,628 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 20:16:25,630 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 20:16:25,630 - lightrag - INFO - Inserting 6 vectors to entities
+2025-01-06 20:16:25,769 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-06 20:16:25,887 - lightrag - INFO - Writing graph with 6 nodes, 1 edges
+2025-01-06 20:16:36,994 - lightrag - WARNING - No JSON-like structure found in keywords extraction result
+2025-01-06 20:16:39,832 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 20:16:39,834 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 20:16:43,483 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 20:16:43,487 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 20:16:43,490 - lightrag - INFO - Inserting 5 vectors to entities
+2025-01-06 20:16:43,530 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-06 20:16:43,545 - lightrag - INFO - Writing graph with 8 nodes, 2 edges
+2025-01-06 20:18:13,977 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 20:18:13,977 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 20:18:13,978 - lightrag - INFO - Load KV full_docs with 2 data
+2025-01-06 20:18:13,984 - lightrag - INFO - Load KV text_chunks with 2 data
+2025-01-06 20:18:13,992 - lightrag - INFO - Loaded graph from C:\Users\nyedr\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 8 nodes, 2 edges
+2025-01-06 20:18:14,015 - lightrag - INFO - Loaded document status storage with 2 records
+2025-01-06 20:18:19,928 - lightrag - INFO - Local query uses 5 entites, 2 relations, 2 text units
+2025-01-06 20:18:20,002 - lightrag - INFO - Global query uses 3 entites, 2 relations, 2 text units
+2025-01-06 20:18:23,891 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 20:19:55,845 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 20:19:55,846 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 20:19:55,847 - lightrag - INFO - Load KV full_docs with 2 data
+2025-01-06 20:19:55,848 - lightrag - INFO - Load KV text_chunks with 2 data
+2025-01-06 20:19:55,852 - lightrag - INFO - Loaded graph from C:\Users\nyedr\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 8 nodes, 2 edges
+2025-01-06 20:19:55,857 - lightrag - INFO - Loaded document status storage with 2 records
+2025-01-06 20:20:11,267 - lightrag - INFO - Local query uses 5 entites, 2 relations, 2 text units
+2025-01-06 20:20:11,334 - lightrag - INFO - Global query uses 3 entites, 2 relations, 2 text units
+2025-01-06 20:20:13,764 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 20:20:22,342 - lightrag - INFO - Local query uses 5 entites, 2 relations, 2 text units
+2025-01-06 20:20:22,393 - lightrag - INFO - Global query uses 3 entites, 2 relations, 2 text units
+2025-01-06 20:20:25,274 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 20:20:56,216 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 20:20:56,216 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 20:20:56,217 - lightrag - INFO - Load KV full_docs with 2 data
+2025-01-06 20:20:56,217 - lightrag - INFO - Load KV text_chunks with 2 data
+2025-01-06 20:20:56,218 - lightrag - INFO - Loaded graph from C:\Users\nyedr\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 8 nodes, 2 edges
+2025-01-06 20:20:56,221 - lightrag - INFO - Loaded document status storage with 2 records
+2025-01-06 20:21:03,416 - lightrag - INFO - kw_prompt result:
+2025-01-06 20:21:04,620 - lightrag - INFO - Local query uses 5 entites, 2 relations, 2 text units
+2025-01-06 20:21:04,638 - lightrag - INFO - Global query uses 3 entites, 2 relations, 2 text units
+2025-01-06 20:21:06,345 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 20:21:28,138 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 20:21:28,138 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 20:21:28,139 - lightrag - INFO - Load KV full_docs with 2 data
+2025-01-06 20:21:28,139 - lightrag - INFO - Load KV text_chunks with 2 data
+2025-01-06 20:21:28,141 - lightrag - INFO - Loaded graph from C:\Users\nyedr\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 8 nodes, 2 edges
+2025-01-06 20:21:28,143 - lightrag - INFO - Loaded document status storage with 2 records
+2025-01-06 20:21:34,455 - lightrag - INFO - Local query uses 5 entites, 2 relations, 2 text units
+2025-01-06 20:21:34,485 - lightrag - INFO - Global query uses 3 entites, 2 relations, 2 text units
+2025-01-06 20:21:36,888 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 20:22:02,391 - lightrag - INFO - Local query uses 5 entites, 2 relations, 2 text units
+2025-01-06 20:22:02,415 - lightrag - INFO - Global query uses 3 entites, 2 relations, 2 text units
+2025-01-06 20:22:04,730 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 20:22:04,736 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 20:22:24,266 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 20:22:24,270 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 20:22:24,273 - lightrag - INFO - Inserting 15 vectors to entities
+2025-01-06 20:22:24,353 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-06 20:22:24,375 - lightrag - INFO - Writing graph with 22 nodes, 3 edges
