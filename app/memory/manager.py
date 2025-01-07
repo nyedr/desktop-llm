@@ -1,6 +1,5 @@
 """Memory manager for LightRAG integration and memory operations."""
 
-import json
 import logging
 from typing import Optional, Dict, Union, List
 from pathlib import Path
@@ -25,7 +24,7 @@ logger = logging.getLogger(__name__)
 # Constants for optimization
 EMBEDDING_CACHE_SIZE = 1000
 DEFAULT_MAX_TOKENS = 4096
-REDUCED_TOP_K = 3
+TOP_K_MEMORY_RESULTS = 5
 
 # Model configurations
 OLLAMA_EMBED_MODEL = "nomic-embed-text"
@@ -228,22 +227,11 @@ class LightRAGManager:
                 logger.info(f"Starting memory query with: {query}")
                 logger.info(f"Current working directory: {self.working_dir}")
 
-                # Log the state of the memory stores
-                try:
-                    # Get storage data directly from the JSON files
-                    full_docs_count = len(self.rag.full_docs.storage.data)
-                    text_chunks_count = len(self.rag.text_chunks.storage.data)
-                    logger.info(
-                        f"Memory store state - Full docs: {full_docs_count}, Text chunks: {text_chunks_count}")
-                except Exception as e:
-                    logger.error(
-                        f"Error checking memory store state: {str(e)}")
-
-                # Create query parameters with naive mode for direct vector similarity search
+                # Create query parameters with local mode for entity-based search
                 query_param = QueryParam(
-                    mode="naive",  # Use naive mode for direct vector similarity
+                    mode="mix",
                     stream=False,
-                    top_k=10,  # Increase top_k for better recall
+                    top_k=TOP_K_MEMORY_RESULTS,
                     only_need_context=only_need_context,
                     max_token_for_local_context=3000,
                     max_token_for_global_context=3000,

@@ -4,13 +4,11 @@ import logging
 from typing import Dict, Any, List, Optional, Union
 from transformers import AutoTokenizer
 from collections import defaultdict
-from datetime import datetime
 
 from app.core.config import config
 from app.models.chat import StrictChatMessage, ChatRole
 from app.models.memory import MemoryResponse
 from app.dependencies.providers import Providers
-from app.utils.utils import format_timestamp
 
 logger = logging.getLogger(__name__)
 
