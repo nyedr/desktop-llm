@@ -46,7 +46,7 @@ class BaseMessage(BaseModel):
     """Base fields for all messages."""
     role: ChatRole
     content: str
-
+    metadata: Optional[Dict[str, Any]] = None
     model_config = ConfigDict(extra="forbid")
 
 

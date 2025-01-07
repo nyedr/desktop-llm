@@ -1,10 +1,15 @@
 """Models for memory operations."""
 from datetime import datetime
 import json
-from typing import Any, Dict, Optional, Union
-import uuid
+import logging
+from typing import Any, Dict, Optional, Union, List
 
 from pydantic import BaseModel, Field, field_validator
+
+from app.models.chat import ChatRole
+from app.utils.utils import format_timestamp
+
+logger = logging.getLogger(__name__)
 
 
 class MemoryContent(BaseModel):
@@ -12,6 +17,15 @@ class MemoryContent(BaseModel):
     user_message: str = Field(default="")
     assistant_response: str = Field(default="")
     tool_response: Optional[str] = Field(default=None)
+
+    def format_conversation(self) -> str:
+        """Format the conversation content."""
+        conversation = [f"User: {self.user_message}"]
+        if self.assistant_response:
+            conversation.append(f"Assistant: {self.assistant_response}")
+        if self.tool_response:
+            conversation.append(f"Tool Response: {self.tool_response}")
+        return "\n".join(conversation)
 
 
 class MemoryMetadata(BaseModel):
@@ -32,17 +46,33 @@ class MemoryMetadata(BaseModel):
     @field_validator('timestamp', mode='before')
     @classmethod
     def parse_timestamp(cls, v: Any) -> datetime:
-        """Parse timestamp from string if needed.
-
-        Args:
-            v: The value to parse
-
-        Returns:
-            datetime: Parsed datetime object
-        """
+        """Parse timestamp from string if needed."""
         if isinstance(v, str):
             return datetime.fromisoformat(v)
         return v
+
+    def format_metadata(self, exclude_internal: bool = True) -> str:
+        """Format metadata for LLM context.
+
+        Args:
+            exclude_internal: Whether to exclude internal fields
+
+        Returns:
+            str: Formatted metadata string
+        """
+        internal_fields = {
+            "memory_id", "timestamp", "request_id", "content_type",
+            "content", "source", "chunk_index", "token_count",
+            "user_message", "assistant_response", "tool_response"
+        } if exclude_internal else set()
+
+        metadata_dict = self.model_dump()
+        metadata_items = [
+            f"- {key}: {value}"
+            for key, value in metadata_dict.items()
+            if key not in internal_fields and value is not None
+        ]
+        return "\n".join(metadata_items)
 
 
 class MemoryResponse(BaseModel):
@@ -50,116 +80,282 @@ class MemoryResponse(BaseModel):
     metadata: MemoryMetadata
     content: MemoryContent
 
-    @classmethod
-    def from_raw_response(cls, response: Dict[str, Any]) -> 'MemoryResponse':
-        """Create a MemoryResponse from a raw response dictionary.
-
-        Args:
-            response: Raw response dictionary from LightRAG
+    def to_context_message(self) -> Dict[str, Any]:
+        """Convert memory response to a context message format.
 
         Returns:
-            MemoryResponse: Properly structured memory response
+            Dict[str, Any]: Formatted context message
         """
-        if isinstance(response, dict) and "content" in response:
-            try:
-                # Parse the content field if it's a JSON string
-                if isinstance(response["content"], str):
-                    content_data = json.loads(response["content"])
-                else:
-                    content_data = response["content"]
+        try:
+            logger.debug(
+                f"Converting memory to context message - Content: {self.content.model_dump_json()}")
 
-                # Extract metadata and content
-                metadata = {
-                    key: value for key, value in content_data.items()
-                    if key not in ["content", "user_message", "assistant_response", "tool_response"]
-                }
+            # Format timestamp
+            formatted_time = self.metadata.timestamp.strftime(
+                "%Y-%m-%d %H:%M:%S")
+            time_from_now = datetime.now() - self.metadata.timestamp
+            time_from_now_str = format_timestamp(time_from_now)
 
-                content = content_data.get("content", {})
-                if not isinstance(content, dict):
-                    content = {
-                        "user_message": str(content),
-                        "assistant_response": "",
-                        "tool_response": None
-                    }
+            # Format metadata and conversation
+            metadata_str = self.metadata.format_metadata()
+            conversation_str = self.content.format_conversation()
 
-                return cls(
-                    metadata=MemoryMetadata(**metadata),
-                    content=MemoryContent(**content)
-                )
-            except Exception as e:
-                raise ValueError(f"Failed to parse memory response: {e}")
-        raise ValueError("Invalid memory response format")
+            logger.debug(f"Formatted conversation: {conversation_str}")
+            logger.debug(f"Formatted metadata: {metadata_str}")
+
+            # Create memory message with metadata context
+            message = {
+                "role": ChatRole.SYSTEM,
+                "content": (
+                    f"[Memory from {time_from_now_str} ({formatted_time})]\n"
+                    f"Context:\n{metadata_str}\n\n"
+                    f"Conversation:\n{conversation_str}"
+                ),
+                "metadata": {"type": "memory"}
+            }
+            logger.debug(f"Created context message: {message}")
+            return message
+        except Exception as e:
+            logger.error(
+                f"Error formatting memory to context message: {e}", exc_info=True)
+            # Fallback to simple format if detailed formatting fails
+            return {
+                "role": ChatRole.SYSTEM,
+                "content": f"[Memory] User: {self.content.user_message}",
+                "metadata": {"type": "memory"}
+            }
 
     @classmethod
-    def from_lightrag_response(cls, response: Union[str, Dict[str, Any]], default_metadata: Optional[Dict[str, Any]] = None) -> Optional['MemoryResponse']:
-        """Create a MemoryResponse from a LightRAG response.
+    def format_memory_context(cls, memories: List[Union['MemoryResponse', Dict[str, Any]]]) -> Dict[str, Any]:
+        """Format multiple memories into a single context message."""
+        if not memories:
+            logger.debug("No memories to format")
+            return None
+
+        memory_contents = []
+        for i, memory in enumerate(memories, 1):
+            try:
+                logger.debug(f"Processing memory {i} of type: {type(memory)}")
+                if isinstance(memory, dict):
+                    logger.debug(
+                        f"Memory {i} content: {json.dumps(memory, default=str)}")
+                else:
+                    logger.debug(
+                        f"Memory {i} content: {memory.model_dump_json()}")
+
+                # If it's already a MemoryResponse, use it directly
+                if isinstance(memory, MemoryResponse):
+                    formatted = memory.to_context_message()
+                    memory_contents.append(
+                        f"[Memory {i}]: {formatted['content']}")
+                    logger.debug(
+                        f"Added formatted memory {i} from MemoryResponse")
+                    continue
+
+                # If it's a dict, try to format it directly
+                if isinstance(memory, dict):
+                    if "content" in memory:
+                        formatted = {
+                            "role": ChatRole.SYSTEM,
+                            "content": f"[Memory] {memory['content']}",
+                            "metadata": {"type": "memory"}
+                        }
+                        memory_contents.append(
+                            f"[Memory {i}]: {formatted['content']}")
+                        logger.debug(f"Added formatted memory {i} from dict")
+                        continue
+
+                logger.warning(
+                    f"Memory {i} could not be formatted: invalid type or structure")
+
+            except Exception as e:
+                logger.error(
+                    f"Failed to format memory {i}: {str(e)}", exc_info=True)
+                continue
+
+        if not memory_contents:
+            logger.warning("No memories were successfully formatted")
+            return None
+
+        context_message = {
+            "role": ChatRole.SYSTEM,
+            "content": "Relevant context from memory:\n" + "\n\n".join(memory_contents),
+            "metadata": {"type": "memory_context"}
+        }
+        logger.debug(
+            f"Created final context message with {len(memory_contents)} memories")
+        return context_message
+
+    @classmethod
+    def from_lightrag_response(cls, response: Union[str, Dict[str, Any]], default_metadata: Optional[Dict[str, Any]] = None) -> Optional[List['MemoryResponse']]:
+        """Create MemoryResponses from a LightRAG response.
 
         Args:
             response: Raw response from LightRAG (string or dict format)
             default_metadata: Default metadata to use if not present in response
 
         Returns:
-            Optional[MemoryResponse]: Structured memory response if valid, None otherwise
+            Optional[List[MemoryResponse]]: List of structured memory responses if valid, None otherwise
         """
         if not response:
+            logger.debug("Empty response received")
             return None
 
         try:
+            memories = []
+            logger.debug(
+                f"Processing LightRAG response of type: {type(response)}")
+            logger.debug(f"Raw response content: {response}")
+
             # Handle string response format (naive mode)
             if isinstance(response, str):
+                # Split into chunks and process each one
                 chunks = response.split("--New Chunk--")
-                for chunk in chunks:
+                logger.debug(f"Split response into {len(chunks)} chunks")
+
+                for i, chunk in enumerate(chunks):
+                    chunk = chunk.strip()
+                    if not chunk:
+                        logger.debug(f"Skipping empty chunk {i}")
+                        continue
+
                     try:
-                        chunk_data = json.loads(chunk.strip())
+                        # Parse the chunk as JSON
+                        logger.debug(f"Parsing chunk {i}: {chunk}")
+                        chunk_data = json.loads(chunk)
                         content = chunk_data.get("content", "").strip()
                         metadata = chunk_data.get("metadata", {})
+                        logger.debug(f"Chunk {i} content: {content}")
+                        logger.debug(f"Chunk {i} metadata: {metadata}")
 
-                        if content:
-                            return cls._create_response(content, metadata, default_metadata)
-                    except json.JSONDecodeError:
+                        if content and metadata:
+                            try:
+                                # Create memory response
+                                memory = MemoryResponse(
+                                    metadata=MemoryMetadata(**{
+                                        **(default_metadata or {}),
+                                        **metadata
+                                    }),
+                                    content=MemoryContent(
+                                        user_message=metadata.get(
+                                            "user_message", content),
+                                        assistant_response=metadata.get(
+                                            "assistant_response", ""),
+                                        tool_response=metadata.get(
+                                            "tool_response")
+                                    )
+                                )
+                                logger.debug(
+                                    f"Created memory from chunk {i}: {memory.content.model_dump_json()}")
+                                memories.append(memory)
+                            except Exception as e:
+                                logger.error(
+                                    f"Failed to create MemoryResponse from chunk {i}: {str(e)}", exc_info=True)
+                        else:
+                            logger.warning(
+                                f"Chunk {i} missing content or metadata")
+                    except json.JSONDecodeError as e:
+                        logger.error(
+                            f"Failed to parse chunk {i} as JSON: {str(e)}\nChunk content: {chunk}")
+                        continue
+                    except Exception as e:
+                        logger.error(
+                            f"Error processing chunk {i}: {str(e)}", exc_info=True)
                         continue
 
             # Handle dictionary response format
-            elif isinstance(response, dict) and "sources" in response:
-                sources = response["sources"]
-                for source in sources:
-                    content = source.get("content", "").strip()
-                    metadata = source.get("metadata", {})
+            elif isinstance(response, dict):
+                logger.debug("Processing dictionary response")
+                if "sources" in response:
+                    # Process each source
+                    sources = response["sources"]
+                    logger.debug(f"Processing {len(sources)} sources")
+                    for i, source in enumerate(sources):
+                        try:
+                            content = source.get("content", "").strip()
+                            metadata = source.get("metadata", {})
+                            logger.debug(f"Source {i} content: {content}")
+                            logger.debug(f"Source {i} metadata: {metadata}")
 
-                    if content:
-                        return cls._create_response(content, metadata, default_metadata)
+                            if content and metadata:
+                                try:
+                                    memory = MemoryResponse(
+                                        metadata=MemoryMetadata(**{
+                                            **(default_metadata or {}),
+                                            **metadata
+                                        }),
+                                        content=MemoryContent(
+                                            user_message=metadata.get(
+                                                "user_message", content),
+                                            assistant_response=metadata.get(
+                                                "assistant_response", ""),
+                                            tool_response=metadata.get(
+                                                "tool_response")
+                                        )
+                                    )
+                                    logger.debug(
+                                        f"Created memory from source {i}: {memory.content.model_dump_json()}")
+                                    memories.append(memory)
+                                except Exception as e:
+                                    logger.error(
+                                        f"Failed to create MemoryResponse from source {i}: {str(e)}", exc_info=True)
+                            else:
+                                logger.warning(
+                                    f"Source {i} missing content or metadata")
+                        except Exception as e:
+                            logger.error(
+                                f"Error processing source {i}: {str(e)}", exc_info=True)
+                            continue
+                else:
+                    # Single memory case
+                    try:
+                        logger.debug("Processing single memory case")
+                        content = response.get("content", "").strip()
+                        metadata = response.get("metadata", {})
+                        logger.debug(f"Content: {content}")
+                        logger.debug(f"Metadata: {metadata}")
 
+                        if content and metadata:
+                            try:
+                                memory = MemoryResponse(
+                                    metadata=MemoryMetadata(**{
+                                        **(default_metadata or {}),
+                                        **metadata
+                                    }),
+                                    content=MemoryContent(
+                                        user_message=metadata.get(
+                                            "user_message", content),
+                                        assistant_response=metadata.get(
+                                            "assistant_response", ""),
+                                        tool_response=metadata.get(
+                                            "tool_response")
+                                    )
+                                )
+                                logger.debug(
+                                    f"Created single memory: {memory.content.model_dump_json()}")
+                                memories.append(memory)
+                            except Exception as e:
+                                logger.error(
+                                    f"Failed to create MemoryResponse: {str(e)}", exc_info=True)
+                        else:
+                            logger.warning(
+                                "Single memory case missing content or metadata")
+                    except Exception as e:
+                        logger.error(
+                            f"Error processing single memory: {str(e)}", exc_info=True)
+
+            logger.info(f"Successfully created {len(memories)} memories")
+            if memories:
+                # Verify all memories are MemoryResponse objects
+                for i, memory in enumerate(memories):
+                    if not isinstance(memory, MemoryResponse):
+                        logger.error(
+                            f"Memory {i} is not a MemoryResponse object: {type(memory)}")
+                        return None
+                return memories
             return None
 
         except Exception as e:
-            raise ValueError(f"Failed to parse LightRAG response: {e}")
-
-    @classmethod
-    def _create_response(cls, content: str, metadata: Dict[str, Any], default_metadata: Optional[Dict[str, Any]] = None) -> 'MemoryResponse':
-        """Create a standardized MemoryResponse with complete metadata.
-
-        Args:
-            content: Content string
-            metadata: Existing metadata
-            default_metadata: Default metadata to use if not present
-
-        Returns:
-            MemoryResponse: Properly structured memory response
-        """
-        # Ensure required metadata fields exist
-        complete_metadata = {
-            "memory_id": str(uuid.uuid4()),
-            "timestamp": datetime.now().isoformat(),
-            "embedding_model": "minilm",
-            **(default_metadata or {}),
-            **metadata
-        }
-
-        return cls(
-            metadata=MemoryMetadata(**complete_metadata),
-            content=MemoryContent(
-                user_message=metadata.get("user_message", content),
-                assistant_response=metadata.get("assistant_response", ""),
-                tool_response=metadata.get("tool_response")
-            )
-        )
+            logger.error(
+                f"Failed to parse LightRAG response: {str(e)}", exc_info=True)
+            return None

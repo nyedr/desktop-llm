@@ -10862,3 +10862,288 @@ Exception: Failed to extract entities and relationships
 2025-01-06 18:15:15,798 - lightrag - INFO - Inserting 5 vectors to entities
 2025-01-06 18:15:15,926 - lightrag - INFO - Inserting 5 vectors to relationships
 2025-01-06 18:15:16,068 - lightrag - INFO - Writing graph with 13 nodes, 6 edges
+2025-01-06 18:19:55,859 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:19:55,860 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:19:55,861 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-06 18:19:55,862 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-06 18:19:55,864 - lightrag - INFO - Loaded document status storage with 0 records
+2025-01-06 18:21:28,945 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:21:29,987 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:21:33,332 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:21:33,334 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:21:33,336 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 18:21:33,337 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-06 18:21:33,393 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 18:21:33,394 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 18:21:33,404 - lightrag - INFO - Writing graph with 2 nodes, 0 edges
+2025-01-06 18:21:43,673 - lightrag - INFO - Truncate 1 to 1 chunks
+2025-01-06 18:21:45,868 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:21:45,872 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:21:48,227 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:21:48,231 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:21:48,232 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 18:21:48,232 - lightrag - INFO - Inserting 4 vectors to entities
+2025-01-06 18:21:48,342 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 18:21:48,342 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 18:21:48,345 - lightrag - INFO - Writing graph with 6 nodes, 0 edges
+2025-01-06 18:25:34,850 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:25:34,850 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:25:34,851 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-06 18:25:34,851 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-06 18:25:34,853 - lightrag - INFO - Loaded document status storage with 0 records
+2025-01-06 18:25:46,959 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:25:48,418 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:25:54,782 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:25:54,784 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:25:54,785 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 18:25:54,785 - lightrag - INFO - Inserting 8 vectors to entities
+2025-01-06 18:25:54,884 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 18:25:54,884 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 18:25:54,895 - lightrag - INFO - Writing graph with 8 nodes, 0 edges
+2025-01-06 18:26:04,631 - lightrag - INFO - Truncate 1 to 1 chunks
+2025-01-06 18:26:06,594 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:26:06,596 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:26:10,621 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:26:10,622 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:26:10,623 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 18:26:10,623 - lightrag - INFO - Inserting 2 vectors to entities
+2025-01-06 18:26:10,652 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 18:26:10,653 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 18:26:10,655 - lightrag - INFO - Writing graph with 9 nodes, 0 edges
+2025-01-06 18:26:16,941 - lightrag - INFO - Truncate 2 to 2 chunks
+2025-01-06 18:26:19,362 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 18:28:14,331 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:28:14,331 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:28:14,332 - lightrag - INFO - Load KV full_docs with 2 data
+2025-01-06 18:28:14,341 - lightrag - INFO - Load KV text_chunks with 2 data
+2025-01-06 18:28:14,350 - lightrag - INFO - Loaded graph from C:\Users\nyedr\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 9 nodes, 0 edges
+2025-01-06 18:28:14,368 - lightrag - INFO - Loaded document status storage with 2 records
+2025-01-06 18:28:20,853 - lightrag - INFO - Truncate 2 to 2 chunks
+2025-01-06 18:28:22,896 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 18:29:55,547 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:29:55,548 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:29:55,549 - lightrag - INFO - Load KV full_docs with 2 data
+2025-01-06 18:29:55,549 - lightrag - INFO - Load KV text_chunks with 2 data
+2025-01-06 18:29:55,551 - lightrag - INFO - Loaded graph from C:\Users\nyedr\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 9 nodes, 0 edges
+2025-01-06 18:29:55,556 - lightrag - INFO - Loaded document status storage with 2 records
+2025-01-06 18:30:07,809 - lightrag - INFO - Truncate 2 to 2 chunks
+2025-01-06 18:30:09,966 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 18:31:38,352 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:31:38,353 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:31:38,354 - lightrag - INFO - Load KV full_docs with 2 data
+2025-01-06 18:31:38,356 - lightrag - INFO - Load KV text_chunks with 2 data
+2025-01-06 18:31:38,358 - lightrag - INFO - Loaded graph from C:\Users\nyedr\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 9 nodes, 0 edges
+2025-01-06 18:31:38,362 - lightrag - INFO - Loaded document status storage with 2 records
+2025-01-06 18:31:43,958 - lightrag - INFO - Truncate 2 to 2 chunks
+2025-01-06 18:31:45,957 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 18:34:00,288 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:34:00,289 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:34:00,289 - lightrag - INFO - Load KV full_docs with 2 data
+2025-01-06 18:34:00,291 - lightrag - INFO - Load KV text_chunks with 2 data
+2025-01-06 18:34:00,294 - lightrag - INFO - Loaded graph from C:\Users\nyedr\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 9 nodes, 0 edges
+2025-01-06 18:34:00,298 - lightrag - INFO - Loaded document status storage with 2 records
+2025-01-06 18:34:04,446 - lightrag - INFO - Truncate 2 to 2 chunks
+2025-01-06 18:34:06,595 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 18:38:29,430 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:38:29,430 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:38:29,431 - lightrag - INFO - Load KV full_docs with 2 data
+2025-01-06 18:38:29,431 - lightrag - INFO - Load KV text_chunks with 2 data
+2025-01-06 18:38:29,432 - lightrag - INFO - Loaded graph from C:\Users\nyedr\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 9 nodes, 0 edges
+2025-01-06 18:38:29,435 - lightrag - INFO - Loaded document status storage with 2 records
+2025-01-06 18:38:35,076 - lightrag - INFO - Truncate 2 to 2 chunks
+2025-01-06 18:38:37,235 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 18:39:25,822 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:39:25,823 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:39:25,823 - lightrag - INFO - Load KV full_docs with 2 data
+2025-01-06 18:39:25,823 - lightrag - INFO - Load KV text_chunks with 2 data
+2025-01-06 18:39:25,825 - lightrag - INFO - Loaded graph from C:\Users\nyedr\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 9 nodes, 0 edges
+2025-01-06 18:39:25,827 - lightrag - INFO - Loaded document status storage with 2 records
+2025-01-06 18:39:31,716 - lightrag - INFO - Truncate 2 to 2 chunks
+2025-01-06 18:39:33,933 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 18:45:42,948 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:45:42,948 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:45:42,949 - lightrag - INFO - Load KV full_docs with 2 data
+2025-01-06 18:45:42,949 - lightrag - INFO - Load KV text_chunks with 2 data
+2025-01-06 18:45:42,950 - lightrag - INFO - Loaded graph from C:\Users\nyedr\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 9 nodes, 0 edges
+2025-01-06 18:45:42,952 - lightrag - INFO - Loaded document status storage with 2 records
+2025-01-06 18:45:48,039 - lightrag - INFO - Truncate 2 to 2 chunks
+2025-01-06 18:45:49,825 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 18:46:11,580 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:46:11,580 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:46:11,581 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-06 18:46:11,581 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-06 18:46:11,582 - lightrag - INFO - Loaded document status storage with 0 records
+2025-01-06 18:46:21,305 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:46:22,320 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:46:36,064 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:46:36,065 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:46:36,066 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 18:46:36,067 - lightrag - INFO - Inserting 17 vectors to entities
+2025-01-06 18:46:36,141 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 18:46:36,141 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 18:46:36,145 - lightrag - INFO - Writing graph with 17 nodes, 0 edges
+2025-01-06 18:46:43,841 - lightrag - INFO - Truncate 1 to 1 chunks
+2025-01-06 18:46:45,702 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:46:45,704 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:47:06,318 - lightrag - INFO - Truncate 2 to 1 chunks
+2025-01-06 18:47:07,995 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:47:07,997 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:47:12,231 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:47:12,232 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:47:12,233 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 18:47:12,233 - lightrag - INFO - Inserting 4 vectors to entities
+2025-01-06 18:47:12,274 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 18:47:12,274 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 18:47:12,278 - lightrag - INFO - Writing graph with 19 nodes, 0 edges
+2025-01-06 18:47:33,172 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:47:33,173 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:47:33,174 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 18:47:33,174 - lightrag - INFO - Inserting 28 vectors to entities
+2025-01-06 18:47:33,315 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 18:47:33,315 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 18:47:33,320 - lightrag - INFO - Writing graph with 39 nodes, 0 edges
+2025-01-06 18:49:59,304 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:49:59,304 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:49:59,305 - lightrag - INFO - Load KV full_docs with 2 data
+2025-01-06 18:49:59,305 - lightrag - INFO - Load KV text_chunks with 2 data
+2025-01-06 18:49:59,315 - lightrag - INFO - Loaded graph from C:\Users\nyedr\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 39 nodes, 0 edges
+2025-01-06 18:49:59,332 - lightrag - INFO - Loaded document status storage with 2 records
+2025-01-06 18:50:04,040 - lightrag - INFO - Truncate 2 to 2 chunks
+2025-01-06 18:50:05,723 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 18:50:25,025 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:50:25,025 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:50:25,025 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-06 18:50:25,025 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-06 18:50:25,026 - lightrag - INFO - Loaded document status storage with 0 records
+2025-01-06 18:50:31,623 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:50:32,740 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:50:36,418 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:50:36,419 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:50:36,419 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 18:50:36,419 - lightrag - INFO - Inserting 4 vectors to entities
+2025-01-06 18:50:36,525 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 18:50:36,525 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 18:50:36,531 - lightrag - INFO - Writing graph with 4 nodes, 0 edges
+2025-01-06 18:50:47,850 - lightrag - INFO - Truncate 1 to 1 chunks
+2025-01-06 18:51:03,162 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:51:03,163 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:51:03,163 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-06 18:51:03,164 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-06 18:51:03,166 - lightrag - INFO - Loaded document status storage with 0 records
+2025-01-06 18:51:10,021 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:51:11,160 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:51:14,861 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:51:14,864 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:51:14,865 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 18:51:14,866 - lightrag - INFO - Inserting 7 vectors to entities
+2025-01-06 18:51:14,906 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 18:51:14,906 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 18:51:14,909 - lightrag - INFO - Writing graph with 7 nodes, 0 edges
+2025-01-06 18:51:21,586 - lightrag - INFO - Truncate 1 to 1 chunks
+2025-01-06 18:51:23,279 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:51:23,284 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:51:33,862 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:51:33,864 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:51:33,865 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 18:51:33,865 - lightrag - INFO - Inserting 22 vectors to entities
+2025-01-06 18:51:33,978 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 18:51:33,978 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 18:51:33,980 - lightrag - INFO - Writing graph with 28 nodes, 0 edges
+2025-01-06 18:53:40,943 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:53:40,944 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:53:40,944 - lightrag - INFO - Load KV full_docs with 2 data
+2025-01-06 18:53:40,956 - lightrag - INFO - Load KV text_chunks with 2 data
+2025-01-06 18:53:40,968 - lightrag - INFO - Loaded graph from C:\Users\nyedr\code\desktop-llm\lightrag_data\graph_chunk_entity_relation.graphml with 28 nodes, 0 edges
+2025-01-06 18:53:40,988 - lightrag - INFO - Loaded document status storage with 2 records
+2025-01-06 18:53:46,658 - lightrag - INFO - Truncate 2 to 2 chunks
+2025-01-06 18:53:48,956 - lightrag - INFO - All documents have been processed or are duplicates
+2025-01-06 18:55:27,168 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:55:27,168 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:55:27,169 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-06 18:55:27,169 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-06 18:55:27,170 - lightrag - INFO - Loaded document status storage with 0 records
+2025-01-06 18:55:35,967 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:55:37,242 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:55:39,910 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:55:39,916 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:55:39,917 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 18:55:39,917 - lightrag - INFO - Inserting 7 vectors to entities
+2025-01-06 18:55:40,060 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 18:55:40,060 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 18:55:40,075 - lightrag - INFO - Writing graph with 7 nodes, 0 edges
+2025-01-06 18:55:49,131 - lightrag - INFO - Truncate 1 to 1 chunks
+2025-01-06 18:55:50,863 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:55:50,866 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:55:58,016 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:55:58,019 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:55:58,020 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 18:55:58,020 - lightrag - INFO - Inserting 13 vectors to entities
+2025-01-06 18:55:58,288 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 18:55:58,288 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 18:55:58,302 - lightrag - INFO - Writing graph with 17 nodes, 0 edges
+2025-01-06 18:56:48,553 - lightrag - INFO - Logger initialized for working directory: C:\Users\nyedr\code\desktop-llm\lightrag_data
+2025-01-06 18:56:48,554 - lightrag - INFO - Load KV llm_response_cache with 0 data
+2025-01-06 18:56:48,554 - lightrag - INFO - Load KV full_docs with 0 data
+2025-01-06 18:56:48,554 - lightrag - INFO - Load KV text_chunks with 0 data
+2025-01-06 18:56:48,557 - lightrag - INFO - Loaded document status storage with 0 records
+2025-01-06 18:56:55,659 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:56:56,718 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:56:59,612 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:56:59,614 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:56:59,615 - lightrag - INFO - Inserting 7 vectors to entities
+2025-01-06 18:56:59,749 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-06 18:56:59,870 - lightrag - INFO - Writing graph with 8 nodes, 1 edges
+2025-01-06 18:57:04,595 - lightrag - INFO - Truncate 1 to 1 chunks
+2025-01-06 18:57:06,683 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:57:06,692 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:57:08,731 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:57:08,732 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:57:08,733 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 18:57:08,733 - lightrag - INFO - Inserting 3 vectors to entities
+2025-01-06 18:57:08,850 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 18:57:08,851 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 18:57:08,853 - lightrag - INFO - Writing graph with 10 nodes, 1 edges
+2025-01-06 18:57:19,844 - lightrag - INFO - Truncate 2 to 2 chunks
+2025-01-06 18:57:22,064 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:57:22,070 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:57:25,293 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:57:25,296 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:57:25,298 - lightrag - INFO - Inserting 4 vectors to entities
+2025-01-06 18:57:25,333 - lightrag - INFO - Inserting 1 vectors to relationships
+2025-01-06 18:57:25,346 - lightrag - INFO - Writing graph with 13 nodes, 2 edges
+2025-01-06 18:57:36,787 - lightrag - INFO - Truncate 3 to 3 chunks
+2025-01-06 18:57:39,394 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:57:39,401 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:57:45,488 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:57:45,493 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:57:45,495 - lightrag - INFO - Inserting 7 vectors to entities
+2025-01-06 18:57:45,603 - lightrag - INFO - Inserting 4 vectors to relationships
+2025-01-06 18:57:45,645 - lightrag - INFO - Writing graph with 16 nodes, 6 edges
+2025-01-06 18:58:06,988 - lightrag - INFO - Truncate 4 to 4 chunks
+2025-01-06 18:58:08,920 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:58:08,923 - lightrag - INFO - Inserting 0 vectors to chunks
+2025-01-06 18:58:08,924 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 18:58:08,926 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:58:08,926 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:58:08,927 - lightrag - WARNING - Didn't extract any entities and relationships, maybe your LLM is not working
+2025-01-06 18:58:08,929 - lightrag - ERROR - Failed to process document doc-d41d8cd98f00b204e9800998ecf8427e: Failed to extract entities and relationships
+Traceback (most recent call last):
+  File "C:\Users\nyedr\Anaconda3\Lib\site-packages\lightrag\lightrag.py", line 462, in ainsert
+    raise e
+  File "C:\Users\nyedr\Anaconda3\Lib\site-packages\lightrag\lightrag.py", line 430, in ainsert
+    raise Exception(
+Exception: Failed to extract entities and relationships
+
+2025-01-06 18:58:08,934 - lightrag - INFO - Writing graph with 16 nodes, 6 edges
+2025-01-06 18:58:18,210 - lightrag - INFO - Truncate 4 to 4 chunks
+2025-01-06 18:58:20,439 - lightrag - INFO - Processing 1 new unique documents
+2025-01-06 18:58:20,443 - lightrag - INFO - Inserting 1 vectors to chunks
+2025-01-06 18:58:36,222 - lightrag - INFO - Inserting entities into storage...
+2025-01-06 18:58:36,225 - lightrag - INFO - Inserting relationships into storage...
+2025-01-06 18:58:36,226 - lightrag - WARNING - Didn't extract any relationships
+2025-01-06 18:58:36,227 - lightrag - INFO - Inserting 22 vectors to entities
+2025-01-06 18:58:36,438 - lightrag - INFO - Inserting 0 vectors to relationships
+2025-01-06 18:58:36,439 - lightrag - WARNING - You insert an empty data to vector DB
+2025-01-06 18:58:36,456 - lightrag - INFO - Writing graph with 38 nodes, 6 edges
+2025-01-06 18:58:38,312 - lightrag - INFO - Truncate 5 to 5 chunks
+2025-01-06 18:58:54,929 - lightrag - INFO - Truncate 5 to 5 chunks

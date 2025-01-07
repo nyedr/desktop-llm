@@ -210,73 +210,30 @@ class LLMContext:
 
             logger.debug(
                 f"[{self.request_id}] Retrieving memories for query: {query}")
-            memories = []
 
             # Get memory response with metadata
             try:
-                memory_response: Optional[MemoryResponse] = await self.memory_manager.query_memory(query)
+                memories = await self.memory_manager.query_memory(query)
             except Exception as e:
                 logger.error(f"[{self.request_id}] Error querying memory: {e}")
                 return []
 
-            # Format memory if we got a response
-            if memory_response:
+            # Format memories if we got responses
+            if memories:
                 try:
-                    # Format timestamp
-                    formatted_time = memory_response.metadata.timestamp.strftime(
-                        "%Y-%m-%d %H:%M:%S")
-                    time_from_now = datetime.now() - memory_response.metadata.timestamp
-                    time_from_now_str = format_timestamp(time_from_now)
-
-                    # Format metadata for LLM, excluding internal fields
-                    internal_fields = {
-                        "memory_id", "timestamp", "request_id", "content_type",
-                        "content", "source", "chunk_index", "token_count",
-                        "user_message", "assistant_response", "tool_response"
-                    }
-                    metadata_dict = memory_response.metadata.model_dump()
-                    metadata_str = "\n".join([
-                        f"- {key}: {value}"
-                        for key, value in metadata_dict.items()
-                        if key not in internal_fields and value is not None
-                    ])
-
-                    # Format conversation content
-                    conversation_str = (
-                        f"User: {memory_response.content.user_message}\n"
-                        f"Assistant: {memory_response.content.assistant_response}"
-                    )
-                    if memory_response.content.tool_response:
-                        conversation_str += f"\nTool Response: {memory_response.content.tool_response}"
-
-                    # Create memory message with metadata context
-                    memory_message = {
-                        "role": ChatRole.SYSTEM,
-                        "content": (
-                            f"[Memory from {time_from_now_str} ({formatted_time})]\n"
-                            f"Context:\n{metadata_str}\n\n"
-                            f"Conversation:\n{conversation_str}"
-                        ),
-                        "metadata": {"type": "memory"}
-                    }
-                    memories.append(memory_message)
-
+                    formatted_memories = []
+                    for memory in memories:
+                        formatted = memory.to_context_message()
+                        if formatted:
+                            formatted_memories.append(formatted)
+                            logger.debug(
+                                f"[{self.request_id}] Formatted memory: {formatted['content']}")
+                    return formatted_memories
                 except Exception as e:
                     logger.error(
-                        f"[{self.request_id}] Error formatting memory response: {e}", exc_info=True)
-                    # Try to create a simple memory message if formatting fails
-                    try:
-                        memories.append({
-                            "role": ChatRole.SYSTEM,
-                            "content": f"[Memory] User: {memory_response.content.user_message}",
-                            "metadata": {"type": "memory"}
-                        })
-                    except:
-                        pass
+                        f"[{self.request_id}] Error formatting memory responses: {e}", exc_info=True)
 
-            logger.debug(
-                f"[{self.request_id}] Retrieved {len(memories)} relevant memories")
-            return memories
+            return []
 
         except Exception as e:
             logger.error(
@@ -436,15 +393,10 @@ class LLMContext:
 
         # Add memory context if available
         if self.context_sources["memory"]:
-            memory_context = "\n\n".join([
-                f"[Memory {i+1}]: {mem['content']}"
-                for i, mem in enumerate(self.context_sources["memory"])
-            ])
-            context_window.append({
-                "role": ChatRole.SYSTEM,
-                "content": f"Relevant context from memory:\n{memory_context}",
-                "metadata": {"type": "memory_context"}
-            })
+            memory_context = MemoryResponse.format_memory_context(
+                self.context_sources["memory"])
+            if memory_context:
+                context_window.append(memory_context)
 
         # Add conversation messages with source labels
         for msg in self.processed_messages:

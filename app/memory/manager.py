@@ -209,7 +209,7 @@ class LightRAGManager:
             return await self._wrapped_llm_func(prompt, system_prompt, history_messages, **kwargs)
         return llm_func
 
-    async def query_memory(self, query: str, only_need_context: bool = True) -> Optional[MemoryResponse]:
+    async def query_memory(self, query: str, only_need_context: bool = True) -> Optional[List[MemoryResponse]]:
         """Query memory for relevant information.
 
         Args:
@@ -217,7 +217,7 @@ class LightRAGManager:
             only_need_context: Whether to only return context without LLM processing
 
         Returns:
-            Optional[MemoryResponse]: Structured memory response if found, None otherwise
+            Optional[List[MemoryResponse]]: List of structured memory responses if found, None otherwise
         """
         if not self._initialized:
             await self.initialize()
@@ -230,10 +230,9 @@ class LightRAGManager:
 
                 # Log the state of the memory stores
                 try:
-                    full_docs_count = len(
-                        self.rag.full_docs.client_storage.get("data", []))
-                    text_chunks_count = len(
-                        self.rag.text_chunks.client_storage.get("data", []))
+                    # Get storage data directly from the JSON files
+                    full_docs_count = len(self.rag.full_docs.storage.data)
+                    text_chunks_count = len(self.rag.text_chunks.storage.data)
                     logger.info(
                         f"Memory store state - Full docs: {full_docs_count}, Text chunks: {text_chunks_count}")
                 except Exception as e:
@@ -261,6 +260,7 @@ class LightRAGManager:
                     )
                     logger.info(
                         f"Raw memory response type: {type(memory_response)}")
+                    logger.debug(f"Raw memory response: {memory_response}")
 
                 except asyncio.TimeoutError:
                     logger.error("Memory query timed out after 30 seconds")
@@ -284,10 +284,20 @@ class LightRAGManager:
                 }
 
                 # Use the MemoryResponse factory method to handle the response
-                return MemoryResponse.from_lightrag_response(
+                memories = MemoryResponse.from_lightrag_response(
                     response=memory_response,
                     default_metadata=default_metadata
                 )
+
+                if memories:
+                    logger.info(f"Found {len(memories)} memories")
+                    for memory in memories:
+                        logger.debug(
+                            f"Memory content: {memory.content.model_dump_json()}")
+                else:
+                    logger.warning("No valid memories found in response")
+
+                return memories
 
             except Exception as e:
                 logger.error(
