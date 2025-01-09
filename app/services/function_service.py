@@ -5,6 +5,7 @@ from typing import Dict, Any, Optional, List, Type
 from app.functions import function_registry, executor
 from app.models.function import BaseFunction, Tool, FunctionType, ToolResponse
 import json
+from app.utils.profiling import profile_operation
 
 logger = logging.getLogger(__name__)
 
@@ -108,12 +109,13 @@ class FunctionService:
 
         return schemas
 
-    async def execute_function(self, function_name: str, function_args: Dict[str, Any]) -> ToolResponse:
+    async def execute_function(self, function_name: str, function_args: Dict[str, Any], request_id: Optional[str] = None) -> ToolResponse:
         """Execute a function by name with given arguments.
 
         Args:
             function_name: Name of the function to execute
             function_args: Arguments to pass to the function
+            request_id: Optional request ID for profiling
 
         Returns:
             ToolResponse with the result or error
@@ -140,7 +142,9 @@ class FunctionService:
 
             function_instance = function_class()
             try:
-                result = await function_instance.execute(args=function_args)
+                # Profile the actual function execution
+                async with profile_operation("function_call_execution", request_id=request_id):
+                    result = await function_instance.execute(args=function_args)
             except TypeError as e:
                 # Handle case where execute() doesn't accept args parameter
                 try:

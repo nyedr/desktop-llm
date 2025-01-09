@@ -2,7 +2,6 @@
 
 import logging
 import asyncio
-import time
 import numpy as np
 from typing import List, Union, Optional, Dict, Literal
 from lightrag.llm import ollama_embedding
@@ -10,6 +9,7 @@ from sentence_transformers import SentenceTransformer
 import torch
 
 from app.services.model_service import ModelService
+from app.utils.profiling import profile_operation
 
 logger = logging.getLogger(__name__)
 
@@ -36,11 +36,6 @@ class EmbeddingService:
             "nomic": {}
         }
         self._embedding_semaphore = asyncio.Semaphore(10)
-        self.cache_hits = {"minilm": 0, "nomic": 0}
-        self.cache_misses = {"minilm": 0, "nomic": 0}
-        self.total_embedding_calls = {"minilm": 0, "nomic": 0}
-        self.embedding_times: Dict[str, List[float]] = {
-            "minilm": [], "nomic": []}
 
         # Initialize MiniLM model
         try:
@@ -66,7 +61,6 @@ class EmbeddingService:
         text_hash = self._hash_text_for_cache(text, model_type)
         cached = self._get_cached_embedding(text_hash, model_type)
         if cached is not None:
-            self.cache_hits[model_type] += 1
             return cached
 
         # Update cache, maintaining size limit per model
@@ -76,7 +70,6 @@ class EmbeddingService:
                 next(iter(self._embedding_cache[model_type])))
 
         self._embedding_cache[model_type][text_hash] = embedding
-        self.cache_misses[model_type] += 1
         return embedding
 
     def _safe_quantize_embedding(self, embedding: np.ndarray, model_type: ModelType) -> np.ndarray:
@@ -125,24 +118,21 @@ class EmbeddingService:
         timeout: int = 30
     ) -> List[List[float]]:
         """Get embeddings with retry logic and proper timing."""
-        start_time = time.perf_counter()
         retry_count = 0
         last_error = None
-        embedding_time = 0.0
 
         while retry_count < max_retries:
             try:
                 # Get embeddings based on model type
-                embedding_start = time.perf_counter()
-                if model_type == "minilm":
-                    embeddings = await self._get_minilm_embeddings(batch)
-                else:  # nomic
-                    embeddings = await asyncio.wait_for(
-                        ollama_embedding(
-                            batch, embed_model="nomic-embed-text"),
-                        timeout=timeout
-                    )
-                embedding_time = time.perf_counter() - embedding_start
+                async with profile_operation(f"generate_{model_type}_embeddings"):
+                    if model_type == "minilm":
+                        embeddings = await self._get_minilm_embeddings(batch)
+                    else:  # nomic
+                        embeddings = await asyncio.wait_for(
+                            ollama_embedding(
+                                batch, embed_model="nomic-embed-text"),
+                            timeout=timeout
+                        )
 
                 # Process embeddings
                 dim = MINILM_DIM if model_type == "minilm" else NOMIC_DIM
@@ -190,20 +180,6 @@ class EmbeddingService:
 
                     processed_embeddings.extend(batch_processed)
 
-                # Record timing and stats
-                duration = time.perf_counter() - start_time
-                if duration > 0:
-                    self.embedding_times[model_type].append(duration)
-                self.total_embedding_calls[model_type] += len(batch)
-
-                # Log performance metrics
-                logger.info(
-                    f"Generated {len(processed_embeddings)} {model_type} embeddings in {duration:.3f}s "
-                    f"(embedding_time={embedding_time:.3f}s, "
-                    f"processing_time={(duration-embedding_time):.3f}s, "
-                    f"throughput={len(processed_embeddings)/duration:.1f} embeddings/s)"
-                )
-
                 return processed_embeddings
 
             except Exception as e:
@@ -239,7 +215,6 @@ class EmbeddingService:
             is_file: Whether the text is from a file document
         """
         async with self._embedding_semaphore:
-            start_time = time.perf_counter()
             try:
                 # Handle single text input
                 if isinstance(texts, str):
@@ -280,11 +255,9 @@ class EmbeddingService:
                                 text_hash, model_type)
                             if cached_emb is not None:
                                 all_embeddings[batch_indices[j]] = cached_emb
-                                self.cache_hits[model_type] += 1
                             else:
                                 uncached_texts.append(text)
                                 uncached_indices.append(j)
-                                self.cache_misses[model_type] += 1
 
                         # Get embeddings for uncached texts
                         if uncached_texts:
@@ -316,16 +289,6 @@ class EmbeddingService:
                                     orig_idx = batch_indices[idx]
                                     all_embeddings[orig_idx] = np.zeros(
                                         dim, dtype=np.uint8)
-
-                # Log overall performance
-                total_duration = time.perf_counter() - start_time
-                logger.info(
-                    f"Embedding generation complete:"
-                    f"\n  Total time: {total_duration:.3f}s"
-                    f"\n  Texts processed: {len(texts)}"
-                    f"\n  MiniLM hits/misses: {self.cache_hits['minilm']}/{self.cache_misses['minilm']}"
-                    f"\n  Nomic hits/misses: {self.cache_hits['nomic']}/{self.cache_misses['nomic']}"
-                )
 
                 # Ensure no None values in results
                 all_embeddings = [

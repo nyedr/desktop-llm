@@ -6,8 +6,6 @@ from pathlib import Path
 import uuid
 from datetime import datetime
 import asyncio
-import time
-from contextlib import contextmanager
 
 from app.core.config import config
 from .datastore import MemoryDatastore
@@ -15,11 +13,16 @@ from .ingestion import MemoryIngestor
 from .embeddings import EmbeddingService, MINILM_DIM, BATCH_SIZE
 from app.models.memory import MemoryResponse
 from app.services.model_service import ModelService
+from app.utils.profiling import profile_operation
 from lightrag import LightRAG
 from lightrag.utils import EmbeddingFunc
 from lightrag.base import QueryParam
 
 logger = logging.getLogger(__name__)
+
+# Suppress LightRAG's internal error logging
+lightrag_logger = logging.getLogger('lightrag')
+lightrag_logger.setLevel(logging.WARNING)
 
 # Constants for optimization
 EMBEDDING_CACHE_SIZE = 1000
@@ -30,33 +33,6 @@ TOP_K_MEMORY_RESULTS = 5
 OLLAMA_EMBED_MODEL = "nomic-embed-text"
 MINILM_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 EXTRACTION_MODEL_NAME = "meta-llama/llama-3.2-3b-instruct"
-# EXTRACTION_MODEL_NAME = "deepseek/deepseek-chat"
-
-
-class ProfilingStats:
-    """Container for profiling statistics."""
-
-    def __init__(self):
-        self.embedding_times = []
-        self.query_times = []
-        self.store_times = []
-        self.total_embedding_calls = 0
-        self.total_query_calls = 0
-        self.total_store_calls = 0
-        self.cache_hits = 0
-        self.cache_misses = 0
-
-
-@contextmanager
-def profile_operation(stats_list: List[float], operation_name: str):
-    """Context manager for profiling operations."""
-    start_time = time.perf_counter()
-    try:
-        yield
-    finally:
-        duration = time.perf_counter() - start_time
-        stats_list.append(duration)
-        logger.debug(f"{operation_name} took {duration:.3f} seconds")
 
 
 class LightRAGManager:
@@ -77,7 +53,6 @@ class LightRAGManager:
         """
         self.working_dir = Path(working_dir or config.memory.data_dir)
         self._initialized = False
-        self.profiling_stats = ProfilingStats()
 
         # These will be initialized during initialize()
         self._llm_semaphore = None
@@ -221,76 +196,75 @@ class LightRAGManager:
         if not self._initialized:
             await self.initialize()
 
-        self.profiling_stats.total_query_calls += 1
-        with profile_operation(self.profiling_stats.query_times, "memory_query"):
+        try:
+            logger.info(f"Starting memory query with: {query}")
+            logger.info(f"Current working directory: {self.working_dir}")
+
+            # Create query parameters with local mode for entity-based search
+            query_param = QueryParam(
+                mode="mix",
+                stream=False,
+                top_k=TOP_K_MEMORY_RESULTS,
+                only_need_context=only_need_context,
+                max_token_for_local_context=3000,
+                max_token_for_global_context=3000,
+                max_token_for_text_unit=3000,
+            )
+            logger.info(f"Query parameters: {query_param}")
+
+            # Get memory response from RAG with timeout
             try:
-                logger.info(f"Starting memory query with: {query}")
-                logger.info(f"Current working directory: {self.working_dir}")
-
-                # Create query parameters with local mode for entity-based search
-                query_param = QueryParam(
-                    mode="mix",
-                    stream=False,
-                    top_k=TOP_K_MEMORY_RESULTS,
-                    only_need_context=only_need_context,
-                    max_token_for_local_context=3000,
-                    max_token_for_global_context=3000,
-                    max_token_for_text_unit=3000,
-                )
-                logger.info(f"Query parameters: {query_param}")
-
-                # Get memory response from RAG with timeout
-                try:
-                    logger.info("Executing RAG query...")
+                logger.info("Executing RAG query...")
+                async with profile_operation("lightrag_query"):
                     memory_response = await asyncio.wait_for(
                         self.rag.aquery(query=query, param=query_param),
                         timeout=30
                     )
-                    logger.info(
-                        f"Raw memory response type: {type(memory_response)}")
-                    logger.debug(f"Raw memory response: {memory_response}")
+                logger.info(
+                    f"Raw memory response type: {type(memory_response)}")
+                logger.debug(f"Raw memory response: {memory_response}")
 
-                except asyncio.TimeoutError:
-                    logger.error("Memory query timed out after 30 seconds")
-                    return None
-                except Exception as e:
-                    logger.error(
-                        f"Error during RAG query: {str(e)}", exc_info=True)
-                    return None
-
-                if not memory_response:
-                    logger.warning("No memory response received")
-                    return None
-
-                # Create default metadata for response
-                default_metadata = {
-                    "content_type": "chat_memory",
-                    "chunk_size": 512,
-                    "max_tokens": DEFAULT_MAX_TOKENS,
-                    "temperature": 0.7,
-                    "embedding_model": "minilm"
-                }
-
-                # Use the MemoryResponse factory method to handle the response
-                memories = MemoryResponse.from_lightrag_response(
-                    response=memory_response,
-                    default_metadata=default_metadata
-                )
-
-                if memories:
-                    logger.info(f"Found {len(memories)} memories")
-                    for memory in memories:
-                        logger.debug(
-                            f"Memory content: {memory.content.model_dump_json()}")
-                else:
-                    logger.warning("No valid memories found in response")
-
-                return memories
-
+            except asyncio.TimeoutError:
+                logger.error("Memory query timed out after 30 seconds")
+                return None
             except Exception as e:
                 logger.error(
-                    f"Unexpected error in query_memory: {str(e)}", exc_info=True)
+                    f"Error during RAG query: {str(e)}", exc_info=True)
                 return None
+
+            if not memory_response:
+                logger.warning("No memory response received")
+                return None
+
+            # Create default metadata for response
+            default_metadata = {
+                "content_type": "chat_memory",
+                "chunk_size": 512,
+                "max_tokens": DEFAULT_MAX_TOKENS,
+                "temperature": 0.7,
+                "embedding_model": "minilm"
+            }
+
+            # Use the MemoryResponse factory method to handle the response
+            memories = MemoryResponse.from_lightrag_response(
+                response=memory_response,
+                default_metadata=default_metadata
+            )
+
+            if memories:
+                logger.info(f"Found {len(memories)} memories")
+                for memory in memories:
+                    logger.debug(
+                        f"Memory content: {memory.content.model_dump_json()}")
+            else:
+                logger.warning("No valid memories found in response")
+
+            return memories
+
+        except Exception as e:
+            logger.error(
+                f"Unexpected error in query_memory: {str(e)}", exc_info=True)
+            return None
 
     async def store_memory(self, text: str, metadata: Optional[Dict] = None) -> str:
         """Store a new memory with metadata.
@@ -305,46 +279,49 @@ class LightRAGManager:
         if not self._initialized:
             await self.initialize()
 
-        self.profiling_stats.total_store_calls += 1
-        with profile_operation(self.profiling_stats.store_times, "memory_store"):
-            if not self.datastore:
-                raise ValueError("Datastore not initialized")
+        if not self.datastore:
+            raise ValueError("Datastore not initialized")
 
-            memory_id = str(uuid.uuid4())
+        memory_id = str(uuid.uuid4())
+        try:
+            # Create metadata dictionary
+            base_metadata = {
+                "memory_id": memory_id,
+                "timestamp": datetime.now().isoformat(),
+                "content_type": "chat_memory",
+                "chunk_size": 512,
+                "max_tokens": DEFAULT_MAX_TOKENS,
+                "temperature": 0.7,
+                "embedding_model": "minilm"
+            }
+
+            # Merge metadata
+            full_metadata = {
+                **base_metadata,
+                **{k: v for k, v in (metadata or {}).items() if v is not None}
+            }
+
+            # Store metadata in SQL database
+            await self.datastore.store_entity(
+                entity_id=memory_id,
+                text=text,
+                metadata=full_metadata
+            )
+
+            # Store memory in LightRAG with error handling
             try:
-                # Create metadata dictionary
-                base_metadata = {
-                    "memory_id": memory_id,
-                    "timestamp": datetime.now().isoformat(),
-                    "content_type": "chat_memory",
-                    "chunk_size": 512,
-                    "max_tokens": DEFAULT_MAX_TOKENS,
-                    "temperature": 0.7,
-                    "embedding_model": "minilm"
-                }
-
-                # Merge metadata
-                full_metadata = {
-                    **base_metadata,
-                    **{k: v for k, v in (metadata or {}).items() if v is not None}
-                }
-
-                # Store metadata in SQL database
-                await self.datastore.store_entity(
-                    entity_id=memory_id,
-                    text=text,
-                    metadata=full_metadata
-                )
-
-                # Store memory in LightRAG
                 await self.rag.ainsert([text], metadata=[full_metadata])
-
-                logger.info(f"Memory stored with ID: {memory_id}")
-                return memory_id
-
             except Exception as e:
-                logger.error(f"Error storing memory: {e}", exc_info=True)
-                raise
+                # Log LightRAG errors without traceback but continue
+                logger.warning(
+                    f"Non-critical error in LightRAG storage: {str(e)}")
+
+            logger.info(f"Memory stored with ID: {memory_id}")
+            return memory_id
+
+        except Exception as e:
+            logger.error(f"Error storing memory: {e}", exc_info=True)
+            raise
 
     async def store_file(self, file_path: Union[str, Path]) -> bool:
         """Store a file as memory.

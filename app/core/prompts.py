@@ -34,6 +34,9 @@ Guidelines:
 - Provide clear and concise responses based on the current discussion
 """
 
+# Tool response guidance prompt
+PROMPTS["tool_response_guidance"] = """Please provide a clear and concise response based on the tool results. Focus on the most important information and summarize it effectively. Ensure your response is natural and conversational while accurately conveying the tool's findings."""
+
 # Function to get appropriate system prompt
 
 

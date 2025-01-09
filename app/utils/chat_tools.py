@@ -69,7 +69,8 @@ async def process_tool_stream(
             # Execute complete tool call
             result = await function_service.execute_function(
                 current_tool_call["function"]["name"],
-                json.loads(current_tool_call["function"]["arguments"])
+                json.loads(current_tool_call["function"]["arguments"]),
+                request_id=request_id  # Pass request_id for profiling
             )
 
             # Handle ToolResponse object

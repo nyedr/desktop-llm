@@ -239,8 +239,8 @@ class MemoryResponse(BaseModel):
                                                         "user_message", content),
                                                     assistant_response=metadata.get(
                                                         "assistant_response", ""),
-                                                    tool_response=metadata.get(
-                                                        "tool_response")
+                                                    tool_response=json.dumps(metadata.get("tool_response")) if isinstance(
+                                                        metadata.get("tool_response"), dict) else metadata.get("tool_response")
                                                 )
                                             )
                                             memories.append(memory)
@@ -282,8 +282,8 @@ class MemoryResponse(BaseModel):
                                                 "user_message", content),
                                             assistant_response=metadata.get(
                                                 "assistant_response", ""),
-                                            tool_response=metadata.get(
-                                                "tool_response")
+                                            tool_response=json.dumps(metadata.get("tool_response")) if isinstance(
+                                                metadata.get("tool_response"), dict) else metadata.get("tool_response")
                                         )
                                     )
                                     memories.append(memory)

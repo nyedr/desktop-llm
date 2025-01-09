@@ -16,16 +16,18 @@
 - [x] No llm memory cache
 - [x] Only one messages is being stored in a conversation
 - [x] Fix filters
-- [ ] File (file storage as well) and image processing logic
 - [x] Massively optimize the memory retrieval pipeline
 - [x] Get memory working with the new lightrag
 - [x] Fix model function calling (function calls work but the model is not being reprompted with their responses)
+- [ ] Centralize and selectively use profiling to measure performance and identify bottlenecks
 - [ ] Make lightrag more performant?
 - [ ] Make the memory retrieval pipeline more performant?
 - [ ] Ensure pipelines are properly implemented as intended
 - [ ] Make a robust memory storage queue
 - [ ] Make application latency consistent (will randomly run slow)
-- [ ] Make function handling more robust; implement more agentic capabilities. The AI should be able to call itself to achive a goal, this includes using a function to get data and then using that data to call another function. Should be a toggle for this behavior.
+- [ ] Make function handling more robust
+- [ ] Implement more agentic capabilities. The AI should be able to call itself to achive a goal, this includes using a function to get data and then using that data to call another function. Should be a toggle for this behavior.
+- [ ] Handle this error; "ERROR:lightrag:Failed to process document doc-2e2e68d738a4036e31740ef8a70abe8f: 'NoneType' object is not subscriptable"
 
 you ask something the AI thinks it can use a function to answer
 the AI calls the function chart_hits_per_artist(genre, search_years)
