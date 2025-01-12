@@ -1,14 +1,13 @@
 """Tests for base function classes and error handling."""
 
-import pytest
-from app.models.function import (
-    FunctionError,
-    ValidationError,
-    TimeoutError,
+from app.models.function import FunctionError, ValidationError
+from app.models.function_base import (
     ExecutionError,
-    FunctionNotFoundError,
     InputValidationError,
-    OutputValidationError
+    OutputValidationError,
+    FunctionNotFoundError,
+
+    TimeoutError
 )
 
 

@@ -2,7 +2,11 @@
 
 import logging
 from typing import Dict, Any, ClassVar, List, Union
-from app.models.function import Filter, FunctionType, register_function
+from app.models.function_base import (
+    Filter,
+    FunctionType,
+    register_function
+)
 
 logger = logging.getLogger(__name__)
 

@@ -1,11 +1,11 @@
 """Tests for function execution system."""
 
 import pytest
-from typing import Dict, Any, Literal
+from typing import Dict, Any
 from pydantic import Field
+
 from app.models.function import (
     Tool,
-    FunctionError,
     ExecutionError,
     InputValidationError,
     FunctionNotFoundError

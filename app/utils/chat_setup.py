@@ -1,11 +1,14 @@
-"""Utility functions for chat setup and verification."""
+"""Utility functions for chat setup."""
 
 import json
 import logging
 from typing import List, Optional, Dict, Any, Tuple
 
 from app.models.chat import ChatRequest, ChatStreamEvent
-from app.models.function import Filter, FunctionType
+from app.models.function_base import (
+    Filter,
+    FunctionType
+)
 from app.services.model_service import ModelService
 from app.services.function_service import FunctionService
 

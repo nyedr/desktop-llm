@@ -515,6 +515,602 @@ except ValidationError as e:
     result = create_error_response(e, "tool", "unknown")
 ```
 
+### Agent System
+
+The agent system provides autonomous capabilities for complex workflows and decision making. Agents can plan, reason, and execute multi-step processes using available tools and memory.
+
+#### Core Components
+
+1. **BaseAgent** (`app/functions/agent.py`):
+   - Abstract base class defining the interface for all agentic workflows
+   - Core phases: think, decide, act, reflect
+   - Standardized agent loop implementation
+
+```python
+class BaseAgent(ABC):
+    """Base class that defines an interface for all agentic workflows."""
+
+    @abstractmethod
+    async def think(self, context: Dict[str, Any], thought_type: str = "reason") -> AsyncGenerator[AgentThought, None]:
+        """Generate thoughts based on current context."""
+        pass
+
+    @abstractmethod
+    async def decide(self, thoughts: List[AgentThought], context: Dict[str, Any]) -> AgentDecision:
+        """Make a decision based on thoughts and context."""
+        pass
+
+    @abstractmethod
+    async def act(self, decision: AgentDecision, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute the decided action."""
+        pass
+
+    @abstractmethod
+    async def reflect(self, execution_result: Dict[str, Any], context: Dict[str, Any]) -> AgentThought:
+        """Reflect on execution results and update state."""
+        pass
+```
+
+2. **GeneralAgent** (`app/functions/agent.py`):
+   - Concrete implementation of BaseAgent
+   - Configurable behavior through AgentConfig
+   - Enhanced retry logic with multiple backoff strategies
+   - Comprehensive hook system for customization
+   - Tool management and usage statistics
+
+```python
+class GeneralAgent(BaseAgent):
+    """General purpose agent implementation with configurable behavior."""
+
+    def __init__(
+        self,
+        name: str,
+        config: Optional[AgentConfig] = None,
+        function_service=None
+    ):
+        self.name = name
+        self.agent_config = config or AgentConfig()
+        self._agent_state = None
+        self._chat_helper = None
+        self._execution_lock = asyncio.Lock()
+        self._function_service = function_service
+```
+
+3. **SupervisorAgent** (`app/functions/agent.py`):
+   - Extends GeneralAgent for orchestrating multiple worker agents
+   - Task delegation capabilities
+   - Parallel execution support
+   - Worker state management
+
+```python
+class SupervisorAgent(GeneralAgent):
+    """A specialized agent that can orchestrate multiple worker agents."""
+
+    def __init__(
+        self,
+        name: str,
+        worker_agents: Optional[Dict[str, GeneralAgent]] = None,
+        config: Optional[AgentConfig] = None
+    ):
+        super().__init__(name, config)
+        self.worker_agents = worker_agents or {}
+        self.task_queue = asyncio.Queue()
+        self.results = {}
+```
+
+#### Configuration System
+
+1. **AgentConfig**:
+
+   ```python
+   @dataclass
+   class AgentConfig:
+       """Configuration for customizing agent behavior."""
+       model: str = "deepseek/deepseek-chat"
+       temperature: float = 0.7
+       max_tokens: int = 2048
+       stream: bool = False
+
+       # Tool configuration
+       enable_tools: bool = True
+       allowed_tools: Optional[List[str]] = None
+       excluded_tools: Optional[List[str]] = None
+       custom_tools: Optional[List[Dict[str, Any]]] = None
+       tool_policies: Dict[str, Dict[str, Any]] = None
+
+       # Hook configuration
+       hooks_enabled: bool = True
+       disabled_phases: List[str] = None
+       hook_callbacks: Dict[str, List[Callable]] = None
+
+       # Thought configuration
+       custom_thought_prompts: Dict[str, str] = None
+       custom_thought_types: Dict[str, Dict[str, Any]] = None
+
+       # Retry configuration
+       retry_config: Optional[RetryConfig] = None
+   ```
+
+2. **RetryConfig and BackoffStrategy**:
+
+   ```python
+   class BackoffStrategy(str, Enum):
+       """Available backoff strategies for retry logic."""
+       CONSTANT = "constant"
+       LINEAR = "linear"
+       EXPONENTIAL = "exponential"
+       EXPONENTIAL_JITTER = "exponential_jitter"
+
+   @dataclass
+   class RetryConfig:
+       """Configuration for retry behavior."""
+       max_retries: int = 3
+       backoff_strategy: BackoffStrategy = BackoffStrategy.EXPONENTIAL
+       backoff_factor: float = 1.5
+       base_delay: float = 1.0
+       max_delay: float = 60.0
+       jitter_factor: float = 0.1
+       custom_backoff_func: Optional[Callable[[int], float]] = None
+       retry_exceptions: Tuple[Type[Exception], ...] = (Exception,)
+       retry_on_exceptions_only: bool = True
+   ```
+
+#### Hook System
+
+The agent system provides a comprehensive hook system for customizing behavior:
+
+1. **Available Hooks**:
+
+   - `on_start`: Called when agent starts
+   - `on_finish`: Called when agent completes
+   - `before_think/after_think`: Around thought generation
+   - `before_decide/after_decide`: Around decision making
+   - `before_act/after_act`: Around action execution
+   - `before_reflect/after_reflect`: Around reflection
+   - `on_iteration_end`: Called at the end of each iteration
+
+2. **Hook Management**:
+
+   ```python
+   # Adding hooks
+   agent.add_hook_callback("before_think", my_callback)
+
+   # Removing hooks
+   agent.remove_hook_callback("before_think", my_callback)
+
+   # Disabling phases
+   agent_config = AgentConfig(disabled_phases=["reflect"])
+   ```
+
+#### Standardized Responses
+
+The system defines standard response types for all agent actions:
+
+1. **Tool Response**:
+
+   ```python
+   class ToolResponse(FunctionResponse):
+       """Response from tool execution."""
+       result: Any
+       tool_name: str
+       execution_time: float = 0.0
+   ```
+
+2. **Agent Response**:
+
+   ```python
+   class AgentResponse(FunctionResponse):
+       """Response from agent execution."""
+       agent_name: str
+       state: AgentState
+       thoughts: List[Dict[str, Any]]
+       decisions: List[Dict[str, Any]]
+       actions_taken: List[Dict[str, Any]]
+       final_output: Dict[str, Any]
+   ```
+
+3. **Pipeline Response**:
+   ```python
+   class PipelineResponse(FunctionResponse):
+       """Response from pipeline execution."""
+       results: List[Dict[str, Any]]
+       pipeline_name: str
+       steps_completed: int
+       total_steps: int
+   ```
+
+#### Tool Management
+
+The agent system provides comprehensive tool management capabilities:
+
+1. **Tool Configuration**:
+
+   ```python
+   agent.configure_tools(
+       allowed_tools=["tool1", "tool2"],
+       excluded_tools=["dangerous_tool"],
+       custom_tools=[custom_tool_schema],
+       tool_policies={
+           "tool1": {
+               "rate_limit": 10,
+               "max_retries": 3
+           }
+       }
+   )
+   ```
+
+2. **Tool Usage Statistics**:
+
+   ```python
+   # Get stats for specific tool
+   stats = agent.get_tool_stats("tool1")
+
+   # Get stats for all tools
+   all_stats = agent.get_tool_stats()
+   ```
+
+3. **Tool Policy Validation**:
+
+   ```python
+   from app.functions.utils import validate_tool_policy
+
+   policy = {
+       "rate_limit": 10,
+       "max_retries": 3,
+       "timeout": 30.0,
+       "cache_results": True
+   }
+
+   validated_policy = validate_tool_policy(policy)
+   ```
+
+### Utility Functions
+
+The system provides a comprehensive set of utility functions in `app/functions/utils.py` to support function development and execution:
+
+#### Message Handling Utilities
+
+```python
+def get_last_user_message(messages: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    """Get the last user message from conversation history."""
+    pass
+
+def get_last_assistant_message(messages: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    """Get the last assistant message from conversation history."""
+    pass
+
+def get_system_message(messages: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    """Get the system message from conversation history."""
+    pass
+
+def ensure_strict_message(msg: Any) -> StrictChatMessage:
+    """Convert input to StrictChatMessage with validation."""
+    pass
+```
+
+#### Response Validation Utilities
+
+```python
+def validate_function_response(response: FunctionResult) -> bool:
+    """Validate a function response."""
+    pass
+
+def validate_tool_response(response: ToolResponse) -> bool:
+    """Validate a tool response."""
+    pass
+
+def validate_filter_response(response: FilterResponse) -> bool:
+    """Validate a filter response."""
+    pass
+
+def validate_pipeline_response(response: PipelineResponse) -> bool:
+    """Validate a pipeline response."""
+    pass
+
+def ensure_response_type(response: Any, expected_type: Type[FunctionResult]) -> FunctionResult:
+    """Ensure response matches expected type."""
+    pass
+
+def create_error_response(error: Exception, function_type: str, function_name: str, **kwargs) -> FunctionResult:
+    """Create an error response of appropriate type."""
+    pass
+```
+
+#### Tool Management Utilities
+
+```python
+def get_registered_tools() -> List[Dict[str, Any]]:
+    """Get all registered tools from function service."""
+    pass
+
+def verify_registered_tool(tool_name: str) -> Optional[Dict[str, Any]]:
+    """Verify if a tool is registered and get its schema."""
+    pass
+
+def validate_tool_names(tool_names: List[str]) -> Tuple[List[str], List[str], List[Dict[str, Any]]]:
+    """Validate tool names against registered tools."""
+    pass
+
+def validate_tool_policy(policy: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate a tool policy configuration."""
+    pass
+
+def get_safe_tool_list(
+    tool_names: Optional[List[str]] = None,
+    required_capabilities: Optional[List[str]] = None,
+    validate_policies: bool = True
+) -> List[Dict[str, Any]]:
+    """Get a filtered and validated list of registered tools."""
+    pass
+```
+
+#### Application Constants
+
+The module also provides access to important application constants:
+
+```python
+APP_CONSTANTS = {
+    "DEFAULT_MODEL": config.llm.model,
+    "MODEL_TEMPERATURE": config.llm.temperature,
+    "MAX_TOKENS": config.llm.max_tokens,
+    "FUNCTION_CALLS_ENABLED": config.llm.enable_tools,
+    "ENABLE_MODEL_FILTER": config.functions.enable_model_filter,
+    "MODEL_FILTER_LIST": config.functions.model_filter_list,
+    "BASE_URL": config.llm.base_url,
+    "MODEL_REQUEST_TIMEOUT": config.llm.timeout,
+    "GENERATION_REQUEST_TIMEOUT": config.llm.timeout
+}
+```
+
+### Agent System
+
+The agent system provides autonomous capabilities for complex workflows and decision making. Agents can plan, reason, and execute multi-step processes using available tools and memory.
+
+#### Core Components
+
+1. **BaseAgent** (`app/functions/agent.py`):
+   - Abstract base class defining the interface for all agentic workflows
+   - Core phases: think, decide, act, reflect
+   - Standardized agent loop implementation
+
+```python
+class BaseAgent(ABC):
+    """Base class that defines an interface for all agentic workflows."""
+
+    @abstractmethod
+    async def think(self, context: Dict[str, Any], thought_type: str = "reason") -> AsyncGenerator[AgentThought, None]:
+        """Generate thoughts based on current context."""
+        pass
+
+    @abstractmethod
+    async def decide(self, thoughts: List[AgentThought], context: Dict[str, Any]) -> AgentDecision:
+        """Make a decision based on thoughts and context."""
+        pass
+
+    @abstractmethod
+    async def act(self, decision: AgentDecision, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute the decided action."""
+        pass
+
+    @abstractmethod
+    async def reflect(self, execution_result: Dict[str, Any], context: Dict[str, Any]) -> AgentThought:
+        """Reflect on execution results and update state."""
+        pass
+```
+
+2. **GeneralAgent** (`app/functions/agent.py`):
+   - Concrete implementation of BaseAgent
+   - Configurable behavior through AgentConfig
+   - Enhanced retry logic with multiple backoff strategies
+   - Comprehensive hook system for customization
+   - Tool management and usage statistics
+
+```python
+class GeneralAgent(BaseAgent):
+    """General purpose agent implementation with configurable behavior."""
+
+    def __init__(
+        self,
+        name: str,
+        config: Optional[AgentConfig] = None,
+        function_service=None
+    ):
+        self.name = name
+        self.agent_config = config or AgentConfig()
+        self._agent_state = None
+        self._chat_helper = None
+        self._execution_lock = asyncio.Lock()
+        self._function_service = function_service
+```
+
+3. **SupervisorAgent** (`app/functions/agent.py`):
+   - Extends GeneralAgent for orchestrating multiple worker agents
+   - Task delegation capabilities
+   - Parallel execution support
+   - Worker state management
+
+```python
+class SupervisorAgent(GeneralAgent):
+    """A specialized agent that can orchestrate multiple worker agents."""
+
+    def __init__(
+        self,
+        name: str,
+        worker_agents: Optional[Dict[str, GeneralAgent]] = None,
+        config: Optional[AgentConfig] = None
+    ):
+        super().__init__(name, config)
+        self.worker_agents = worker_agents or {}
+        self.task_queue = asyncio.Queue()
+        self.results = {}
+```
+
+#### Configuration System
+
+1. **AgentConfig**:
+
+   ```python
+   @dataclass
+   class AgentConfig:
+       """Configuration for customizing agent behavior."""
+       model: str = "deepseek/deepseek-chat"
+       temperature: float = 0.7
+       max_tokens: int = 2048
+       stream: bool = False
+
+       # Tool configuration
+       enable_tools: bool = True
+       allowed_tools: Optional[List[str]] = None
+       excluded_tools: Optional[List[str]] = None
+       custom_tools: Optional[List[Dict[str, Any]]] = None
+       tool_policies: Dict[str, Dict[str, Any]] = None
+
+       # Hook configuration
+       hooks_enabled: bool = True
+       disabled_phases: List[str] = None
+       hook_callbacks: Dict[str, List[Callable]] = None
+
+       # Thought configuration
+       custom_thought_prompts: Dict[str, str] = None
+       custom_thought_types: Dict[str, Dict[str, Any]] = None
+
+       # Retry configuration
+       retry_config: Optional[RetryConfig] = None
+   ```
+
+2. **RetryConfig and BackoffStrategy**:
+
+   ```python
+   class BackoffStrategy(str, Enum):
+       """Available backoff strategies for retry logic."""
+       CONSTANT = "constant"
+       LINEAR = "linear"
+       EXPONENTIAL = "exponential"
+       EXPONENTIAL_JITTER = "exponential_jitter"
+
+   @dataclass
+   class RetryConfig:
+       """Configuration for retry behavior."""
+       max_retries: int = 3
+       backoff_strategy: BackoffStrategy = BackoffStrategy.EXPONENTIAL
+       backoff_factor: float = 1.5
+       base_delay: float = 1.0
+       max_delay: float = 60.0
+       jitter_factor: float = 0.1
+       custom_backoff_func: Optional[Callable[[int], float]] = None
+       retry_exceptions: Tuple[Type[Exception], ...] = (Exception,)
+       retry_on_exceptions_only: bool = True
+   ```
+
+#### Hook System
+
+The agent system provides a comprehensive hook system for customizing behavior:
+
+1. **Available Hooks**:
+
+   - `on_start`: Called when agent starts
+   - `on_finish`: Called when agent completes
+   - `before_think/after_think`: Around thought generation
+   - `before_decide/after_decide`: Around decision making
+   - `before_act/after_act`: Around action execution
+   - `before_reflect/after_reflect`: Around reflection
+   - `on_iteration_end`: Called at the end of each iteration
+
+2. **Hook Management**:
+
+   ```python
+   # Adding hooks
+   agent.add_hook_callback("before_think", my_callback)
+
+   # Removing hooks
+   agent.remove_hook_callback("before_think", my_callback)
+
+   # Disabling phases
+   agent_config = AgentConfig(disabled_phases=["reflect"])
+   ```
+
+#### Standardized Responses
+
+The system defines standard response types for all agent actions:
+
+1. **Tool Response**:
+
+   ```python
+   class ToolResponse(FunctionResponse):
+       """Response from tool execution."""
+       result: Any
+       tool_name: str
+       execution_time: float = 0.0
+   ```
+
+2. **Agent Response**:
+
+   ```python
+   class AgentResponse(FunctionResponse):
+       """Response from agent execution."""
+       agent_name: str
+       state: AgentState
+       thoughts: List[Dict[str, Any]]
+       decisions: List[Dict[str, Any]]
+       actions_taken: List[Dict[str, Any]]
+       final_output: Dict[str, Any]
+   ```
+
+3. **Pipeline Response**:
+   ```python
+   class PipelineResponse(FunctionResponse):
+       """Response from pipeline execution."""
+       results: List[Dict[str, Any]]
+       pipeline_name: str
+       steps_completed: int
+       total_steps: int
+   ```
+
+#### Tool Management
+
+The agent system provides comprehensive tool management capabilities:
+
+1. **Tool Configuration**:
+
+   ```python
+   agent.configure_tools(
+       allowed_tools=["tool1", "tool2"],
+       excluded_tools=["dangerous_tool"],
+       custom_tools=[custom_tool_schema],
+       tool_policies={
+           "tool1": {
+               "rate_limit": 10,
+               "max_retries": 3
+           }
+       }
+   )
+   ```
+
+2. **Tool Usage Statistics**:
+
+   ```python
+   # Get stats for specific tool
+   stats = agent.get_tool_stats("tool1")
+
+   # Get stats for all tools
+   all_stats = agent.get_tool_stats()
+   ```
+
+3. **Tool Policy Validation**:
+
+   ```python
+   from app.functions.utils import validate_tool_policy
+
+   policy = {
+       "rate_limit": 10,
+       "max_retries": 3,
+       "timeout": 30.0,
+       "cache_results": True
+   }
+
+   validated_policy = validate_tool_policy(policy)
+   ```
+
 ### Response Validation Rules
 
 1. **Common Rules for All Responses**:
@@ -825,6 +1421,7 @@ class MonitoredTool(Tool):
 
    ```python
    def _fix_validation_error(self, error: InputValidationError, args: Dict[str, Any]) -> Dict[str, Any]:
+       fixed = args.copy()
        if "unit" in error.details.get("invalid_params", []):
            logger.info(f"Converting invalid unit '{args['unit']}' to 'fahrenheit'")
            return {"unit": "fahrenheit", **{k:v for k,v in args.items() if k != "unit"}}

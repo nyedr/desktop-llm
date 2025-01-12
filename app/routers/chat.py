@@ -11,7 +11,7 @@ from sse_starlette.sse import EventSourceResponse
 from app.core.config import config
 from app.core.prompts import PROMPTS
 from app.models.chat import ChatRequest, ChatStreamEvent, StrictChatMessage
-from app.services.agent import Agent
+from app.services.assistant import Assistant
 from app.services.model_service import ModelService
 from app.services.function_service import FunctionService
 from app.memory.manager import LightRAGManager
@@ -21,9 +21,18 @@ from app.utils.chat_setup import verify_model_availability, setup_chat_component
 from app.utils.filters import apply_filters
 from app.utils.chat_messages import format_conversation_metadata, handle_string_chunk
 from app.utils.chat_tools import process_tool_stream
-from app.utils.profiling import profile_request, profile_operation
+from app.utils.profiling import profile_request
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/chat",
+    tags=["chat"],
+    responses={
+        400: {"description": "Bad request - Invalid input parameters"},
+        500: {"description": "Internal server error"},
+        429: {"description": "Too many requests - Rate limit exceeded"},
+    }
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -54,7 +63,7 @@ async def stream_chat_response(
     request: Request,
     chat_request: ChatRequest,
     background_tasks: BackgroundTasks,
-    agent: Agent = Depends(Providers.get_agent),
+    assistant: Assistant = Depends(Providers.get_assistant),
     model_service: ModelService = Depends(Providers.get_model_service),
     function_service: FunctionService = Depends(
         Providers.get_function_service),
@@ -144,7 +153,7 @@ async def stream_chat_response(
             # Record when we're about to send request to model
             profiler.record_model_request()
 
-            async for chunk in agent.chat(
+            async for chunk in assistant.chat(
                 messages=processed_messages,
                 model=model,
                 temperature=chat_request.temperature or config.llm.temperature,
@@ -205,8 +214,10 @@ async def stream_chat_response(
 
                                     # Record when we're about to send request to model for final response
                                     profiler.record_model_request()
+                                    # Reset first response timing for the new generation
+                                    profiler.reset_first_response()
 
-                                    async for final_chunk in agent.chat(
+                                    async for final_chunk in assistant.chat(
                                         messages=processed_messages,
                                         model=model,
                                         temperature=chat_request.temperature or config.llm.temperature,
@@ -218,6 +229,8 @@ async def stream_chat_response(
                                         if isinstance(final_chunk, str):
                                             if string_event := await handle_string_chunk(request_id, final_chunk, filters):
                                                 yield string_event
+                                                if not profiler.first_response_time:
+                                                    profiler.record_first_response()
                                                 current_message["content"] += final_chunk
                                 except Exception as e:
                                     logger.error(
@@ -302,26 +315,86 @@ async def stream_chat_response(
             )
 
 
-@router.post("/chat/stream")
+@router.post("/stream",
+             response_class=EventSourceResponse,
+             summary="Stream Chat Completion",
+             description="""
+    Generate a streaming chat completion with optional function calling and memory.
+    
+    Key Features:
+    - Streaming response using Server-Sent Events (SSE)
+    - Function/tool calling with automatic execution
+    - Context management with memory integration
+    - Support for inlet/outlet filters and pipelines
+    - Automatic model verification
+    
+    The response is streamed as a series of events:
+    - 'start': Indicates the start of streaming
+    - 'message': Contains content chunks or tool calls
+    - 'error': Contains error information if something fails
+    - 'pipeline': Contains pipeline execution results
+    """,
+             response_description="Server-Sent Events stream of chat completion chunks",
+             responses={
+                 200: {
+                     "description": "Successful response",
+                     "content": {
+                         "text/event-stream": {
+                             "example": "event: message\ndata: {\"content\": \"Hello!\"}\n\n"
+                         }
+                     }
+                 }
+             }
+             )
 async def chat_stream(
     request: Request,
     chat_request: ChatRequest,
     background_tasks: BackgroundTasks,
-    agent: Agent = Depends(Providers.get_agent),
+    assistant: Assistant = Depends(Providers.get_assistant),
     model_service: ModelService = Depends(Providers.get_model_service),
     function_service: FunctionService = Depends(
         Providers.get_function_service),
     memory_manager: LightRAGManager = Depends(Providers.get_lightrag_manager)
 ) -> EventSourceResponse:
-    """Stream chat response."""
+    """Stream a chat completion response.
+
+    The response is streamed as Server-Sent Events (SSE) with the following event types:
+    - 'start': Indicates the start of streaming
+    - 'message': Contains content chunks or tool calls
+    - 'error': Contains error information if something fails
+    - 'pipeline': Contains pipeline execution results
+
+    Features:
+    - Streaming response using SSE
+    - Optional function/tool calling with automatic execution
+    - Context management with memory integration
+    - Support for inlet/outlet filters and pipelines
+    - Automatic model verification
+
+    Args:
+        request: The FastAPI request object
+        chat_request: The chat request parameters
+        background_tasks: FastAPI background tasks handler
+        assistant: The assistant service for chat completions
+        model_service: The model service for LLM operations
+        function_service: The function service for tool execution
+        memory_manager: The memory manager for context storage
+
+    Returns:
+        An EventSourceResponse that streams the chat completion
+
+    Raises:
+        HTTPException: If there are errors in request processing
+    """
     return EventSourceResponse(
         stream_chat_response(
             request=request,
             chat_request=chat_request,
             background_tasks=background_tasks,
-            agent=agent,
+            assistant=assistant,
             model_service=model_service,
             function_service=function_service,
             memory_manager=memory_manager
-        )
+        ),
+        media_type="text/event-stream"
     )

@@ -1,7 +1,11 @@
 """Example filter that modifies text content."""
 
 from typing import Dict, Any
-from app.models.function import Filter, FunctionType, register_function
+from app.models.function_base import (
+    Filter,
+    FunctionType,
+    register_function
+)
 from app.models.chat import StrictChatMessage
 import logging
 

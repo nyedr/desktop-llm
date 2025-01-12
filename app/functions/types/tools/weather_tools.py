@@ -2,7 +2,12 @@
 
 import logging
 from typing import ClassVar, Dict, Any, List
-from app.models.function import InputValidationError, Tool, FunctionType, register_function
+from app.models.function_base import (
+    Tool,
+    FunctionType,
+    register_function
+)
+from app.models.function import InputValidationError
 
 logger = logging.getLogger(__name__)
 

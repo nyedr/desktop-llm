@@ -1,15 +1,57 @@
-"""Message handling operations for chat router."""
+"""Utility functions for working with chat messages."""
 
 from datetime import datetime
 import json
 import logging
-from typing import Dict, Any, List, Union, Optional
-from app.models.chat import ChatRequest, ChatStreamEvent
-from app.models.function import Filter
+from typing import Dict, Any, List, Optional, Union
+from app.models.function_base import Filter
+from app.models.chat import (
+    ChatRequest,
+    ChatStreamEvent,
+    AssistantMessage,
+    StrictChatMessage,
+    SystemMessage,
+    ToolMessage,
+    UserMessage
+)
 from app.utils.filters import apply_filters, get_filter
 from app.core.config import config
 
 logger = logging.getLogger(__name__)
+
+
+def ensure_strict_message(msg: Any) -> StrictChatMessage:
+    """Ensure a message is a StrictChatMessage instance.
+
+    Args:
+        msg: Message to convert
+
+    Returns:
+        StrictChatMessage instance
+    """
+    if isinstance(msg, StrictChatMessage):
+        return msg
+
+    if isinstance(msg, dict):
+        role = msg.get("role", "").lower()
+        content = msg.get("content", "")
+
+        if role == "user":
+            return UserMessage(content=content)
+        elif role == "assistant":
+            return AssistantMessage(content=content)
+        elif role == "system":
+            return SystemMessage(content=content)
+        elif role == "tool":
+            return ToolMessage(
+                content=content,
+                tool_name=msg.get("name", "unknown_tool"),
+                tool_args=msg.get("arguments", {})
+            )
+        else:
+            raise ValueError(f"Unknown message role: {role}")
+
+    raise ValueError(f"Cannot convert {type(msg)} to StrictChatMessage")
 
 
 async def handle_assistant_message(response: Union[str, Dict[str, Any]], filters: List[Dict[str, Any]], request_id: str) -> Optional[Dict[str, Any]]:
@@ -78,7 +120,7 @@ def format_conversation_metadata(
         "user_message": last_user_message,
         "assistant_response": current_message.get("content", "") if isinstance(current_message, dict) else getattr(current_message, "content", ""),
         "tool_response": tool_response.dict() if hasattr(tool_response, "dict") else tool_response
-        }
+    }
 
 
 async def handle_string_chunk(

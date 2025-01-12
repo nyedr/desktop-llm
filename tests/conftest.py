@@ -6,7 +6,7 @@ import os
 from app.main import app
 from app.services.function_service import FunctionService
 from app.services.model_service import ModelService
-from app.services.agent import Agent
+from app.services.assistant import Assistant
 
 
 @pytest.fixture
@@ -32,9 +32,9 @@ async def model_service():
 @pytest.fixture
 async def agent(function_service, model_service):
     """Create an agent instance for testing."""
-    agent = Agent(function_service=function_service,
-                  model_service=model_service)
-    yield agent
+    assistant = Assistant(function_service=function_service,
+                          model_service=model_service)
+    yield assistant
 
 
 # Chroma-specific fixtures

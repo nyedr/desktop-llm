@@ -1,9 +1,9 @@
-"""Filter-related functionality for the function system."""
+"""Utility functions for working with filters."""
 
 import json
 import logging
 from typing import Dict, Any, List, Tuple, Union, Optional
-from app.models.function import Filter, FilterResponse
+from app.models.function_base import Filter, FilterResponse
 from app.functions.utils import validate_filter_response, create_error_response
 from app.models.chat import ChatStreamEvent
 

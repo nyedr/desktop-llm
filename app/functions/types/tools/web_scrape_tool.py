@@ -1,12 +1,17 @@
 """Web scraping tool using Jina Reader with markdown conversion."""
 
-import re
 import logging
-import requests
 from typing import Dict, Any, Optional
+import re
 import markdownify
+import requests
+from app.models.function_base import (
+    Tool,
+    FunctionType,
+    register_function
+)
 
-from app.models.function import Tool, FunctionType, register_function, ExecutionError
+from app.models.function import ExecutionError
 
 logger = logging.getLogger(__name__)
 

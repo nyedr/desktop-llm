@@ -73,6 +73,14 @@ class RequestProfile:
                 f"request_id={self.request_id}, event=first_response, time_to_first={time_to_first:.3f}, model_time={model_time:.3f}"
             )
 
+    def reset_first_response(self) -> None:
+        """Reset first response timing for a new generation."""
+        self.first_response_time = None
+        # Log to metrics file
+        metrics_logger.info(
+            f"request_id={self.request_id}, event=reset_first_response"
+        )
+
     def record_model_request(self) -> None:
         """Record when request is sent to the model."""
         self.model_request_time = time.perf_counter()

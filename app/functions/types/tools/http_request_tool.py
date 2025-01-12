@@ -3,8 +3,13 @@ import aiohttp
 import asyncio
 import logging
 from pydantic import Field, ConfigDict
-from app.models.function import Tool, FunctionType
-from app.models.function import register_function, ExecutionError, InputValidationError, TimeoutError
+from app.models.function import ExecutionError, InputValidationError, TimeoutError
+from app.models.function_base import (
+    Tool,
+    FunctionType,
+    register_function
+)
+
 
 logger = logging.getLogger(__name__)
 

@@ -85,8 +85,8 @@ async def initialize_service(service_name: str, get_service_fn, state: ServiceSt
                 if not getattr(service, '_initialized', False):
                     raise RuntimeError("LightRAG manager failed to initialize")
             else:
-                # For Agent, pass required services
-                if service_name == "Agent":
+                # For Assistant, pass required services
+                if service_name == "Assistant":
                     model_service = Providers.get_model_service()
                     await service.initialize(model_service)
                 else:
@@ -106,7 +106,7 @@ service_states = {
     "function": ServiceState(),
     "lightrag": ServiceState(),
     "mcp": ServiceState(),
-    "agent": ServiceState()
+    "assistant": ServiceState()
 }
 
 
@@ -125,8 +125,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         # Initialize model
         await initialize_service("Model", Providers.get_model_service, service_states['model'])
 
-        # Initialize agent last since it depends on other services
-        await initialize_service("Agent", Providers.get_agent, service_states['agent'])
+        # Initialize assistant last since it depends on other services
+        await initialize_service("Assistant", Providers.get_assistant, service_states['assistant'])
 
         # Log final service states
         for service_name, state in service_states.items():
@@ -200,10 +200,10 @@ async def log_requests(request: Request, call_next):
 
 # Include routers with API prefix
 api_prefix = "/api/v1"
-app.include_router(chat.router, prefix=api_prefix, tags=["chat"])
-app.include_router(functions.router, prefix=api_prefix, tags=["functions"])
-app.include_router(completion.router, prefix=api_prefix, tags=["completion"])
-app.include_router(health.router, prefix=api_prefix, tags=["health"])
+app.include_router(chat.router, prefix=api_prefix)
+app.include_router(functions.router, prefix=api_prefix)
+app.include_router(completion.router, prefix=api_prefix)
+app.include_router(health.router, prefix=api_prefix)
 
 
 @app.exception_handler(Exception)

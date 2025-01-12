@@ -10,11 +10,19 @@ from pathlib import Path
 
 from app.dependencies.providers import Providers
 from app.services.function_service import FunctionService
-from app.models.function import RegisterFunctionRequest
 from app.functions.registry import function_registry
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/functions", tags=["functions"])
+router = APIRouter(
+    prefix="/functions",
+    tags=["functions"],
+    responses={
+        400: {"description": "Bad request - Invalid input parameters"},
+        404: {"description": "Function not found"},
+        500: {"description": "Internal server error"},
+        429: {"description": "Too many requests - Rate limit exceeded"},
+    }
+)
 
 
 class RegisterFunctionRequest(BaseModel):
@@ -43,15 +51,57 @@ class ExecuteFunctionRequest(BaseModel):
 
 class FunctionResponse(BaseModel):
     """Response model for function data."""
-    name: str
-    type: str
-    description: Optional[str] = None
-    parameters: Optional[Dict[str, Any]] = None
+    name: str = Field(..., description="Name of the function")
+    type: str = Field(...,
+                      description="Type of the function (tool/filter/pipeline)")
+    description: Optional[str] = Field(
+        None, description="Function description")
+    parameters: Optional[Dict[str, Any]] = Field(
+        None, description="Function parameters schema")
 
 
-@router.post("/register", response_model=dict)
+@router.post("/register",
+             response_model=dict,
+             summary="Register Function",
+             description="""
+    Register a new function in the system.
+    
+    This endpoint allows you to register a new function that can be called by the language model.
+    The function must be defined in a Python module and follow the required interface.
+    
+    Features:
+    - Dynamic function registration
+    - Input/output schema validation
+    - Automatic function discovery
+    - Configuration persistence
+    """,
+             response_description="Registration status and confirmation",
+             responses={
+                 200: {
+                     "description": "Function registered successfully",
+                     "content": {
+                         "application/json": {
+                             "example": {
+                                 "status": "success",
+                                 "message": "Function example_function registered successfully"
+                             }
+                         }
+                     }
+                 }
+             }
+             )
 async def register_function(request: RegisterFunctionRequest):
-    """Register a new function."""
+    """Register a new function.
+
+    Args:
+        request: The registration request containing function details
+
+    Returns:
+        A dictionary containing registration status and confirmation message
+
+    Raises:
+        HTTPException: If registration fails or there are validation errors
+    """
     try:
         # Load current config
         config_path = Path("app/functions/config.json")
@@ -127,12 +177,45 @@ async def register_function(request: RegisterFunctionRequest):
         )
 
 
-@router.delete("/{name}")
+@router.delete("/{name}",
+               summary="Unregister Function",
+               description="""
+    Remove a registered function from the system.
+    
+    This endpoint unregisters a function, making it unavailable for future calls.
+    The function's configuration will be removed from the system.
+    """,
+               response_description="Unregistration status and confirmation",
+               responses={
+                   200: {
+                       "description": "Function unregistered successfully",
+                       "content": {
+                           "application/json": {
+                               "example": {
+                                   "status": "success",
+                                   "message": "Function example_function unregistered successfully"
+                               }
+                           }
+                       }
+                   }
+               }
+               )
 async def unregister_function(
     name: str,
     function_service: FunctionService = Depends(Providers.get_function_service)
 ) -> Dict[str, Any]:
-    """Unregister a function."""
+    """Unregister a function.
+
+    Args:
+        name: The name of the function to unregister
+        function_service: The function service for managing functions
+
+    Returns:
+        A dictionary containing unregistration status and confirmation message
+
+    Raises:
+        HTTPException: If the function is not found or there are errors during unregistration
+    """
     logger.info(f"Unregistering function: {name}")
     try:
         if function_service.unregister_function(name):
@@ -146,12 +229,58 @@ async def unregister_function(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("", response_model=List[FunctionResponse])
+@router.get("",
+            response_model=List[FunctionResponse],
+            summary="List Functions",
+            description="""
+    List all registered functions in the system.
+    
+    This endpoint returns information about all registered functions, including their:
+    - Name and type
+    - Description
+    - Input/output parameters
+    - Configuration
+    """,
+            response_description="List of registered function details",
+            responses={
+                200: {
+                    "description": "List of functions retrieved successfully",
+                    "content": {
+                        "application/json": {
+                            "example": [
+                                {
+                                    "name": "example_function",
+                                    "type": "tool",
+                                    "description": "An example function",
+                                    "parameters": {
+                                        "type": "object",
+                                        "properties": {
+                                            "input": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+            )
 async def list_functions(
     request: Request,
     function_service: FunctionService = Depends(Providers.get_function_service)
 ) -> List[Dict[str, Any]]:
-    """List all registered functions."""
+    """List all registered functions.
+
+    Args:
+        request: The FastAPI request object
+        function_service: The function service for managing functions
+
+    Returns:
+        A list of dictionaries containing function details
+
+    Raises:
+        HTTPException: If there are errors retrieving the function list
+    """
     logger.info(
         f"[{request.state.request_id}] Listing all registered functions")
     try:
@@ -168,12 +297,49 @@ async def list_functions(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/execute")
+@router.post("/execute",
+             summary="Execute Function",
+             description="""
+    Execute a registered function with provided arguments.
+    
+    This endpoint allows you to execute any registered function by providing:
+    - Function name
+    - Required arguments
+    - Optional timeout
+    
+    The function will be executed asynchronously and its result returned.
+    """,
+             response_description="Function execution result",
+             responses={
+                 200: {
+                     "description": "Function executed successfully",
+                     "content": {
+                         "application/json": {
+                             "example": {
+                                 "status": "success",
+                                 "result": {"output": "Function result"}
+                             }
+                         }
+                     }
+                 }
+             }
+             )
 async def execute_function(
     request: ExecuteFunctionRequest,
     function_service: FunctionService = Depends(Providers.get_function_service)
 ) -> Dict[str, Any]:
-    """Execute a registered function."""
+    """Execute a registered function.
+
+    Args:
+        request: The execution request containing function name and arguments
+        function_service: The function service for executing functions
+
+    Returns:
+        A dictionary containing the execution status and result
+
+    Raises:
+        HTTPException: If the function execution fails or times out
+    """
     logger.info(f"Executing function: {request.name}")
     try:
         result = await function_service.execute_function(

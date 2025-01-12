@@ -1,4 +1,4 @@
-"""Agent service module."""
+"""Assistant service module."""
 
 import logging
 from typing import AsyncGenerator, Dict, Any, List, Optional, Union
@@ -10,11 +10,11 @@ from app.services.model_service import ModelService
 logger = logging.getLogger(__name__)
 
 
-class Agent:
-    """Agent for handling chat interactions."""
+class Assistant:
+    """Assistant for handling chat interactions."""
 
     def __init__(self):
-        """Initialize agent with default configuration."""
+        """Initialize Assistant with default configuration."""
         self.model = config.llm.model
         self.temperature = config.llm.temperature
         self.max_tokens = config.llm.max_tokens
@@ -24,14 +24,14 @@ class Agent:
         self._initialized = False
 
     @classmethod
-    async def create(cls, model_service: ModelService) -> 'Agent':
-        """Create and initialize a new Agent instance."""
-        agent = cls()
-        await agent.initialize(model_service)
-        return agent
+    async def create(cls, model_service: ModelService) -> 'Assistant':
+        """Create and initialize a new Assistant instance."""
+        Assistant = cls()
+        await Assistant.initialize(model_service)
+        return Assistant
 
     async def initialize(self, model_service: ModelService):
-        """Initialize the agent with required services."""
+        """Initialize the Assistant with required services."""
         if self._initialized:
             return
 
@@ -59,7 +59,7 @@ class Agent:
             Generated text chunks
         """
         if not self._initialized:
-            raise RuntimeError("Agent not initialized")
+            raise RuntimeError("Assistant not initialized")
 
         try:
             completion_stream = self.model_service.generate(
@@ -103,7 +103,7 @@ class Agent:
             Response chunks from the model and tool execution
         """
         if not self._initialized:
-            raise RuntimeError("Agent not initialized")
+            raise RuntimeError("Assistant not initialized")
 
         try:
             async for chunk in self.model_service.chat(
@@ -123,12 +123,12 @@ class Agent:
             raise
 
     async def cleanup(self):
-        """Cleanup agent resources."""
+        """Cleanup Assistant resources."""
         try:
-            logger.info("Cleaning up Agent...")
+            logger.info("Cleaning up Assistant...")
             self._initialized = False
             self.model_service = None
-            logger.info("Agent cleanup complete")
+            logger.info("Assistant cleanup complete")
         except Exception as e:
-            logger.error(f"Error during Agent cleanup: {e}")
+            logger.error(f"Error during Assistant cleanup: {e}")
             raise

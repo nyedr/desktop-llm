@@ -5,7 +5,7 @@ from typing import Optional
 from pathlib import Path
 
 from app.core.service_locator import get_service_locator
-from app.services.agent import Agent
+from app.services.assistant import Assistant
 from app.services.model_service import ModelService
 from app.services.function_service import FunctionService
 from app.services.mcp_service import MCPService
@@ -17,16 +17,16 @@ logger = logging.getLogger(__name__)
 
 class Providers:
     """Service providers for dependency injection."""
-    _agent: Optional[Agent] = None
+    _assistant: Optional[Assistant] = None
     _model_service: Optional[ModelService] = None
     _function_service: Optional[FunctionService] = None
     _mcp_service: Optional[MCPService] = None
     _lightrag_manager: Optional[LightRAGManager] = None
 
     @classmethod
-    async def get_agent(cls) -> Agent:
-        """Get or create agent instance."""
-        if cls._agent is None:
+    async def get_assistant(cls) -> Assistant:
+        """Get or create assistant instance."""
+        if cls._assistant is None:
             try:
                 # Get services from service locator
                 service_locator = get_service_locator()
@@ -39,18 +39,18 @@ class Providers:
                 # Get the services
                 model_service = service_locator.get_service("model_service")
 
-                # Create and initialize agent
-                cls._agent = Agent()
-                await cls._agent.initialize(model_service)
+                # Create and initialize assistant
+                cls._assistant = Assistant()
+                await cls._assistant.initialize(model_service)
 
                 # Register with service locator
-                service_locator.register_service("agent", cls._agent)
+                service_locator.register_service("assistant", cls._assistant)
 
             except Exception as e:
-                logger.error(f"Failed to initialize agent: {e}")
+                logger.error(f"Failed to initialize assistant: {e}")
                 raise
 
-        return cls._agent
+        return cls._assistant
 
     @classmethod
     def get_model_service(cls) -> ModelService:
@@ -127,7 +127,7 @@ class Providers:
                     logger.error(f"Error stopping lightrag manager: {e}")
 
             # Clear service instances
-            cls._agent = None
+            cls._assistant = None
             cls._model_service = None
             cls._function_service = None
             cls._mcp_service = None

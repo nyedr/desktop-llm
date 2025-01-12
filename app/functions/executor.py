@@ -2,24 +2,12 @@
 
 import logging
 import json
-from typing import Dict, Any, List, Union
-from jsonschema import validate, ValidationError as JsonSchemaValidationError
+from typing import Dict, Any, List
 
-from app.models.function import (
-    FunctionError,
-    ValidationError,
-    ExecutionError,
-    FunctionNotFoundError,
-    InputValidationError,
-    Tool,
-    Filter,
-    Pipeline,
-    ToolResponse,
-    FilterResponse,
-    PipelineResponse,
-    FunctionResult
-)
 from app.functions.registry import function_registry
+from app.models.function import ExecutionError, FilterResponse, FunctionError, FunctionNotFoundError, FunctionResponse, InputValidationError, PipelineResponse, ToolResponse, ValidationError
+from app.models.function_base import Filter, Pipeline, Tool
+from jsonschema import validate, ValidationError as JsonSchemaValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +21,7 @@ class FunctionExecutor:
         logger.info(
             f"FunctionExecutor initialized with {len(functions)} functions")
 
-    async def execute(self, name: str, params: Dict[str, Any]) -> FunctionResult:
+    async def execute(self, name: str, params: Dict[str, Any]) -> FunctionResponse:
         """Execute a function by name with the given parameters.
 
         Args:
