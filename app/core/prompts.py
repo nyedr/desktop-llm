@@ -37,45 +37,25 @@ Guidelines:
 # Tool response guidance prompt
 PROMPTS["tool_response_guidance"] = """Please provide a clear and concise response based on the tool results. Focus on the most important information and summarize it effectively. Ensure your response is natural and conversational while accurately conveying the tool's findings."""
 
-# Agent thought prompts
-PROMPTS["agent_thought_types"] = {
-    "reason": "Analyze the current situation and reason about the best approach:",
-    "plan": "Create a detailed plan to achieve the goal:",
-    "evaluate": "Evaluate the current progress and outcomes:",
-    "reflect": "Reflect on actions taken and their consequences:",
-    "debug": "Analyze the current state for issues or errors:",
-    "summarize": "Provide a concise summary of the current situation:"
-}
+# Agent system prompt
+PROMPTS["agent_system"] = """Goal: {goal}
+Capabilities: {capabilities}
+Constraints: {constraints}
 
-# Agent decision prompt
-PROMPTS["agent_decision"] = """Based on the following thoughts and context, decide on the next action:
-Consider:
-1. The goal and current progress
-2. Available capabilities and constraints
-3. Previous actions and their outcomes
-4. Potential risks and alternatives
+You are an autonomous agent. Your task is to achieve the goal above.
+You can use the available tools to help you complete the task.
+Base your next action on the current state and history of actions taken.
 
-Provide a clear action plan with:
-- Action type
-- Detailed steps
-- Expected outcomes
-- Confidence level
-"""
+When you believe you have completed the task, respond using this exact XML format:
+<attempt_completion>
+<result>
+[Provide a clear explanation of what was accomplished and why you consider the task complete]
+</result>
+<command>[Optional: Include a command that demonstrates or verifies the result]</command>
+<answer>[Optional: Include a direct answer or response to the user's query]</answer>
+</attempt_completion>
 
-# Agent reflection prompt
-PROMPTS["agent_reflection"] = """Reflect on the execution results and provide insights:
-Consider:
-1. What worked well and what didn't
-2. Progress toward the goal
-3. Unexpected challenges or outcomes
-4. Lessons learned for future actions
-5. Necessary adjustments to the strategy
-
-Provide:
-- Progress evaluation
-- State updates
-- Recommendations for next steps
-"""
+Do not use any completion tools or functions - just respond with the XML format above when finished."""
 
 # Function to get appropriate system prompt
 
@@ -92,18 +72,3 @@ def get_system_prompt(enable_memory: bool = True) -> str:
     return PROMPTS["chat_system"] if enable_memory else PROMPTS["memory_disabled"]
 
 # Function to get agent prompts
-
-
-def get_agent_thought_prompt(thought_type: str) -> str:
-    """Get the prompt for a specific thought type.
-
-    Args:
-        thought_type: Type of thought (reason, plan, evaluate, etc.)
-
-    Returns:
-        str: The prompt for the thought type
-    """
-    return PROMPTS["agent_thought_types"].get(
-        thought_type,
-        "Think about the current situation:"
-    )

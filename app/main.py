@@ -20,7 +20,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from fastapi.responses import JSONResponse
 
 from app.dependencies.providers import Providers
-from app.routers import chat, functions, completion, health
+from app.routers import chat, functions, completion, health, agent
 
 # Configure logging
 logging.basicConfig(
@@ -106,7 +106,8 @@ service_states = {
     "function": ServiceState(),
     "lightrag": ServiceState(),
     "mcp": ServiceState(),
-    "assistant": ServiceState()
+    "assistant": ServiceState(),
+    "agent": ServiceState()
 }
 
 
@@ -116,14 +117,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     app.state.service_states = service_states
 
     try:
+        # Initialize base services first
         await initialize_service("Function", Providers.get_function_service, service_states['function'])
 
-        # Initialize base services first
         await initialize_service("Memory", Providers.get_lightrag_manager, service_states['lightrag'])
         await initialize_service("MCP", Providers.get_mcp_service, service_states['mcp'])
 
-        # Initialize model
+        # Initialize model and agent services
         await initialize_service("Model", Providers.get_model_service, service_states['model'])
+        await initialize_service("Agent", Providers.get_agent_service, service_states['agent'])
 
         # Initialize assistant last since it depends on other services
         await initialize_service("Assistant", Providers.get_assistant, service_states['assistant'])
@@ -204,6 +206,7 @@ app.include_router(chat.router, prefix=api_prefix)
 app.include_router(functions.router, prefix=api_prefix)
 app.include_router(completion.router, prefix=api_prefix)
 app.include_router(health.router, prefix=api_prefix)
+app.include_router(agent.router, prefix=api_prefix)
 
 
 @app.exception_handler(Exception)

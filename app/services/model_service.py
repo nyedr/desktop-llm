@@ -108,7 +108,7 @@ class ModelService:
         """Initialize configuration parameters."""
         self.request_timeout = config.llm.timeout
         self.generation_timeout = config.llm.timeout
-        self.default_model = "deepseek/deepseek-chat"
+        self.default_model = config.llm.model
         self.temperature = config.llm.temperature
         self.max_tokens = config.llm.max_tokens
         self.function_calls_enabled = config.llm.enable_tools
@@ -288,6 +288,18 @@ class ModelService:
                 if formatted_tools:
                     params["tools"] = formatted_tools
                     params["tool_choice"] = "auto"
+                    logger.info(
+                        f"[{request_id}] Enabled {len(formatted_tools)} tools for model {params['model']}")
+                else:
+                    logger.info(
+                        f"[{request_id}] No tools were formatted for model {params['model']}")
+            else:
+                logger.info(
+                    f"[{request_id}] Tools disabled for model {params['model']}")
+
+            # Log request details
+            logger.info(
+                f"[{request_id}] Making request to model {params['model']} with temperature {params['temperature']}")
 
             # Get response from API
             try:

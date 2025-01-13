@@ -2,7 +2,7 @@
 
 import logging
 import time
-from typing import Optional
+from typing import Optional, Dict, Any
 from contextlib import asynccontextmanager
 import os
 from logging.handlers import RotatingFileHandler
@@ -32,7 +32,7 @@ metrics_logger.addHandler(metrics_handler)
 
 
 class RequestProfile:
-    """Simple request profiler."""
+    """Request profiler with tool execution tracking and error monitoring."""
 
     def __init__(self, request_id: str):
         self.request_id = request_id
@@ -40,7 +40,17 @@ class RequestProfile:
         self.first_response_time: Optional[float] = None
         self.model_request_time: Optional[float] = None
 
-    def log_operation(self, operation: str, start_time: float, end_time: float) -> None:
+        # Tool execution tracking
+        self.tool_timings: Dict[str, Dict[str, Any]] = {}
+        self.total_tool_time: float = 0.0
+
+        # Error tracking
+        self.error_count: int = 0
+        self.last_error: Optional[Dict[str, Any]] = None
+        self.retry_count: int = 0
+        self.max_retries: int = 3  # Maximum number of retries before giving up
+
+    def log_operation(self, operation: str, start_time: float, end_time: float, metadata: Optional[Dict[str, Any]] = None) -> None:
         """Log an operation's timing information."""
         duration = end_time - start_time
         elapsed_from_start = start_time - self.start_time
@@ -50,10 +60,48 @@ class RequestProfile:
             f"[TIMING][{self.request_id}] Operation '{operation}' completed in {duration:.3f}s (+{elapsed_from_start:.3f}s from start)"
         )
 
+        # Log to metrics file with metadata
+        log_data = {
+            "request_id": self.request_id,
+            "operation": operation,
+            "duration": f"{duration:.3f}",
+            "elapsed_from_start": f"{elapsed_from_start:.3f}"
+        }
+        if metadata:
+            log_data.update(metadata)
+
+        metrics_logger.info(", ".join(f"{k}={v}" for k, v in log_data.items()))
+
+    def record_error(self, error: str, error_type: str, metadata: Optional[Dict[str, Any]] = None) -> bool:
+        """Record an error and check if we should continue retrying.
+
+        Returns:
+            bool: True if we should retry, False if we should stop
+        """
+        self.error_count += 1
+        self.retry_count += 1
+
+        self.last_error = {
+            "error": error,
+            "error_type": error_type,
+            "timestamp": time.perf_counter(),
+            "retry_count": self.retry_count,
+            **(metadata or {})
+        }
+
+        # Log error with retry information
+        logger.error(
+            f"[{self.request_id}] Error {self.error_count} (retry {self.retry_count}/{self.max_retries}): {error_type} - {error}"
+        )
+
         # Log to metrics file
         metrics_logger.info(
-            f"request_id={self.request_id}, operation={operation}, duration={duration:.3f}, elapsed_from_start={elapsed_from_start:.3f}"
+            f"request_id={self.request_id}, event=error, error_type={error_type}, "
+            f"error_count={self.error_count}, retry_count={self.retry_count}, error={error}"
         )
+
+        # Return whether we should continue retrying
+        return self.retry_count < self.max_retries
 
     def record_first_response(self) -> None:
         """Record when first response was sent."""
@@ -76,7 +124,6 @@ class RequestProfile:
     def reset_first_response(self) -> None:
         """Reset first response timing for a new generation."""
         self.first_response_time = None
-        # Log to metrics file
         metrics_logger.info(
             f"request_id={self.request_id}, event=reset_first_response"
         )
@@ -93,8 +140,56 @@ class RequestProfile:
 
         # Log to metrics file
         metrics_logger.info(
-            f"request_id={self.request_id}, event=model_request, elapsed={elapsed:.3f}"
+            f"request_id={self.request_id}, event=model_request, elapsed={elapsed:.3f}, retry_count={self.retry_count}"
         )
+
+    def record_tool_execution(self, tool_name: str, duration: float, success: bool, metadata: Optional[Dict[str, Any]] = None) -> None:
+        """Record timing for a tool execution."""
+        if tool_name not in self.tool_timings:
+            self.tool_timings[tool_name] = {
+                "count": 0,
+                "total_time": 0.0,
+                "successful_calls": 0,
+                "failed_calls": 0
+            }
+
+        self.tool_timings[tool_name]["count"] += 1
+        self.tool_timings[tool_name]["total_time"] += duration
+        if success:
+            self.tool_timings[tool_name]["successful_calls"] += 1
+        else:
+            self.tool_timings[tool_name]["failed_calls"] += 1
+
+        self.total_tool_time += duration
+
+        # Log tool execution
+        log_data = {
+            "request_id": self.request_id,
+            "event": "tool_execution",
+            "tool": tool_name,
+            "duration": f"{duration:.3f}",
+            "success": str(success),
+            "total_tool_time": f"{self.total_tool_time:.3f}"
+        }
+        if metadata:
+            log_data.update(metadata)
+
+        metrics_logger.info(", ".join(f"{k}={v}" for k, v in log_data.items()))
+
+    def get_summary(self) -> Dict[str, Any]:
+        """Get a summary of all timing information."""
+        total_duration = time.perf_counter() - self.start_time
+        return {
+            "request_id": self.request_id,
+            "total_duration": total_duration,
+            "total_tool_time": self.total_tool_time,
+            "tool_timings": self.tool_timings,
+            "first_response_time": self.first_response_time - self.start_time if self.first_response_time else None,
+            "model_request_time": self.model_request_time - self.start_time if self.model_request_time else None,
+            "error_count": self.error_count,
+            "retry_count": self.retry_count,
+            "last_error": self.last_error
+        }
 
 
 @asynccontextmanager
@@ -111,21 +206,24 @@ async def profile_request(request_id: str):
     try:
         yield profiler
     finally:
-        duration = time.perf_counter() - profiler.start_time
+        # Get and log summary
+        summary = profiler.get_summary()
 
         # Log to console
         logger.info(
-            f"[TIMING][{request_id}] Request completed in {duration:.3f}s"
+            f"[TIMING][{request_id}] Request completed in {summary['total_duration']:.3f}s"
         )
 
-        # Log to metrics file
+        # Log detailed summary to metrics file
         metrics_logger.info(
-            f"request_id={request_id}, event=request_end, total_duration={duration:.3f}"
+            f"request_id={request_id}, event=request_end, " +
+            ", ".join(f"{k}={v}" for k, v in summary.items()
+                      if k != 'request_id')
         )
 
 
 @asynccontextmanager
-async def profile_operation(operation: str, profiler: Optional[RequestProfile] = None, request_id: Optional[str] = None):
+async def profile_operation(operation: str, profiler: Optional[RequestProfile] = None, request_id: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None):
     """Profile an operation's duration."""
     start_time = time.perf_counter()
     try:
@@ -133,7 +231,7 @@ async def profile_operation(operation: str, profiler: Optional[RequestProfile] =
     finally:
         end_time = time.perf_counter()
         if profiler:
-            profiler.log_operation(operation, start_time, end_time)
+            profiler.log_operation(operation, start_time, end_time, metadata)
         else:
             duration = end_time - start_time
             log_prefix = f"[{request_id}] " if request_id else ""
@@ -143,7 +241,14 @@ async def profile_operation(operation: str, profiler: Optional[RequestProfile] =
                 f"[TIMING]{log_prefix}Operation '{operation}' completed in {duration:.3f}s"
             )
 
-            # Log to metrics file
+            # Log to metrics file with metadata
+            log_data = {
+                "request_id": request_id or "unknown",
+                "operation": operation,
+                "duration": f"{duration:.3f}"
+            }
+            if metadata:
+                log_data.update(metadata)
+
             metrics_logger.info(
-                f"request_id={request_id or 'unknown'}, operation={operation}, duration={duration:.3f}"
-            )
+                ", ".join(f"{k}={v}" for k, v in log_data.items()))

@@ -2,6 +2,11 @@
 
 ## Core Features
 
+- [ ] Low latency memory retrieval (1-2 seconds)
+- [ ] Low latency tool execution (1-2 seconds, tool dependent)
+- [ ] File and image handling
+- [ ] Agentic capabilities
+
 ### Random todos
 
 - [x] Make the application services non-blocking to improve partition tolerance
@@ -30,7 +35,8 @@
 - [ ] Remove function call caching for real-time tools
 - [ ] Create specialized entity extraction llm function that directly uses openrouter with specified providers
 - [ ] Check tokenizer initialization for context service, it should be initialized on server start
-- [ ] Integrate agents into the system
+- [x] Integrate agents into the system
+- [ ] Test agentic capabilities (multi-turn function calls, and step-by-step problem solving)
 
 ### Function calling
 

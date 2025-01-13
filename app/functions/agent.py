@@ -10,11 +10,8 @@ from enum import Enum
 import random
 
 from app.functions.chat_helper import ChatHelper
-from app.core.prompts import PROMPTS, get_agent_thought_prompt
 from app.models.agent import (
     AgentState,
-    AgentThought,
-    AgentDecision,
     AgentCapability,
 )
 from app.models.function import (
@@ -24,6 +21,7 @@ from app.models.function import (
     PipelineResponse
 )
 from langchain.schema.messages import SystemMessage, HumanMessage, BaseMessage
+from app.core.prompts import PROMPTS
 
 logger = logging.getLogger(__name__)
 
@@ -85,21 +83,14 @@ class AgentConfig:
 
     # Tool configuration
     enable_tools: bool = True
-    allowed_tools: Optional[List[str]] = None  # List of allowed tool names
-    excluded_tools: Optional[List[str]] = None  # List of tool names to exclude
-    custom_tools: Optional[List[Dict[str, Any]]
-                           ] = None  # Additional tool schemas
-    # Per-tool configuration like rate limits, retries, etc.
+    allowed_tools: Optional[List[str]] = None
+    excluded_tools: Optional[List[str]] = None
+    custom_tools: Optional[List[Dict[str, Any]]] = None
     tool_policies: Dict[str, Dict[str, Any]] = None
 
     # Hook configuration
     hooks_enabled: bool = True
-    disabled_phases: List[str] = None
     hook_callbacks: Dict[str, List[Callable]] = None
-
-    # Thought configuration
-    custom_thought_prompts: Dict[str, str] = None
-    custom_thought_types: Dict[str, Dict[str, Any]] = None
 
     # Retry configuration
     retry_config: Optional[RetryConfig] = None
@@ -108,14 +99,8 @@ class AgentConfig:
         """Initialize default values for mutable fields."""
         if self.retry_config is None:
             self.retry_config = RetryConfig()
-        if self.disabled_phases is None:
-            self.disabled_phases = []
         if self.hook_callbacks is None:
             self.hook_callbacks = {}
-        if self.custom_thought_prompts is None:
-            self.custom_thought_prompts = {}
-        if self.custom_thought_types is None:
-            self.custom_thought_types = {}
         if self.tool_policies is None:
             self.tool_policies = {}
         if self.allowed_tools is None:
@@ -130,28 +115,8 @@ class BaseAgent(ABC):
     """Base class that defines an interface for all agentic workflows."""
 
     @abstractmethod
-    async def think(self, context: Dict[str, Any], thought_type: str = "reason") -> AsyncGenerator[AgentThought, None]:
-        """Generate thoughts based on current context."""
-        pass
-
-    @abstractmethod
-    async def decide(self, thoughts: List[AgentThought], context: Dict[str, Any]) -> AgentDecision:
-        """Make a decision based on thoughts and context."""
-        pass
-
-    @abstractmethod
-    async def act(self, decision: AgentDecision, context: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute the decided action."""
-        pass
-
-    @abstractmethod
-    async def reflect(self, execution_result: Dict[str, Any], context: Dict[str, Any]) -> AgentThought:
-        """Reflect on execution results and update state."""
-        pass
-
-    @abstractmethod
     async def run_agent_loop(self) -> AsyncGenerator[Dict[str, Any], None]:
-        """Defines the main agent loop or pipeline."""
+        """Defines the main agent loop that runs until task completion."""
         pass
 
 
@@ -163,6 +128,7 @@ class GeneralAgent(BaseAgent):
         name: str,
         config: Optional[AgentConfig] = None,
         function_service=None,
+        model_service=None,
         *args,
         **kwargs
     ):
@@ -172,27 +138,9 @@ class GeneralAgent(BaseAgent):
         self._chat_helper: Optional[ChatHelper] = None
         self._execution_lock = asyncio.Lock()
         self._function_service = function_service
+        self._model_service = model_service
         self._available_tools: Dict[str, Dict[str, Any]] = {}
         self._tool_usage_stats: Dict[str, Dict[str, Any]] = {}
-
-        # Initialize thought prompts from core prompts and custom prompts
-        self._thought_prompts = {}
-
-        # Add default thought types
-        for thought_type in PROMPTS["agent_thought_types"].keys():
-            self._thought_prompts[thought_type] = get_agent_thought_prompt(
-                thought_type)
-
-        # Add custom prompts
-        if self.agent_config.custom_thought_prompts:
-            self._thought_prompts.update(
-                self.agent_config.custom_thought_prompts)
-
-        # Add custom thought types
-        if self.agent_config.custom_thought_types:
-            for thought_type, config in self.agent_config.custom_thought_types.items():
-                if "prompt" in config:
-                    self._thought_prompts[thought_type] = config["prompt"]
 
     @property
     def agent_state(self) -> AgentState:
@@ -200,11 +148,7 @@ class GeneralAgent(BaseAgent):
         if not self._agent_state:
             self._agent_state = AgentState(
                 goal="Complete the task",
-                capabilities=[
-                    AgentCapability.REASONING,
-                    AgentCapability.PLANNING,
-                    AgentCapability.FUNCTION_CALLING
-                ],
+                capabilities=[AgentCapability.FUNCTION_CALLING],
                 constraints={}
             )
         return self._agent_state
@@ -213,134 +157,86 @@ class GeneralAgent(BaseAgent):
     def chat_helper(self) -> ChatHelper:
         """Get the chat helper instance."""
         if not self._chat_helper:
-            self._chat_helper = ChatHelper()
+            if not self._model_service:
+                raise ValueError("Model service not provided for chat helper")
+            self._chat_helper = ChatHelper(model_service=self._model_service)
         return self._chat_helper
 
     async def run_agent_loop(self) -> AsyncGenerator[Dict[str, Any], None]:
-        """Main entry point for running the agent."""
-        async for result in self.execute_with_retry():
-            yield result
-
-    async def execute_with_retry(
-        self,
-        max_retries: Optional[int] = None,
-        retry_exceptions: Optional[Tuple[Type[Exception], ...]] = None,
-        on_retry: Optional[Callable[[int, Exception], Any]] = None,
-    ) -> AsyncGenerator[Dict[str, Any], None]:
-        """Execute agent with flexible retry logic and improved error handling."""
-        retry_config = self.agent_config.retry_config
-        max_retries = max_retries or retry_config.max_retries
-        retry_exceptions = retry_exceptions or retry_config.retry_exceptions
-
-        attempt = 0
-        last_error = None
-
-        while attempt < max_retries:
-            try:
-                async with self._execution_lock:
-                    async for result in self._execute_agent_loop():
-                        yield result
-                    return
-            except Exception as e:
-                attempt += 1
-                last_error = e
-
-                # Check if we should retry this exception
-                should_retry = (
-                    not retry_config.retry_on_exceptions_only or
-                    isinstance(e, retry_exceptions)
-                )
-
-                if not should_retry:
-                    logger.error(
-                        f"Non-retryable error in agent {self.name}: {str(e)}")
-                    raise
-
-                # Log retry attempt
-                if attempt < max_retries:
-                    logger.warning(
-                        f"Retry attempt {attempt}/{max_retries} for agent {self.name} "
-                        f"due to error: {str(e)}"
-                    )
-                else:
-                    logger.error(
-                        f"Final retry attempt {attempt}/{max_retries} for agent {self.name} "
-                        f"failed with error: {str(e)}"
-                    )
-
-                # Record failure in agent state
-                self.agent_state.record_failure({
-                    "attempt": attempt,
-                    "error": str(e),
-                    "error_type": e.__class__.__name__,
-                    "state": self.agent_state.get_execution_summary(),
-                    "retry_info": {
-                        "max_retries": max_retries,
-                        "backoff_strategy": retry_config.backoff_strategy,
-                        "should_retry": should_retry
-                    }
-                })
-
-                # Call retry callback if provided
-                if on_retry:
-                    try:
-                        on_retry(attempt, e)
-                    except Exception as callback_error:
-                        logger.error(
-                            f"Error in retry callback for agent {self.name}: {str(callback_error)}")
-
-                if attempt >= max_retries:
-                    logger.error(
-                        f"Agent {self.name} exceeded maximum retry attempts ({max_retries})")
-                    raise last_error
-
-                # Calculate and apply backoff delay
-                delay = retry_config.calculate_delay(attempt)
-                logger.info(
-                    f"Agent {self.name} backing off for {delay:.2f} seconds before retry {attempt}")
-                await asyncio.sleep(delay)
-
-    async def _execute_agent_loop(self) -> AsyncGenerator[Dict[str, Any], None]:
-        """Core agent execution loop with enhanced hook system."""
+        """Core agent execution loop."""
         context = await self._build_context()
 
-        # Run start hooks
-        if "think" not in self.agent_config.disabled_phases:
-            await self._run_hook("on_start", context)
+        # Run start hook
+        await self._run_hook("on_start", context)
 
         while not await self._is_goal_complete():
-            # Think phase
-            if "think" not in self.agent_config.disabled_phases:
-                await self._run_hook("before_think", context)
-            thoughts = []
-            async for thought in self.think(context):
-                thoughts.append(thought)
-                self.agent_state.add_thought(thought.model_dump())
-                yield {"phase": "thinking", "thought": thought.model_dump()}
-                await self._run_hook("after_think", thoughts, context)
+            # Get next action from LLM
+            messages = await self._build_messages(context)
+            tools = await self._get_available_tools() if self.agent_config.enable_tools else None
 
-            # Decide phase
-            if "decide" not in self.agent_config.disabled_phases:
-                await self._run_hook("before_decide", thoughts, context)
-            decision = await self.decide(thoughts, context)
-            yield {"phase": "decision", "decision": decision.model_dump()}
-            await self._run_hook("after_decide", decision, context)
+            async for response in self.chat_helper.generate_completion(
+                messages=messages,
+                model=self.agent_config.model,
+                temperature=self.agent_config.temperature,
+                max_tokens=self.agent_config.max_tokens,
+                stream=self.agent_config.stream,
+                tools=tools,
+                enable_tools=self.agent_config.enable_tools
+            ):
+                # Handle function calls or text responses
+                if isinstance(response, dict) and "function_call" in response:
+                    result = await self._execute_action(response, context)
+                    self.agent_state.last_tool_result = result
+                    # Record the action in history
+                    self.agent_state.history.append({
+                        "timestamp": datetime.now().isoformat(),
+                        "action": response.get("function_call", {}),
+                        "result": result,
+                        "state_snapshot": self.agent_state.get_execution_summary()
+                    })
+                    yield {"type": "tool_call", "result": result}
+                else:
+                    # Handle regular text response
+                    content = response if isinstance(
+                        response, str) else response.get("content", "")
 
-            # Act phase
-            if "act" not in self.agent_config.disabled_phases:
-                await self._run_hook("before_act", decision, context)
-            result = await self.act(decision, context)
-            self.agent_state.last_tool_result = result
-            yield {"phase": "action", "result": result}
-            await self._run_hook("after_act", result, context)
+                    # Check for completion XML
+                    if "<attempt_completion>" in content:
+                        try:
+                            # Extract result and optional command
+                            result_start = content.find("<result>") + 10
+                            result_end = content.find("</result>")
+                            final_result = content[result_start:result_end].strip(
+                            )
 
-            # Reflect phase
-            if "reflect" not in self.agent_config.disabled_phases:
-                await self._run_hook("before_reflect", result, context)
-            reflection = await self.reflect(result, context)
-            self.agent_state.add_thought(reflection.model_dump())
-            yield {"phase": "reflection", "reflection": reflection.model_dump()}
-            await self._run_hook("after_reflect", reflection, context)
+                            command = None
+                            if "<command>" in content:
+                                command_start = content.find("<command>") + 9
+                                command_end = content.find("</command>")
+                                command = content[command_start:command_end].strip(
+                                )
+
+                            # Update agent state with completion signal
+                            self.agent_state.update_progress(1.0)
+                            self.agent_state.current_state["completion_result"] = final_result
+                            if command:
+                                self.agent_state.current_state["final_command"] = command
+                        except Exception as e:
+                            logger.error(
+                                f"Error parsing completion XML: {str(e)}")
+                            # Set error state and mark as complete to exit loop
+                            self.agent_state.update_progress(1.0)
+                            self.agent_state.current_state[
+                                "completion_result"] = f"Failed to parse completion XML: {str(e)}"
+                            self.agent_state.current_state["completion_error"] = True
+
+                    # Record the message in history
+                    self.agent_state.history.append({
+                        "timestamp": datetime.now().isoformat(),
+                        "message": content,
+                        "state_snapshot": self.agent_state.get_execution_summary()
+                    })
+                    yield {"type": "message", "content": content}
 
             await self._run_hook("on_iteration_end", context)
             context = await self._build_context()
@@ -350,6 +246,50 @@ class GeneralAgent(BaseAgent):
             "success": True,
             "final_state": self.agent_state.get_execution_summary()
         }
+
+    async def _build_messages(self, context: Dict[str, Any]) -> List[BaseMessage]:
+        """Build messages for LLM interaction."""
+        # Create system message with agent's goal and capabilities
+        system_content = PROMPTS["agent_system"].format(
+            goal=self.agent_state.goal,
+            capabilities=[cap.value for cap in self.agent_state.capabilities],
+            constraints=self.agent_state.constraints
+        )
+
+        # Add history summary if available
+        history_summary = self._format_history_summary()
+        if history_summary:
+            system_content += f"\n\nPrevious Actions:\n{history_summary}"
+
+        messages = [
+            SystemMessage(content=system_content),
+            HumanMessage(content=self._format_context(context))
+        ]
+        return messages
+
+    def _format_history_summary(self) -> str:
+        """Format a summary of recent actions from history."""
+        if not self.agent_state.history:
+            return ""
+
+        # Get last 5 actions for context
+        recent_history = self.agent_state.history[-5:]
+        summary = []
+
+        for entry in recent_history:
+            if "action" in entry:
+                func_call = entry["action"]
+                result = entry["result"]
+                summary.append(
+                    f"- Called {func_call.get('name')} with args {func_call.get('arguments')}")
+                if isinstance(result, dict) and result.get('error'):
+                    summary.append(f"  Result: Error - {result['error']}")
+                else:
+                    summary.append(f"  Result: Success")
+            elif "message" in entry:
+                summary.append(f"- Responded: {entry['message'][:100]}...")
+
+        return "\n".join(summary)
 
     async def _run_hook(self, hook_name: str, *args, **kwargs) -> None:
         """Run all callbacks for a given hook."""
@@ -369,149 +309,9 @@ class GeneralAgent(BaseAgent):
             else:
                 callback(*args, **kwargs)
 
-    async def think(
-        self,
-        context: Dict[str, Any],
-        thought_type: str = "reason"
-    ) -> AsyncGenerator[AgentThought, None]:
-        """Generate thoughts based on current context with support for custom types."""
-        if thought_type not in self._thought_prompts:
-            logger.warning(
-                f"Unknown thought type: {thought_type}, falling back to 'reason'")
-            thought_type = "reason"
-
-        messages = self._create_thought_messages(
-            thought_type, self._thought_prompts, context)
-
-        # Get custom configuration for thought type if available
-        custom_config = self.agent_config.custom_thought_types.get(
-            thought_type, {})
-        temperature = custom_config.get(
-            "temperature") or self._get_temperature_for_thought(thought_type)
-        max_tokens = custom_config.get(
-            "max_tokens") or self.agent_config.max_tokens
-
-        # Get available tools based on configuration
-        tools = await self._get_available_tools() if self.agent_config.enable_tools else None
-
-        async for response in self.chat_helper.generate_completion(
-            messages=messages,
-            model=self.agent_config.model,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            stream=self.agent_config.stream,
-            tools=tools,
-            enable_tools=self.agent_config.enable_tools
-        ):
-            yield AgentThought(
-                type=thought_type,
-                content=response.get("content", ""),
-                confidence=response.get("metadata", {}).get("confidence", 0.0),
-                reasoning_path=response.get(
-                    "metadata", {}).get("reasoning_path", []),
-                alternatives=response.get(
-                    "metadata", {}).get("alternatives", []),
-                metadata={
-                    **response.get("metadata", {}),
-                    "thought_config": custom_config,
-                    "available_tools": [t.get("function", {}).get("name") for t in (tools or [])]
-                }
-            )
-
-    async def decide(
-        self,
-        thoughts: List[AgentThought],
-        context: Dict[str, Any]
-    ) -> AgentDecision:
-        """Make a decision based on thoughts and context."""
-        messages = [
-            SystemMessage(content=PROMPTS["agent_decision"]),
-            HumanMessage(content=self._format_decision_context(
-                thoughts, context))
-        ]
-
-        async for response in self.chat_helper.generate_completion(
-            messages=messages,
-            model=self.agent_config.model,
-            temperature=0.3,
-            max_tokens=self.agent_config.max_tokens,
-            stream=self.agent_config.stream,
-            tools=self.agent_config.tools,
-            enable_tools=self.agent_config.enable_tools
-        ):
-            return AgentDecision(
-                action_type=response.get("metadata", {}).get(
-                    "action_type", "default"),
-                action_plan=response.get("content", ""),
-                confidence=response.get("metadata", {}).get("confidence", 0.0),
-                reasoning=response.get("metadata", {}).get("reasoning", ""),
-                alternatives=response.get(
-                    "metadata", {}).get("alternatives", [])
-            )
-
-    async def act(self, decision: AgentDecision, context: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute the decided action."""
-        return await self._execute_action(decision, context)
-
-    async def reflect(
-        self,
-        execution_result: Dict[str, Any],
-        context: Dict[str, Any]
-    ) -> AgentThought:
-        """Reflect on execution results and update state."""
-        messages = [
-            SystemMessage(content=PROMPTS["agent_reflection"]),
-            HumanMessage(content=self._format_reflection_context(
-                execution_result, context))
-        ]
-
-        async for response in self.chat_helper.generate_completion(
-            messages=messages,
-            model=self.agent_config.model,
-            temperature=0.4,
-            max_tokens=self.agent_config.max_tokens,
-            stream=self.agent_config.stream,
-            tools=self.agent_config.tools,
-            enable_tools=self.agent_config.enable_tools
-        ):
-            reflection = AgentThought(
-                type="reflection",
-                content=response.get("content", ""),
-                confidence=response.get("metadata", {}).get("confidence", 0.0),
-                metadata={
-                    "progress_evaluation": response.get("metadata", {}).get("progress", 0.0),
-                    "state_updates": response.get("metadata", {}).get("state_updates", {}),
-                    "next_steps": response.get("metadata", {}).get("next_steps", [])
-                }
-            )
-            self._update_agent_state(reflection)
-            return reflection
-
     # Hook methods (empty by default)
     async def on_start(self, context: Dict[str, Any]): pass
     async def on_finish(self, context: Dict[str, Any]): pass
-    async def before_think(self, context: Dict[str, Any]): pass
-
-    async def after_think(
-        self, thoughts: List[AgentThought], context: Dict[str, Any]): pass
-
-    async def before_decide(
-        self, thoughts: List[AgentThought], context: Dict[str, Any]): pass
-
-    async def after_decide(self, decision: AgentDecision,
-                           context: Dict[str, Any]): pass
-
-    async def before_act(self, decision: AgentDecision,
-                         context: Dict[str, Any]): pass
-
-    async def after_act(
-        self, result: Dict[str, Any], context: Dict[str, Any]): pass
-
-    async def before_reflect(
-        self, result: Dict[str, Any], context: Dict[str, Any]): pass
-    async def after_reflect(self, reflection: AgentThought,
-                            context: Dict[str, Any]): pass
-
     async def on_iteration_end(self, context: Dict[str, Any]): pass
 
     # Helper methods
@@ -526,22 +326,39 @@ class GeneralAgent(BaseAgent):
             "constraints": self.agent_state.constraints
         }
 
+    def _format_context(self, context: Dict[str, Any]) -> str:
+        """Format context for LLM consumption."""
+        if not self._agent_state:
+            return str(context)
+
+        return f"""Current State: {context.get('current_state', {})}
+Last Action Result: {context.get('last_tool_result', 'None')}
+Progress: {context.get('progress', 0.0)}"""
+
     async def _is_goal_complete(self) -> bool:
         """Check if the current goal is complete."""
+        # Check for explicit completion signal
+        if "completion_result" in self.agent_state.current_state:
+            return True
+        # Check progress-based completion
         return self.agent_state.progress >= 1.0
 
-    async def _execute_action(self, decision: AgentDecision, context: Dict[str, Any]) -> FunctionResponse:
-        """Execute the decided action."""
-        action_type = decision.action_type
+    async def _execute_action(
+        self,
+        decision: Dict[str, Any],
+        context: Dict[str, Any]
+    ) -> FunctionResponse:
+        """Execute actions, potentially delegating to worker agents."""
+        action_type = decision.get("action_type", "default")
 
-        # Handle function calls
-        if action_type == "function_call":
+        # Check for function calls in metadata
+        if "function_call" in decision:
             if not self._function_service:
                 raise ValueError(
                     "Function service not provided for function calls")
 
-            function_name = decision.metadata.get("function_name")
-            function_args = decision.metadata.get("arguments", {})
+            function_name = decision.get("function_name")
+            function_args = decision.get("arguments", {})
 
             if not function_name:
                 raise ValueError(
@@ -553,6 +370,17 @@ class GeneralAgent(BaseAgent):
                     function_name,
                     function_args
                 )
+
+                # Check if this is an attempt_completion call
+                if function_name == "attempt_completion" and isinstance(result, dict):
+                    if result.get("completion_signal"):
+                        # Update agent state to mark completion
+                        self.agent_state.update_progress(1.0)
+                        self.agent_state.current_state["completion_result"] = result.get(
+                            "final_result", "")
+                        if "command" in result:
+                            self.agent_state.current_state["final_command"] = result["command"]
+
                 return ToolResponse(
                     success=True,
                     tool_name=function_name,
@@ -579,153 +407,18 @@ class GeneralAgent(BaseAgent):
                     }
                 )
 
-        # Handle self-calls (agent calling itself)
-        elif action_type == "self_call":
-            sub_goal = decision.metadata.get("goal")
-            sub_context = decision.metadata.get("context", {})
-
-            if not sub_goal:
-                raise ValueError("Goal not provided for self call")
-
-            # Create a new agent state for this sub-goal
-            original_state = self._agent_state
-            self._agent_state = AgentState(
-                goal=sub_goal,
-                capabilities=original_state.capabilities,
-                constraints=original_state.constraints,
-                current_state={**original_state.current_state, **sub_context}
+        # Handle default action type (when no function call is present)
+        else:
+            response = AgentResponse(
+                success=True,
+                agent_name=self.name,
+                state=self.agent_state,
+                final_output={"content": decision.get(
+                    "content", "No response generated")},
+                metadata=decision.get("metadata", {})
             )
-
-            try:
-                result = {}
-                async for output in self.run_agent_loop():
-                    result = output
-                return AgentResponse(
-                    success=True,
-                    agent_name=self.name,
-                    state=self._agent_state,
-                    thoughts=self._agent_state.thought_process,
-                    decisions=[],  # TODO: Track decisions
-                    actions_taken=[],  # TODO: Track actions
-                    final_output=result,
-                    metadata={
-                        "action_type": action_type,
-                        "sub_goal": sub_goal,
-                        "sub_context": sub_context
-                    }
-                )
-            except Exception as e:
-                logger.error(f"Error in self-call execution: {str(e)}")
-                return AgentResponse(
-                    success=False,
-                    agent_name=self.name,
-                    state=self._agent_state,
-                    error=str(e),
-                    metadata={
-                        "action_type": action_type,
-                        "sub_goal": sub_goal,
-                        "error_type": type(e).__name__
-                    }
-                )
-            finally:
-                # Restore original state
-                self._agent_state = original_state
-
-        # Handle chain-of-thought execution
-        elif action_type == "chain_of_thought":
-            try:
-                thoughts = []
-                for thought_type in decision.metadata.get("thought_sequence", ["reason"]):
-                    async for thought in self.think(context, thought_type):
-                        thoughts.append(thought)
-
-                return PipelineResponse(
-                    success=True,
-                    pipeline_name="chain_of_thought",
-                    results=[t.model_dump() for t in thoughts],
-                    steps_completed=len(thoughts),
-                    total_steps=len(decision.metadata.get(
-                        "thought_sequence", ["reason"])),
-                    metadata={
-                        "action_type": action_type,
-                        "thought_sequence": decision.metadata.get("thought_sequence", ["reason"])
-                    }
-                )
-            except Exception as e:
-                logger.error(f"Error in chain-of-thought execution: {str(e)}")
-                return PipelineResponse(
-                    success=False,
-                    pipeline_name="chain_of_thought",
-                    error=str(e),
-                    steps_completed=len(thoughts),
-                    total_steps=len(decision.metadata.get(
-                        "thought_sequence", ["reason"])),
-                    metadata={
-                        "action_type": action_type,
-                        "error_type": type(e).__name__
-                    }
-                )
-
-        raise NotImplementedError(f"Action type {action_type} not implemented")
-
-    def _get_temperature_for_thought(self, thought_type: str) -> float:
-        """Get appropriate temperature for different thought types."""
-        if self.agent_config.thought_config:
-            return self.agent_config.thought_config.get(thought_type, 0.7)
-
-        temperatures = {
-            "reason": 0.7,
-            "plan": 0.5,
-            "evaluate": 0.3,
-            "reflect": 0.6
-        }
-        return temperatures.get(thought_type, 0.7)
-
-    def _create_thought_messages(
-        self,
-        thought_type: str,
-        prompts: Dict[str, str],
-        context: Dict[str, Any]
-    ) -> List[BaseMessage]:
-        """Create messages for thought generation."""
-        # Use get_agent_thought_prompt for default prompts
-        prompt = prompts.get(
-            thought_type) or get_agent_thought_prompt(thought_type)
-        return [
-            SystemMessage(content=prompt),
-            HumanMessage(content=self._format_context(context))
-        ]
-
-    def _format_context(self, context: Dict[str, Any]) -> str:
-        """Format context for LLM consumption."""
-        if not self._agent_state:
-            return str(context)
-
-        return f"""
-Goal: {self._agent_state.goal}
-Current State: {self._agent_state.current_state}
-Context: {context}
-History: {self._agent_state.history[-5:] if self._agent_state.history else 'No history'}
-Capabilities: {[cap.value for cap in self._agent_state.capabilities]}
-Constraints: {self._agent_state.constraints}
-"""
-
-    def _update_agent_state(self, reflection: AgentThought) -> None:
-        """Update agent state based on reflection."""
-        if not self._agent_state:
-            return
-
-        metadata = reflection.metadata
-        if "state_updates" in metadata:
-            self._agent_state.current_state.update(metadata["state_updates"])
-        if "progress_evaluation" in metadata:
-            self._agent_state.update_progress(metadata["progress_evaluation"])
-
-        self._agent_state.history.append({
-            "timestamp": datetime.now().isoformat(),
-            "reflection": reflection.model_dump(),
-            "state_snapshot": self._agent_state.model_dump()
-        })
+            # Convert to dict for JSON serialization
+            return response.model_dump() if hasattr(response, 'model_dump') else vars(response)
 
     def add_hook_callback(self, hook_name: str, callback: Callable) -> None:
         """Add a callback to a specific hook."""
@@ -740,51 +433,6 @@ Constraints: {self._agent_state.constraints}
                 self.agent_config.hook_callbacks[hook_name].remove(callback)
             except ValueError:
                 pass
-
-    def add_thought_type(
-        self,
-        name: str,
-        prompt: str,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None
-    ) -> None:
-        """Add a new thought type with custom configuration."""
-        self._thought_prompts[name] = prompt
-        self.agent_config.custom_thought_types[name] = {
-            "prompt": prompt,
-            "temperature": temperature,
-            "max_tokens": max_tokens
-        }
-
-    def update_thought_prompt(self, thought_type: str, prompt: str) -> None:
-        """Update the prompt for an existing thought type."""
-        if thought_type in self._thought_prompts:
-            self._thought_prompts[thought_type] = prompt
-            if thought_type in self.agent_config.custom_thought_types:
-                self.agent_config.custom_thought_types[thought_type]["prompt"] = prompt
-
-    async def _format_decision_context(
-        self,
-        thoughts: List[AgentThought],
-        context: Dict[str, Any]
-    ) -> str:
-        """Format context for decision making with available functions."""
-        base_context = self._format_context(context)
-
-        # Add available functions if function service is present
-        if self._function_service:
-            available_functions = await self._function_service.get_available_functions()
-            functions_str = "\nAvailable Functions:\n"
-            for func in available_functions:
-                functions_str += f"- {func['name']}: {func['description']}\n"
-            base_context += functions_str
-
-        # Add thoughts summary
-        thoughts_str = "\nThought Process:\n"
-        for thought in thoughts:
-            thoughts_str += f"- {thought.type}: {thought.content}\n"
-
-        return base_context + thoughts_str
 
     def register_function(self, function_name: str, function_impl: Callable) -> None:
         """Register a new function that can be called by the agent."""
@@ -959,16 +607,16 @@ class SupervisorAgent(GeneralAgent):
 
     async def _execute_action(
         self,
-        decision: AgentDecision,
+        decision: Dict[str, Any],
         context: Dict[str, Any]
     ) -> FunctionResponse:
         """Execute actions, potentially delegating to worker agents."""
-        action_type = decision.action_type
+        action_type = decision.get("action_type", "default")
 
         if action_type == "delegate":
             # Extract worker and task from decision
-            worker_name = decision.metadata.get("worker")
-            task = decision.metadata.get("task")
+            worker_name = decision.get("worker")
+            task = decision.get("task")
             if not worker_name or not task:
                 raise ValueError("Delegation requires worker name and task")
 
@@ -976,7 +624,7 @@ class SupervisorAgent(GeneralAgent):
 
         elif action_type == "parallel_delegate":
             # Handle parallel delegation to multiple workers
-            tasks = decision.metadata.get("tasks", [])
+            tasks = decision.get("tasks", [])
             results = []
             total_tasks = len(tasks)
             completed_tasks = 0

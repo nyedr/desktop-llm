@@ -9,6 +9,7 @@ from app.services.assistant import Assistant
 from app.services.model_service import ModelService
 from app.services.function_service import FunctionService
 from app.services.mcp_service import MCPService
+from app.services.agent_service import AgentService
 from app.memory.manager import LightRAGManager
 from app.core.config import config
 
@@ -22,6 +23,7 @@ class Providers:
     _function_service: Optional[FunctionService] = None
     _mcp_service: Optional[MCPService] = None
     _lightrag_manager: Optional[LightRAGManager] = None
+    _agent_service: Optional[AgentService] = None
 
     @classmethod
     async def get_assistant(cls) -> Assistant:
@@ -70,6 +72,23 @@ class Providers:
             get_service_locator().register_service(
                 "function_service", cls._function_service)
         return cls._function_service
+
+    @classmethod
+    def get_agent_service(cls) -> AgentService:
+        """Get or create agent service instance."""
+        if cls._agent_service is None:
+            # Get both required services
+            function_service = cls.get_function_service()
+            model_service = cls.get_model_service()
+
+            cls._agent_service = AgentService(
+                function_service=function_service,
+                model_service=model_service
+            )
+            # Register with service locator
+            get_service_locator().register_service(
+                "agent_service", cls._agent_service)
+        return cls._agent_service
 
     @classmethod
     def get_mcp_service(cls) -> MCPService:
@@ -132,6 +151,7 @@ class Providers:
             cls._function_service = None
             cls._mcp_service = None
             cls._lightrag_manager = None
+            cls._agent_service = None
 
             # Clear service locator
             get_service_locator().clear()

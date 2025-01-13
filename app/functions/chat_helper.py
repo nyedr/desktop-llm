@@ -85,11 +85,15 @@ class ChatHelper:
                         for tool in tools
                     ])
 
+            # Log which model we're using
+            used_model = model or config.llm.model
+            logger.info(f"Using model: {used_model} for chat completion")
+
             async for response in self.model_service.chat(
                 messages=messages,
-                model=model or config.DEFAULT_MODEL,
-                temperature=temperature or config.MODEL_TEMPERATURE,
-                max_tokens=max_tokens or config.MAX_TOKENS,
+                model=used_model,
+                temperature=temperature or config.llm.temperature,
+                max_tokens=max_tokens or config.llm.max_tokens,
                 stream=stream,
                 tools=registered_tools if enable_tools else None,
                 enable_tools=enable_tools

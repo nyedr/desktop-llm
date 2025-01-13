@@ -34,6 +34,9 @@ OLLAMA_EMBED_MODEL = "nomic-embed-text"
 MINILM_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 EXTRACTION_MODEL_NAME = "meta-llama/llama-3.2-3b-instruct"
 
+# TODO: Initialize tokenizer once on manager start
+# TODO: Max chunk size (1024) should be reconfigured, as of now it can be too small
+
 
 class LightRAGManager:
     """Memory manager for LightRAG integration and memory operations.

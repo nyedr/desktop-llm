@@ -7,5 +7,5 @@ from .http_request_tool import HttpRequestTool
 __all__ = [
     "WebScrapeTool",
     "WeatherTool",
-    "HttpRequestTool"
+    "HttpRequestTool",
 ]
