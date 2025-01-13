@@ -37,6 +37,7 @@
 - [ ] Check tokenizer initialization for context service, it should be initialized on server start
 - [x] Integrate agents into the system
 - [ ] Test agentic capabilities (multi-turn function calls, and step-by-step problem solving)
+- [ ] Get agent tools working
 
 ### Function calling
 

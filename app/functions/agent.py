@@ -22,6 +22,7 @@ from app.models.function import (
 )
 from langchain.schema.messages import SystemMessage, HumanMessage, BaseMessage
 from app.core.prompts import PROMPTS
+from app.utils.utils import parse_attempt_completion
 
 logger = logging.getLogger(__name__)
 
@@ -165,85 +166,107 @@ class GeneralAgent(BaseAgent):
     async def run_agent_loop(self) -> AsyncGenerator[Dict[str, Any], None]:
         """Core agent execution loop."""
         context = await self._build_context()
+        retry_config = self.agent_config.retry_config or RetryConfig()
+        retry_count = 0
 
         # Run start hook
         await self._run_hook("on_start", context)
 
         while not await self._is_goal_complete():
-            # Get next action from LLM
-            messages = await self._build_messages(context)
-            tools = await self._get_available_tools() if self.agent_config.enable_tools else None
+            try:
+                # Get next action from LLM
+                messages = await self._build_messages(context)
+                tools = await self._get_available_tools() if self.agent_config.enable_tools else None
 
-            async for response in self.chat_helper.generate_completion(
-                messages=messages,
-                model=self.agent_config.model,
-                temperature=self.agent_config.temperature,
-                max_tokens=self.agent_config.max_tokens,
-                stream=self.agent_config.stream,
-                tools=tools,
-                enable_tools=self.agent_config.enable_tools
-            ):
-                # Handle function calls or text responses
-                if isinstance(response, dict) and "function_call" in response:
-                    result = await self._execute_action(response, context)
-                    self.agent_state.last_tool_result = result
-                    # Record the action in history
-                    self.agent_state.history.append({
-                        "timestamp": datetime.now().isoformat(),
-                        "action": response.get("function_call", {}),
-                        "result": result,
-                        "state_snapshot": self.agent_state.get_execution_summary()
-                    })
-                    yield {"type": "tool_call", "result": result}
-                else:
-                    # Handle regular text response
-                    content = response if isinstance(
-                        response, str) else response.get("content", "")
+                # Track if we got a successful completion
+                success = False
 
-                    # Check for completion XML
-                    if "<attempt_completion>" in content:
-                        try:
-                            # Extract result and optional command
-                            result_start = content.find("<result>") + 10
-                            result_end = content.find("</result>")
-                            final_result = content[result_start:result_end].strip(
-                            )
+                async for response in self.chat_helper.generate_completion(
+                    messages=messages,
+                    model=self.agent_config.model,
+                    temperature=self.agent_config.temperature,
+                    max_tokens=self.agent_config.max_tokens,
+                    stream=self.agent_config.stream,
+                    tools=tools,
+                    enable_tools=self.agent_config.enable_tools
+                ):
+                    # Handle function calls or text responses
+                    if isinstance(response, dict) and "function_call" in response:
+                        result = await self._execute_action(response, context)
+                        self.agent_state.last_tool_result = result
+                        # Record the action in history
+                        self.agent_state.history.append({
+                            "timestamp": datetime.now().isoformat(),
+                            "action": response.get("function_call", {}),
+                            "result": result,
+                            "state_snapshot": self.agent_state.get_execution_summary()
+                        })
+                        yield {"type": "tool_call", "result": result}
+                        success = True
+                    else:
+                        # Handle regular text response
+                        content = response if isinstance(
+                            response, str) else response.get("content", "")
 
-                            command = None
-                            if "<command>" in content:
-                                command_start = content.find("<command>") + 9
-                                command_end = content.find("</command>")
-                                command = content[command_start:command_end].strip(
-                                )
-
+                        # Check for completion XML
+                        has_completion, result, command, answer = parse_attempt_completion(
+                            content)
+                        if has_completion:
                             # Update agent state with completion signal
                             self.agent_state.update_progress(1.0)
-                            self.agent_state.current_state["completion_result"] = final_result
+                            self.agent_state.current_state["completion_result"] = result
                             if command:
                                 self.agent_state.current_state["final_command"] = command
-                        except Exception as e:
-                            logger.error(
-                                f"Error parsing completion XML: {str(e)}")
-                            # Set error state and mark as complete to exit loop
-                            self.agent_state.update_progress(1.0)
-                            self.agent_state.current_state[
-                                "completion_result"] = f"Failed to parse completion XML: {str(e)}"
-                            self.agent_state.current_state["completion_error"] = True
+                            if answer:
+                                self.agent_state.current_state["final_answer"] = answer
+                            success = True
 
-                    # Record the message in history
-                    self.agent_state.history.append({
-                        "timestamp": datetime.now().isoformat(),
-                        "message": content,
-                        "state_snapshot": self.agent_state.get_execution_summary()
-                    })
-                    yield {"type": "message", "content": content}
+                        # Record the message in history
+                        self.agent_state.history.append({
+                            "timestamp": datetime.now().isoformat(),
+                            "message": content,
+                            "state_snapshot": self.agent_state.get_execution_summary()
+                        })
+                        yield {"type": "message", "content": content}
+
+                # Only reset retry count if we got a successful completion
+                if success:
+                    retry_count = 0
+                else:
+                    # If we got here without success, it means we got partial responses but no completion
+                    raise Exception("Incomplete response from model")
+
+            except Exception as e:
+                retry_count += 1
+                logger.error(
+                    f"Error in agent loop (attempt {retry_count}/{retry_config.max_retries}): {str(e)}")
+
+                if retry_count >= retry_config.max_retries:
+                    logger.error(
+                        f"Max retries exceeded ({retry_count}/{retry_config.max_retries}), exiting agent loop")
+                    self.agent_state.update_progress(1.0)
+                    self.agent_state.current_state[
+                        "completion_result"] = f"Failed after {retry_count} attempts: {str(e)}"
+                    self.agent_state.current_state["completion_error"] = True
+                    yield {
+                        "type": "error",
+                        "error": f"Max retries exceeded ({retry_count}/{retry_config.max_retries}): {str(e)}",
+                        "retry_count": retry_count
+                    }
+                    break
+
+                # Calculate and apply retry delay
+                delay = retry_config.calculate_delay(retry_count)
+                await asyncio.sleep(delay)
+                continue
 
             await self._run_hook("on_iteration_end", context)
             context = await self._build_context()
 
         await self._run_hook("on_finish", context)
         yield {
-            "success": True,
+            "type": "complete",
+            "success": not self.agent_state.current_state.get("completion_error", False),
             "final_state": self.agent_state.get_execution_summary()
         }
 
@@ -370,16 +393,6 @@ Progress: {context.get('progress', 0.0)}"""
                     function_name,
                     function_args
                 )
-
-                # Check if this is an attempt_completion call
-                if function_name == "attempt_completion" and isinstance(result, dict):
-                    if result.get("completion_signal"):
-                        # Update agent state to mark completion
-                        self.agent_state.update_progress(1.0)
-                        self.agent_state.current_state["completion_result"] = result.get(
-                            "final_result", "")
-                        if "command" in result:
-                            self.agent_state.current_state["final_command"] = result["command"]
 
                 return ToolResponse(
                     success=True,
