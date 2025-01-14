@@ -26,7 +26,6 @@ def _filter_redundant_messages(_, __, event_dict):
         "Discovery complete",
         "Initializing Chroma Service",
         "Initializing LangChain Service",
-        "Initializing MCP Service",
         "Initializing Model Service",
         "Initializing FunctionService",
         "Original Python path",

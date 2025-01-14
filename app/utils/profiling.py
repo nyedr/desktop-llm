@@ -39,6 +39,7 @@ class RequestProfile:
         self.start_time = time.perf_counter()
         self.first_response_time: Optional[float] = None
         self.model_request_time: Optional[float] = None
+        self.first_audio_time: Optional[float] = None
 
         # Tool execution tracking
         self.tool_timings: Dict[str, Dict[str, Any]] = {}
@@ -176,6 +177,33 @@ class RequestProfile:
 
         metrics_logger.info(", ".join(f"{k}={v}" for k, v in log_data.items()))
 
+    def record_first_audio(self, text_chunk: str) -> None:
+        """Record when first audio chunk is played.
+
+        Args:
+            text_chunk: The text being spoken
+        """
+        if self.first_audio_time is None:
+            self.first_audio_time = time.perf_counter()
+            time_to_audio = self.first_audio_time - self.start_time
+            time_from_first_response = self.first_audio_time - \
+                (self.first_response_time or self.first_audio_time)
+
+            # Log to console
+            logger.info(
+                f"[TIMING][{self.request_id}] First audio played after {time_to_audio:.3f}s "
+                f"(+{time_from_first_response:.3f}s from first response)"
+            )
+
+            # Log to metrics file
+            metrics_logger.info(
+                f"request_id={self.request_id}, event=first_audio, "
+                f"time_to_audio={time_to_audio:.3f}, "
+                f"time_from_first_response={time_from_first_response:.3f}, "
+                # Log first 50 chars of text being spoken
+                f"text_chunk={text_chunk[:50]}"
+            )
+
     def get_summary(self) -> Dict[str, Any]:
         """Get a summary of all timing information."""
         total_duration = time.perf_counter() - self.start_time
@@ -186,6 +214,7 @@ class RequestProfile:
             "tool_timings": self.tool_timings,
             "first_response_time": self.first_response_time - self.start_time if self.first_response_time else None,
             "model_request_time": self.model_request_time - self.start_time if self.model_request_time else None,
+            "first_audio_time": self.first_audio_time - self.start_time if self.first_audio_time else None,
             "error_count": self.error_count,
             "retry_count": self.retry_count,
             "last_error": self.last_error

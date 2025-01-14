@@ -35,13 +35,12 @@
 - [x] Ensure pipelines are properly implemented as intended
 - [x] Add api documentation
 - [x] Integrate agents into the system
+- [x] Implement more agentic capabilities. The AI should be able to call itself to achive a goal, this includes using a function to get data and then using that data to call another function. Should be a toggle for this behavior.
 
 ### Incomplete Todos
 
 - [ ] Revamp all tests
-- [ ] Make the memory retrieval pipeline more performant?
 - [ ] Make function and tool handling more robust
-- [ ] Implement more agentic capabilities. The AI should be able to call itself to achive a goal, this includes using a function to get data and then using that data to call another function. Should be a toggle for this behavior.
 - [ ] Handle this error; "ERROR:lightrag:Failed to process document doc-2e2e68d738a4036e31740ef8a70abe8f: 'NoneType' object is not subscriptable"
 - [ ] Remove function call caching for real-time tools
 - [ ] Create specialized entity extraction llm function that directly uses openrouter with specified providers
@@ -49,6 +48,8 @@
 - [ ] Test agentic capabilities (multi-turn function calls, and step-by-step problem solving)
 - [ ] Get agent tools working
 - [ ] Check for unneeded dependencies
+- [ ] Update memory formatting to improve clarity, model is looking at dates from old chats instead of current time
+- [ ] Improve context management, context size is a small preset
 
 ### Function calling
 

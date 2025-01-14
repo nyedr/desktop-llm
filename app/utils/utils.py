@@ -15,11 +15,13 @@ def format_timestamp(time_diff: timedelta) -> str:
         A human-readable string like "2 days ago", "3 hours ago", etc.
     """
     total_seconds = int(time_diff.total_seconds())
+
     days = total_seconds // (24 * 3600)
     remaining_seconds = total_seconds % (24 * 3600)
     hours = remaining_seconds // 3600
     remaining_seconds %= 3600
     minutes = remaining_seconds // 60
+    seconds = remaining_seconds % 60
 
     if days >= 365:
         years = days // 365
@@ -27,14 +29,21 @@ def format_timestamp(time_diff: timedelta) -> str:
     elif days >= 30:
         months = days // 30
         return f"{months} {'month' if months == 1 else 'months'} ago"
+    elif days > 7:
+        weeks = days // 7
+        return f"{weeks} {'week' if weeks == 1 else 'weeks'} ago"
     elif days > 0:
         return f"{days} {'day' if days == 1 else 'days'} ago"
     elif hours > 0:
+        if minutes > 0:
+            return f"{hours} {'hour' if hours == 1 else 'hours'} and {minutes} {'minute' if minutes == 1 else 'minutes'} ago"
         return f"{hours} {'hour' if hours == 1 else 'hours'} ago"
     elif minutes > 0:
+        if seconds > 0:
+            return f"{minutes} {'minute' if minutes == 1 else 'minutes'} and {seconds} {'second' if seconds == 1 else 'seconds'} ago"
         return f"{minutes} {'minute' if minutes == 1 else 'minutes'} ago"
     else:
-        return "just now"
+        return f"{seconds} {'second' if seconds == 1 else 'seconds'} ago" if seconds > 0 else "just now"
 
 
 def format_timestamp_date(timestamp: datetime) -> str:

@@ -22,6 +22,7 @@ from app.utils.filters import apply_filters
 from app.utils.chat_messages import format_conversation_metadata, handle_string_chunk
 from app.utils.chat_tools import process_tool_stream
 from app.utils.profiling import profile_request
+from app.services.tts_service import TTSService
 
 router = APIRouter(
     prefix="/chat",
@@ -67,7 +68,8 @@ async def stream_chat_response(
     model_service: ModelService = Depends(Providers.get_model_service),
     function_service: FunctionService = Depends(
         Providers.get_function_service),
-    memory_manager: LightRAGManager = Depends(Providers.get_lightrag_manager)
+    memory_manager: LightRAGManager = Depends(Providers.get_lightrag_manager),
+    tts_service: TTSService = Depends(Providers.get_tts_service)
 ) -> AsyncGenerator[ChatStreamEvent, None]:
     """Generate streaming chat response."""
     request_id = str(uuid.uuid4())
@@ -76,6 +78,7 @@ async def stream_chat_response(
     final_messages = []
     tool_response = None
     current_message = {"role": "assistant", "content": ""}
+    text_buffer = ""
 
     async with profile_request(request_id) as profiler:
         try:
@@ -232,6 +235,22 @@ async def stream_chat_response(
                                                 if not profiler.first_response_time:
                                                     profiler.record_first_response()
                                                 current_message["content"] += final_chunk
+                                                if chat_request.speak_aloud:
+                                                    text_buffer += final_chunk
+                                                    if any(p in text_buffer for p in ".!?") or len(text_buffer) > 100:
+                                                        try:
+                                                            async for _ in tts_service.stream_speech(
+                                                                text_buffer.strip(),
+                                                                voice=chat_request.tts_voice,
+                                                                play_audio=True,
+                                                                response_format="pcm",
+                                                                profiler=profiler
+                                                            ):
+                                                                continue  # Let the service handle audio playback
+                                                        except Exception as e:
+                                                            logger.error(
+                                                                f"[{request_id}] TTS error: {e}")
+                                                        text_buffer = ""
                                 except Exception as e:
                                     logger.error(
                                         f"[{request_id}] Error generating final response: {e}")
@@ -249,6 +268,37 @@ async def stream_chat_response(
                         if not profiler.first_response_time:
                             profiler.record_first_response()
                         current_message["content"] += chunk
+                        if chat_request.speak_aloud:
+                            text_buffer += chunk
+                            if any(p in text_buffer for p in ".!?") or len(text_buffer) > 100:
+                                try:
+                                    async for _ in tts_service.stream_speech(
+                                        text_buffer.strip(),
+                                        voice=chat_request.tts_voice,
+                                        play_audio=True,
+                                        response_format="pcm",
+                                        profiler=profiler
+                                    ):
+                                        continue  # Let the service handle audio playback
+                                except Exception as e:
+                                    logger.error(
+                                        f"[{request_id}] TTS error: {e}")
+                                text_buffer = ""
+
+            # Process any remaining text for TTS
+            if chat_request.speak_aloud and text_buffer.strip():
+                try:
+                    async for _ in tts_service.stream_speech(
+                        text_buffer.strip(),
+                        voice=chat_request.tts_voice,
+                        play_audio=True,
+                        response_format="pcm",
+                        profiler=profiler
+                    ):
+                        continue  # Let the service handle audio playback
+                except Exception as e:
+                    logger.error(f"[{request_id}] TTS error: {e}")
+                text_buffer = ""
 
             # After all chunks are processed and before storing memory
             if current_message["content"]:
@@ -354,7 +404,8 @@ async def chat_stream(
     model_service: ModelService = Depends(Providers.get_model_service),
     function_service: FunctionService = Depends(
         Providers.get_function_service),
-    memory_manager: LightRAGManager = Depends(Providers.get_lightrag_manager)
+    memory_manager: LightRAGManager = Depends(Providers.get_lightrag_manager),
+    tts_service: TTSService = Depends(Providers.get_tts_service)
 ) -> EventSourceResponse:
     """Stream a chat completion response.
 
@@ -379,6 +430,7 @@ async def chat_stream(
         model_service: The model service for LLM operations
         function_service: The function service for tool execution
         memory_manager: The memory manager for context storage
+        tts_service: The TTS service for text-to-speech
 
     Returns:
         An EventSourceResponse that streams the chat completion
@@ -394,7 +446,8 @@ async def chat_stream(
             assistant=assistant,
             model_service=model_service,
             function_service=function_service,
-            memory_manager=memory_manager
+            memory_manager=memory_manager,
+            tts_service=tts_service
         ),
         media_type="text/event-stream"
     )

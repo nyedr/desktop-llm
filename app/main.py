@@ -105,9 +105,9 @@ service_states = {
     "model": ServiceState(),
     "function": ServiceState(),
     "lightrag": ServiceState(),
-    "mcp": ServiceState(),
     "assistant": ServiceState(),
-    "agent": ServiceState()
+    "agent": ServiceState(),
+    "tts": ServiceState()
 }
 
 
@@ -121,11 +121,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         await initialize_service("Function", Providers.get_function_service, service_states['function'])
 
         await initialize_service("Memory", Providers.get_lightrag_manager, service_states['lightrag'])
-        await initialize_service("MCP", Providers.get_mcp_service, service_states['mcp'])
 
         # Initialize model and agent services
         await initialize_service("Model", Providers.get_model_service, service_states['model'])
         await initialize_service("Agent", Providers.get_agent_service, service_states['agent'])
+
+        # Initialize TTS service
+        await initialize_service("TTS", Providers.get_tts_service, service_states['tts'])
 
         # Initialize assistant last since it depends on other services
         await initialize_service("Assistant", Providers.get_assistant, service_states['assistant'])

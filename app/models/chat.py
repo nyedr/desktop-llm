@@ -125,6 +125,10 @@ class ChatRequest(BaseModel):
         None, description="ID of the conversation for memory context")
     enable_summarization: Optional[bool] = Field(
         False, description="Whether to enable conversation summarization")
+    speak_aloud: bool = Field(
+        False, description="Whether to speak the assistant's responses aloud using TTS")
+    tts_voice: Optional[str] = Field(
+        "af_bella", description="Voice to use for text-to-speech")
 
     @field_validator("messages")
     def validate_messages(cls, v):

@@ -89,7 +89,7 @@ class HealthResponse(BaseModel):
     Check the health status of all system components.
     
     This endpoint performs a comprehensive health check of:
-    - Core services (MCP, LightRAG, etc.)
+    - Core services (LightRAG, ModelService, FunctionService)
     - Model endpoints (OpenAI, Ollama)
     - Function components (Tools, Filters, Pipelines)
     - System resources
@@ -107,7 +107,6 @@ class HealthResponse(BaseModel):
                                 "status": "healthy",
                                 "components": {
                                     "services": {
-                                        "mcp": {"status": "ready", "status_icon": "✅", "error": None},
                                         "lightrag": {"status": "ready", "status_icon": "✅", "error": None}
                                     },
                                     "models": {
@@ -186,7 +185,7 @@ async def health_check(
             services_status[service_name] = service_info
 
             # Update overall status if any critical service is down
-            if service_name in ['mcp', 'lightrag'] and state.status.name in ['FAILED', 'OFFLINE']:
+            if service_name in ['lightrag'] and state.status.name in ['FAILED', 'OFFLINE']:
                 overall_status = "degraded"
 
         return {

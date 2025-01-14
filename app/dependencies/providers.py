@@ -8,8 +8,8 @@ from app.core.service_locator import get_service_locator
 from app.services.assistant import Assistant
 from app.services.model_service import ModelService
 from app.services.function_service import FunctionService
-from app.services.mcp_service import MCPService
 from app.services.agent_service import AgentService
+from app.services.tts_service import TTSService
 from app.memory.manager import LightRAGManager
 from app.core.config import config
 
@@ -21,9 +21,24 @@ class Providers:
     _assistant: Optional[Assistant] = None
     _model_service: Optional[ModelService] = None
     _function_service: Optional[FunctionService] = None
-    _mcp_service: Optional[MCPService] = None
     _lightrag_manager: Optional[LightRAGManager] = None
     _agent_service: Optional[AgentService] = None
+    _tts_service: Optional[TTSService] = None
+
+    @classmethod
+    async def get_tts_service(cls) -> TTSService:
+        """Get or create TTS service instance."""
+        if cls._tts_service is None:
+            try:
+                cls._tts_service = TTSService()
+                await cls._tts_service.__aenter__()
+                # Register with service locator
+                get_service_locator().register_service("tts_service", cls._tts_service)
+                logger.info("TTS service initialized successfully")
+            except Exception as e:
+                logger.error(f"Failed to initialize TTS service: {e}")
+                raise
+        return cls._tts_service
 
     @classmethod
     async def get_assistant(cls) -> Assistant:
@@ -91,15 +106,6 @@ class Providers:
         return cls._agent_service
 
     @classmethod
-    def get_mcp_service(cls) -> MCPService:
-        """Get or create MCP service instance."""
-        if cls._mcp_service is None:
-            cls._mcp_service = MCPService()
-            # Register with service locator
-            get_service_locator().register_service("mcp_service", cls._mcp_service)
-        return cls._mcp_service
-
-    @classmethod
     async def get_lightrag_manager(cls) -> Optional[LightRAGManager]:
         """Get or create LightRAG manager instance."""
         if cls._lightrag_manager is None:
@@ -137,6 +143,15 @@ class Providers:
         try:
             logger.info("Starting service cleanup...")
 
+            # Clean up TTS service
+            if cls._tts_service:
+                try:
+                    await cls._tts_service.__aexit__(None, None, None)
+                    cls._tts_service.cleanup()
+                    logger.info("TTS service cleaned up")
+                except Exception as e:
+                    logger.error(f"Error cleaning up TTS service: {e}")
+
             # Stop memory manager first
             if cls._lightrag_manager:
                 try:
@@ -149,9 +164,9 @@ class Providers:
             cls._assistant = None
             cls._model_service = None
             cls._function_service = None
-            cls._mcp_service = None
             cls._lightrag_manager = None
             cls._agent_service = None
+            cls._tts_service = None
 
             # Clear service locator
             get_service_locator().clear()
