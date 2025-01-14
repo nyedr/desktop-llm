@@ -12,14 +12,40 @@ dependencies = [
     "pydantic",
     "pytest",
     "pytest-asyncio",
+    "pytest-cov",
+    "pytest-xdist",
     "httpx",
     "ollama",
     "sse-starlette"
 ]
 requires-python = ">=3.8"
 
+[tool.setuptools]
+packages = ["app"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-v"
+python_files = ["test_*.py"]
+pythonpath = ["."]
+addopts = """
+    -v
+    --color=yes
+    --durations=5
+    --import-mode=importlib
+"""
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88

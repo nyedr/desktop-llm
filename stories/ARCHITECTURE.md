@@ -1,261 +1,320 @@
-# Desktop LLM Architecture
+# Desktop LLM Project Rules
 
-## Overview
+## Project Context
 
-Desktop LLM is a FastAPI-based application that provides a robust interface for interacting with local and remote language models. The application supports streaming chat completions, function calling, and a modular system for processing inputs and outputs, with integrated long-term memory and file system capabilities.
+(Rule: ProjectContext)
+Desktop LLM is a FastAPI-based application that provides a robust interface for interacting with local and remote language models. The application focuses on streaming chat completions, function calling, and modular system processing with integrated long-term memory and file system capabilities.
 
-## Core Components
+## Tech Stack & Architecture
 
-### Configuration (`app/core/config.py`)
+(Rule: TechStack)
 
-- Manages application-wide settings using Pydantic BaseSettings
-- Key configurations:
-  - Multiple Ollama base URLs support
-  - Model parameters (temperature, max tokens)
-  - Rate limiting
-  - Function execution settings
-  - SSE (Server-Sent Events) configurations
-  - Chroma and MCP settings
-  - Workspace directory configuration
+- Primary Language: Python
+- Framework: FastAPI
+- Key Dependencies:
+  - Pydantic: Data validation
+  - aiohttp: Async HTTP client
+  - SSE-Starlette: Server-Sent Events
+  - OpenAI Compatible Models: Remote model access
+  - LightRAG: Memory management and retrieval system
+  - SentenceTransformers: Embeddings with optimized storage
+  - MCP: Model Context Protocol with extended capabilities
 
-### Service Layer
+(Rule: Architecture)
 
-#### Model Service (`app/services/model_service.py`)
+- Service-oriented architecture with clear separation of concerns
+- Modular design with distinct service layers:
+  - Model Service: Handles LLM interactions with streaming support
+  - Function Service: Manages function registry and execution with transaction handling
+  - Agent Service: High-level orchestration with memory integration
+  - Memory Service: LightRAG-based memory operations and storage
+  - MCP Service: Model Context Protocol integrations with extended tool support
+- Asynchronous operations for non-blocking performance
+- Event-driven streaming responses with optimized memory usage
+- LightRAG-based memory system with hybrid storage
+- Multi-level memory hierarchy with graph-based relationships
 
-- Handles interactions with language models
-- Features:
-  - Model discovery and caching from multiple providers (Ollama, OpenAI)
-  - Streaming chat completions
-  - Tool/function calling integration
-  - Response chunking and word-by-word streaming
-- Uses AsyncClient for non-blocking operations
+## Code Style & Structure
 
-#### Function Service (`app/services/function_service.py`)
+(Rule: CodeStyle)
 
-- Manages the function registry and execution
-- Supports multiple function types:
-  - Tools: Callable by LLMs for external actions
+- Follow PEP 8 conventions for Python code
+- Use type hints for all function parameters and return values
+- Implement async/await patterns for I/O operations
+- Keep functions focused and single-purpose
+- Use descriptive variable names that reflect their purpose
+- Document complex logic with clear comments
+- Use Pydantic models for data validation and serialization
+- Ensure code is modular and easy to understand, with clear separation of concerns.
+
+## Repository Structure
+
+(Rule: RepoStructure)
+
+```
+project-root/
+├── app/
+│   ├── context/
+│   │   └── llm_context.py
+│   ├── core/
+│   │   ├── config.py
+│   │   ├── mcp_config.py
+│   │   ├── prompts.py
+│   │   └── service_locator.py
+│   ├── dependencies/
+│   │   └── providers.py
+│   ├── functions/
+│   │   ├── __init__.py
+│   │   ├── agent.py
+│   │   ├── base.py
+│   │   ├── chat_helper.py
+│   │   ├── executor.py
+│   │   ├── registry.py
+│   │   ├── types/
+│   │   │   ├── __init__.py
+│   │   │   ├── filters/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── parameter_normalizer.py
+│   │   │   │   └── text_modifier.py
+│   │   │   ├── pipelines/
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── multi_step.py
+│   │   │   └── tools/
+│   │   │       ├── __init__.py
+│   │   │       ├── calculator.py
+│   │   │       ├── memory_tool.py
+│   │   │       ├── weather_tools.py
+│   │   │       └── web_scrape_tool.py
+│   │   └── utils.py
+│   ├── memory/
+│   │   ├── __init__.py
+│   │   ├── datastore.py
+│   │   ├── embeddings.py
+│   │   ├── ingestion.py
+│   │   └── manager.py
+│   ├── models/
+│   │   ├── agent.py
+│   │   ├── chat.py
+│   │   ├── completion.py
+│   │   ├── function_base.py
+│   │   ├── function.py
+│   │   ├── memory.py
+│   │   └── model.py
+│   ├── routers/
+│   │   ├── chat.py
+│   │   ├── completion.py
+│   │   ├── functions.py
+│   │   └── health.py
+│   ├── services/
+│   │   ├── assistant.py
+│   │   ├── base.py
+│   │   ├── context_service.py
+│   │   ├── function_service.py
+│   │   ├── mcp_service.py
+│   │   ├── model_service.py
+│   │   └── monitoring.py
+│   ├── utils/
+│   │   ├── chat_messages.py
+│   │   ├── chat_setup.py
+│   │   ├── chat_tools.py
+│   │   ├── filters.py
+│   │   ├── profiling.py
+│   │   ├── tool_formatter.py
+│   │   └── utils.py
+│   └── main.py
+├── config.json
+├── config.py
+├── environment.yml
+├── logger.py
+├── pyproject.toml
+├── requirements.txt
+├── run.py
+├── setup.py
+├── stories/
+│   ├── ARCHITECTURE.md
+│   ├── chroma_revamp.md
+│   ├── Context_management_revamp.md
+│   ├── function_development.md
+│   ├── functions_revamp.md
+│   ├── lightrag.md
+│   ├── memory_pipeline.md
+│   ├── rules.md
+│   └── todos.md
+└── streaming/
+    ├── __init__.py
+    ├── processor.py
+    ├── sse.py
+    ├── stream_config.py
+    └── stream_processor.py
+```
+
+## Naming Conventions
+
+(Rule: NamingConventions)
+
+- Python files: snake_case (e.g., `model_service.py`)
+- Classes: PascalCase (e.g., `ModelService`)
+- Functions/methods: snake_case (e.g., `get_model_response`)
+- Variables: snake_case (e.g., `response_stream`)
+- Constants: UPPER_SNAKE_CASE (e.g., `MAX_TOKENS`)
+- API endpoints: kebab-case (e.g., `/api/v1/chat-stream`)
+
+## Error Handling & Logging
+
+(Rule: ErrorHandling)
+
+- Use custom exception classes for specific error cases
+- Implement proper error boundaries in API endpoints
+- Provide meaningful error messages for debugging
+- Handle async operation errors appropriately
+- Implement parameter normalization for function inputs
+- Use structured error types from `app/functions/base.py`
+
+(Rule: Logging)
+
+- Use structured logging with appropriate log levels
+- Include relevant context in log messages
+- Configure logging based on environment
+- Implement proper error tracking and monitoring
+
+## Testing
+
+(Rule: Testing)
+
+- Write unit tests for all services and functions
+- Use pytest as the testing framework
+- Implement integration tests for API endpoints
+- Mock external dependencies in tests
+- Maintain high test coverage for critical components
+- Test all function types (Tools, Filters, Pipelines)
+- Implement end-to-end flow tests
+- Include performance benchmarks
+
+## Security & Compliance
+
+(Rule: Security)
+
+- Store sensitive data in environment variables
+- Implement proper rate limiting
+- Validate all input data using Pydantic models
+- Handle API keys and credentials securely
+- Implement proper CORS policies
+- Ensure secure file system operations
+- Implement proper access controls for memory operations
+
+## Version Control & Workflow
+
+(Rule: GitWorkflow)
+
+- Use feature branches for development
+- Write descriptive commit messages
+- Review code changes through pull requests
+- Keep the main branch stable
+- Document breaking changes
+
+## Documentation
+
+(Rule: Documentation)
+
+- Maintain clear and up-to-date README files
+- Document API endpoints with OpenAPI/Swagger
+- Include docstrings for classes and functions
+- Keep architecture documentation current
+- Document configuration options
+- Provide clear guidelines for function development
+- Document memory management strategies
+
+## Performance
+
+(Rule: Performance)
+
+- Use async operations for I/O-bound tasks
+- Implement proper caching strategies
+- Optimize database queries and vector operations
+- Monitor memory usage with large language models
+- Configure appropriate timeouts for external services
+- Implement efficient streaming mechanisms
+- Use proper chunking for responses
+
+## Function System Guidelines
+
+(Rule: FunctionSystem)
+
+- Function Types:
+
+  - Tools: LLM-callable functions for external actions
   - Filters: Process input/output streams
   - Pipelines: Complex multi-step workflows
 
-#### Agent Service (`app/services/agent.py`)
+- Registration & Discovery:
 
-- High-level orchestration of model and function interactions
-- Manages conversation state and tool execution
-- Provides unified interface for chat and completion endpoints
+  - Singleton registry pattern for managing functions
+  - Automatic discovery of functions in specified directories
+  - Configuration-based loading of functions
+  - Dependency checking before registration
+  - Dynamic function creation for runtime registration
 
-#### Chroma Service (`app/services/chroma_service.py`)
+- Execution Flow:
 
-- Manages vector database operations
-- Features:
-  - Persistent storage of embeddings
-  - Semantic search capabilities
-  - Memory management with metadata
-  - Document retrieval and storage
+  - Parameter normalization and validation
+  - Error handling with custom exception classes
+  - Structured ToolResponse format for consistent results
+  - Profiling of function execution
+  - Batch processing of multiple tool calls
 
-#### MCP Service (`app/services/mcp_service.py`)
+- Implementation Requirements:
 
-- Manages Model Context Protocol integrations
-- Features:
-  - File system operations
-  - Tool discovery and execution
-  - Plugin management
-  - Session handling
+  - Use proper base classes from `app/functions/base.py`
+  - Register functions using the `@register_function` decorator
+  - Implement proper parameter validation
+  - Handle function execution errors gracefully
+  - Support streaming responses where appropriate
+  - Use proper utility functions from `app/functions/utils.py`
 
-#### LangChain Service (`app/services/langchain_service.py`)
+- Function Schema:
 
-- Integrates LangChain capabilities
-- Features:
-  - Vector store integration with Chroma
-  - Memory querying and retrieval
-  - File system integration with MCP
-  - Custom embedding strategies
+  - name: Unique identifier
+  - type: filter, pipe, or action
+  - parameters: Structured input requirements
+  - description: Clear purpose explanation
+  - dependencies: Required external resources
+  - valves: Dynamic configuration options
 
-### API Layer
+- Service Integration:
+  - FunctionService manages execution and lifecycle
+  - Provides OpenAI-compatible function schemas
+  - Handles both static and dynamic function registration
+  - Maintains comprehensive logging and monitoring
 
-#### Chat Router (`app/routers/chat.py`)
+## Memory Management
 
-- Main endpoint: `/api/v1/chat/stream`
-- Features:
-  - Server-Sent Events for streaming responses
-  - Function/tool integration
-  - Pipeline processing
-  - Input/output filtering
-  - Error handling and logging
+(Rule: MemoryManagement)
 
-#### Health Router (`app/routers/health.py`)
-
-- System health monitoring
-- Reports:
-  - Available models
-  - Registered functions
-  - System metrics (memory, disk)
-  - Component status
-  - Service states
-
-### Function System
-
-#### Base Classes (`app/functions/base.py`)
-
-- Abstract base classes for function types:
-  - `BaseFunction`: Common attributes
-  - `Filter`: Input/output processing
-  - `Tool`: LLM-callable functions
-  - `Pipeline`: Multi-step processors
-- Built-in error handling and validation
-
-#### Function Registry (`app/functions/registry.py`)
-
-- Central registry for all function types
-- Features:
-  - Dynamic function discovery
-  - Dependency checking
-  - Configuration loading
-  - Type-safe registration
-
-#### Function Types
-
-1. Tools (`app/functions/types/tools/`)
-
-   - File system tools
-   - Web scraping tools
-   - Calculator
-   - Weather tools
-
-2. Filters (`app/functions/types/filters/`)
-
-   - Text modification
-   - Content filtering
-
-3. Pipelines (`app/functions/types/pipelines/`)
-   - Multi-step processing
-   - Complex workflows
-
-### Service Locator (`app/core/service_locator.py`)
-
-- Manages service dependencies
-- Prevents circular dependencies
-- Provides global access to services
-- Supports runtime service registration
-
-## Data Flow
-
-1. Request Processing
-
-   ```
-   Client Request
-   → FastAPI Router
-   → Request Validation (Pydantic)
-   → Agent Service
-   → Model Service
-   → LLM Provider (Ollama/OpenAI)
-   ```
-
-2. Response Processing
-
-   ```
-   LLM Response
-   → Model Service (chunking)
-   → Tool Execution (if needed)
-   → Filter Processing
-   → SSE Stream
-   → Client
-   ```
-
-3. Memory Operations
-   ```
-   File/Content
-   → MCP Service
-   → LangChain Service
-   → Chroma Service (vectorization)
-   → Persistent Storage
-   ```
-
-## Key Features
-
-### Streaming
-
-- Word-by-word streaming for smooth UI updates
-- Configurable chunk sizes
-- Keep-alive ping mechanism
-- Error handling with immediate client notification
-
-### Tool Integration
-
-- Dynamic tool discovery and registration
-- Schema validation
-- Asynchronous execution
-- Result streaming
-
-### Model Management
-
-- Multiple provider support
-- Model caching
-- Health checking
-- Automatic retries
-
-### Long-term Memory
-
-- Vector-based storage with Chroma
-- Semantic search capabilities
-- File system integration
-- Metadata filtering
-
-## Dependencies
-
-- FastAPI: Web framework
-- Pydantic: Data validation
-- aiohttp: Async HTTP client
-- SSE-Starlette: Server-Sent Events
-- Ollama: Local model interface
-- OpenAI (optional): Remote model access
-- Chroma: Vector database
-- LangChain: LLM framework
-- SentenceTransformers: Embeddings
-- MCP: Model Context Protocol
-
-## Configuration
-
-Key environment variables:
-
-```
-OLLAMA_BASE_URLS=["http://localhost:11434"]
-DEFAULT_MODEL="granite3.1-8b-24k"
-MODEL_TEMPERATURE=0.7
-MAX_TOKENS=4096
-FUNCTION_CALLS_ENABLED=true
-LOG_LEVEL=DEBUG
-CHROMA_PERSIST_DIRECTORY=chroma_data
-CHROMA_COLLECTION_NAME=desktop_llm_memory
-MCP_SERVER_FILESYSTEM_PATH=./src/filesystem/dist/index.js
-WORKSPACE_DIR=./data
-```
-
-## API Endpoints
-
-### Chat
-
-- `POST /api/v1/chat/stream`
-  - Streaming chat completions
-  - Function calling
-  - Pipeline processing
-
-### Health
-
-- `GET /api/v1/health`
-  - System status
-  - Component health
-  - Resource metrics
-
-### Memory
-
-- `POST /api/v1/memory/add`
-
-  - Add content to memory
-  - File processing
-  - Directory indexing
-
-- `GET /api/v1/memory/query`
-  - Semantic search
-  - File retrieval
-  - Metadata filtering
+- LightRAG-based memory system with hybrid storage:
+  - NanoVectorDB for vector storage
+  - NetworkX for graph-based relationships
+  - JSON-based key-value storage for metadata
+- Optimized embedding strategies:
+  - MiniLM embeddings for efficient semantic search
+  - Batch processing with configurable batch sizes
+  - Embedding cache for improved performance
+- Comprehensive metadata management:
+  - Automatic metadata generation
+  - Custom metadata fields support
+  - Indexed fields for efficient filtering
+- File system integration:
+  - Automatic file ingestion and chunking
+  - Support for multiple file formats
+  - Configurable chunk sizes and overlaps
+- Advanced memory operations:
+  - Entity-based search with graph relationships
+  - Context-aware memory retrieval
+  - Multi-level memory hierarchy
+- Performance optimization:
+  - Asynchronous operations with configurable concurrency
+  - LLM and embedding caching
+  - Query timeouts and retries
+- Monitoring and maintenance:
+  - Automatic memory cleanup
+  - Query profiling and optimization
+  - Error handling and recovery
