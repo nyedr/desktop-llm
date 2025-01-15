@@ -13,7 +13,7 @@
   - [ ] Temporal Dynamics
   - [ ] Emotional Markers
   - [ ] Turn-taking Signals
-- [ ] Specialized Memory solution (profiles,audio, rag data switching, base agent memory, etc.)
+- [ ] Specialized Memory solution (profiles, audio, rag data switching, base agent memory, etc.)
 
 ### Completed todos
 
@@ -40,16 +40,22 @@
 ### Incomplete Todos
 
 - [ ] Revamp all tests
-- [ ] Make function and tool handling more robust
 - [ ] Handle this error; "ERROR:lightrag:Failed to process document doc-2e2e68d738a4036e31740ef8a70abe8f: 'NoneType' object is not subscriptable"
 - [ ] Remove function call caching for real-time tools
 - [ ] Create specialized entity extraction llm function that directly uses openrouter with specified providers
+- [ ] Make function and tool handling more robust
 - [ ] Check tokenizer initialization for context service, it should be initialized on server start
 - [ ] Test agentic capabilities (multi-turn function calls, and step-by-step problem solving)
-- [ ] Get agent tools working
 - [ ] Check for unneeded dependencies
-- [ ] Update memory formatting to improve clarity, model is looking at dates from old chats instead of current time
 - [ ] Improve context management, context size is a small preset
+- [ ] Is app.memory.datastore needed?
+
+## Next todos
+
+- [ ] Revamp memory system, lightrag is not built for this
+- [ ] Memory stops working after first query - NoneType error prevents further queries
+- [ ] Get agent tools working
+- [ ] Update memory formatting to improve clarity, model is looking at dates from old chats instead of current time
 
 ### Function calling
 

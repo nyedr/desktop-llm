@@ -10,22 +10,6 @@ from app.models.chat import ChatStreamEvent
 logger = logging.getLogger(__name__)
 
 
-def get_filter(filter_config: Dict[str, Any]) -> Optional[Filter]:
-    """Create a filter instance from a filter configuration.
-
-    Args:
-        filter_config: Dictionary containing filter configuration
-
-    Returns:
-        Filter instance if successful, None if failed
-    """
-    try:
-        return Filter(**filter_config)
-    except Exception as e:
-        logger.error(f"Failed to create filter from config: {e}")
-        return None
-
-
 async def apply_filters(
     filters: List[Filter],
     data: Dict[str, Any],

@@ -3,7 +3,7 @@
 from datetime import datetime
 import json
 import logging
-from typing import Dict, Any, List, Optional, Union
+from typing import Dict, Any, List, Union
 from app.models.function_base import Filter
 from app.models.chat import (
     ChatRequest,
@@ -14,7 +14,7 @@ from app.models.chat import (
     ToolMessage,
     UserMessage
 )
-from app.utils.filters import apply_filters, get_filter
+from app.utils.filters import apply_filters
 from app.core.config import config
 
 logger = logging.getLogger(__name__)
@@ -52,51 +52,6 @@ def ensure_strict_message(msg: Any) -> StrictChatMessage:
             raise ValueError(f"Unknown message role: {role}")
 
     raise ValueError(f"Cannot convert {type(msg)} to StrictChatMessage")
-
-
-async def handle_assistant_message(response: Union[str, Dict[str, Any]], filters: List[Dict[str, Any]], request_id: str) -> Optional[Dict[str, Any]]:
-    """Handle assistant message and apply filters."""
-    try:
-        # Handle string responses (direct content)
-        if isinstance(response, str):
-            message = {
-                "role": "assistant",
-                "content": response
-            }
-        # Handle dict responses (tool calls or structured content)
-        elif isinstance(response, dict):
-            message = {
-                "role": "assistant",
-                "content": response.get("content", ""),
-                "tool_calls": response.get("tool_calls", [])
-            }
-        else:
-            logger.error(
-                f"[{request_id}] Invalid response type: {type(response)}")
-            return None
-
-        # Apply filters
-        if filters:
-            filtered_message = message
-            for filter_config in filters:
-                filter_instance = get_filter(filter_config)
-                if filter_instance:
-                    try:
-                        filtered_message = await filter_instance.process(filtered_message)
-                    except Exception as e:
-                        logger.error(
-                            f"[{request_id}] Filter processing error: {str(e)}")
-                else:
-                    logger.warning(
-                        f"[{request_id}] Failed to create filter from config: {filter_config}")
-            message = filtered_message
-
-        return message
-
-    except Exception as e:
-        logger.error(
-            f"[{request_id}] Error handling assistant message: {str(e)}", exc_info=True)
-        return None
 
 
 def format_conversation_metadata(

@@ -5,7 +5,6 @@ from typing import AsyncGenerator, Dict, Any, Optional
 import pyaudio
 from openai import AsyncOpenAI
 from app.utils.profiling import RequestProfile
-import time
 
 logger = logging.getLogger(__name__)
 

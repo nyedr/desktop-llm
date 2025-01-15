@@ -13,7 +13,7 @@ from app.models.chat import StrictChatMessage
 from app.models.model import Model
 from lightrag.llm import ollama_embedding
 
-from app.utils.tool_formatter import format_tools_for_chat
+from app.utils.chat_tools import format_tools_for_chat
 
 logger = logging.getLogger(__name__)
 

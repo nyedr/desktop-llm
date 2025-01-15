@@ -2,7 +2,7 @@
 
 import logging
 from typing import Dict, Any, Optional, List, Type
-from app.functions import function_registry, executor
+from app.functions import function_registry
 from app.models.function_base import (
     BaseFunction,
     Tool,
@@ -21,9 +21,7 @@ class FunctionService:
     def __init__(self):
         logger.info("[INIT] Initializing FunctionService")
         self.registry = function_registry
-        self.executor = executor
-        logger.info(
-            "[INIT] FunctionService initialized with registry and executor")
+        logger.info("[INIT] FunctionService initialized with registry")
 
     def register_function(
         self,
@@ -196,22 +194,6 @@ class FunctionService:
                 error=str(e),
                 tool_name=function_name
             )
-
-    async def handle_tool_calls(self, tool_calls: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Handle multiple tool calls in sequence."""
-        logger.info(f"[TOOLS] Handling {len(tool_calls)} tool calls")
-        logger.debug(f"[TOOLS] Tool calls: {json.dumps(tool_calls, indent=2)}")
-
-        try:
-            results = await self.executor.handle_tool_calls(tool_calls)
-            logger.info(
-                f"[TOOLS] Successfully handled {len(results)} tool calls")
-            logger.debug(f"[TOOLS] Results: {json.dumps(results, indent=2)}")
-            return results
-        except Exception as e:
-            logger.error(
-                f"[TOOLS] Error handling tool calls: {e}", exc_info=True)
-            raise
 
     def get_function(self, name: str) -> Optional[Type[BaseFunction]]:
         """Get a function class by name."""

@@ -61,7 +61,6 @@ async def process_chat_context(
 
 
 async def stream_chat_response(
-    request: Request,
     chat_request: ChatRequest,
     background_tasks: BackgroundTasks,
     assistant: Assistant = Depends(Providers.get_assistant),
@@ -440,7 +439,6 @@ async def chat_stream(
     """
     return EventSourceResponse(
         stream_chat_response(
-            request=request,
             chat_request=chat_request,
             background_tasks=background_tasks,
             assistant=assistant,

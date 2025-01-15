@@ -10,7 +10,7 @@ import asyncio
 from app.core.config import config
 from .datastore import MemoryDatastore
 from .ingestion import MemoryIngestor
-from .embeddings import EmbeddingService, MINILM_DIM, BATCH_SIZE
+from .embeddings import EmbeddingService, EMBEDDING_DIM, BATCH_SIZE
 from app.models.memory import MemoryResponse
 from app.services.model_service import ModelService
 from app.utils.profiling import profile_operation
@@ -30,7 +30,6 @@ DEFAULT_MAX_TOKENS = 4096
 TOP_K_MEMORY_RESULTS = 5
 
 # Model configurations
-OLLAMA_EMBED_MODEL = "nomic-embed-text"
 MINILM_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 EXTRACTION_MODEL_NAME = "meta-llama/llama-3.2-3b-instruct"
 
@@ -56,6 +55,11 @@ class LightRAGManager:
         """
         self.working_dir = Path(working_dir or config.memory.data_dir)
         self._initialized = False
+        self.embedding_cache_config = {
+            "enabled": True,
+            "similarity_threshold": 0.95,
+            "max_size": EMBEDDING_CACHE_SIZE
+        }
 
         # These will be initialized during initialize()
         self._llm_semaphore = None
@@ -100,17 +104,13 @@ class LightRAGManager:
                 llm_model_func=self._get_llm_func(),
                 llm_model_name=EXTRACTION_MODEL_NAME,
                 embedding_func=EmbeddingFunc(
-                    embedding_dim=MINILM_DIM,
+                    embedding_dim=EMBEDDING_DIM,
                     max_token_size=config.memory.max_chunk_tokens,
                     func=lambda texts: self.embedding_service.get_embeddings(
-                        texts, force_model="minilm")
+                        texts)
                 ),
                 enable_llm_cache=True,
-                embedding_cache_config={
-                    "enabled": True,
-                    "similarity_threshold": 0.95,
-                    "max_size": EMBEDDING_CACHE_SIZE
-                },
+                embedding_cache_config=self.embedding_cache_config,
                 chunk_token_size=256,
                 chunk_overlap_token_size=32,
                 kv_storage="JsonKVStorage",

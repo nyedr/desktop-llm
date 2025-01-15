@@ -31,14 +31,6 @@ class ServiceState(BaseModel):
         None, description="Error message if service is unhealthy")
 
 
-class SystemMetrics(BaseModel):
-    """System metrics model."""
-    memory: Dict[str, Any] = Field(
-        description="Memory metrics including total, available, and percent usage")
-    disk: Dict[str, Any] = Field(
-        description="Disk metrics including total, free, and percent usage")
-
-
 class EndpointStatus(BaseModel):
     """Endpoint status model."""
     connected: bool = Field(description="Whether the endpoint is connected")

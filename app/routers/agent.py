@@ -3,17 +3,15 @@
 import json
 import logging
 import uuid
-from typing import AsyncGenerator, Dict, Any, List, Optional
+from typing import AsyncGenerator, Dict, Any, List
 
 from fastapi import APIRouter, Request, Depends
 from sse_starlette.sse import EventSourceResponse
-from pydantic import BaseModel, Field
 
 from app.services.agent_service import AgentService
 from app.dependencies.providers import Providers
 from app.utils.profiling import profile_request
-from app.models.chat import StrictChatMessage
-from app.models.agent import AgentCapability
+from app.models.agent import AgentRequest
 from app.utils.utils import parse_attempt_completion
 
 logger = logging.getLogger(__name__)
@@ -27,74 +25,6 @@ router = APIRouter(
         429: {"description": "Too many requests - Rate limit exceeded"},
     }
 )
-
-
-class AgentRequest(BaseModel):
-    """Request model for agent endpoints."""
-    messages: List[StrictChatMessage] = Field(
-        ...,
-        description="List of messages in the conversation"
-    )
-    goal: str = Field(
-        ...,
-        description="The goal or task for the agent to accomplish"
-    )
-    agent_type: str = Field(
-        default="general",
-        description="Type of agent to use (e.g., 'general', 'supervisor', or custom registered types)"
-    )
-    agent_name: Optional[str] = Field(
-        default=None,
-        description="Custom name for the agent instance"
-    )
-    capabilities: List[AgentCapability] = Field(
-        default_factory=lambda: [AgentCapability.FUNCTION_CALLING],
-        description="List of capabilities the agent should have"
-    )
-    constraints: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="Constraints for the agent's operation"
-    )
-    stream: bool = Field(
-        default=True,
-        description="Whether to stream the response or return it all at once"
-    )
-    model: Optional[str] = Field(
-        default=None,
-        description="The model to use for agent operations"
-    )
-    temperature: Optional[float] = Field(
-        default=None,
-        description="Temperature for model responses"
-    )
-    max_tokens: Optional[int] = Field(
-        default=None,
-        description="Maximum number of tokens to generate"
-    )
-    max_turns: int = Field(
-        default=5,
-        description="Maximum number of turns before forcing completion"
-    )
-    enable_tools: Optional[bool] = Field(
-        default=None,
-        description="Whether to enable tool/function calling"
-    )
-    enable_memory: bool = Field(
-        default=True,
-        description="Whether to enable memory/context management"
-    )
-    allowed_tools: Optional[List[str]] = Field(
-        default=None,
-        description="List of specific tools the agent is allowed to use"
-    )
-    excluded_tools: Optional[List[str]] = Field(
-        default=None,
-        description="List of tools the agent should not use"
-    )
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="Additional metadata for the agent execution"
-    )
 
 
 @router.get("/types",
